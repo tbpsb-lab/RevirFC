@@ -20,6 +20,15 @@ interface Props {
   showDownloadButton?: boolean;
 }
 
+const THEME_SHIELDS: Record<CardTheme, string> = {
+  gold: '/cards/gold_shield.png',
+  totw: '/cards/totw_shield.png',
+  inform: '/cards/inform_shield.png',
+  revir: '/cards/revir_shield.png',
+  legend: '/cards/legend_shield.png',
+  bidon: '/cards/bidon_shield.png',
+};
+
 export const FCCard: React.FC<Props> = ({
   player,
   overrideStats,
@@ -367,14 +376,12 @@ export const FCCard: React.FC<Props> = ({
           />
         </div>
 
-        {/* Sağ Üst Tema Kalkanı (Altın temasında overlay, diğer temalarda şablona gömülü) */}
-        {theme === 'gold' && (
-          <img
-            src="/cards/gold_shield.png"
-            alt="Golden Crest"
-            className={`absolute top-[13.5%] right-[14%] ${sizeConfig.shieldSize} object-contain pointer-events-none z-20 opacity-95 drop-shadow-md select-none`}
-          />
-        )}
+        {/* Sağ Üst Tema Kalkanı (Tüm temalarda en üst katman z-30 overlay) */}
+        <img
+          src={THEME_SHIELDS[theme]}
+          alt={`${theme} Crest`}
+          className={`absolute top-[13.0%] right-[13.5%] ${sizeConfig.shieldSize} object-contain pointer-events-none z-30 opacity-95 drop-shadow-md select-none`}
+        />
 
         {/* Oyuncu Adı ve Halı Saha Lakabı */}
         <div
