@@ -13,10 +13,12 @@ import {
   KeyRound,
   LogOut,
   Sparkles,
+  Sliders,
 } from 'lucide-react';
 
 export type NavTab =
   | 'squad'
+  | 'scouting'
   | 'match'
   | 'tactics'
   | 'locker'
@@ -43,6 +45,8 @@ export const Navbar: React.FC<Props> = ({
 
   const navItems: { id: NavTab; label: string; icon: React.FC<{ className?: string }>; adminOnly?: boolean }[] = [
     { id: 'squad', label: '20 Kişilik Kadro', icon: Users },
+    { id: 'scouting', label: '⭐ Kurul Puanlama', icon: Sliders },
+    { id: 'match', label: 'Maç & Check-In', icon: Trophy },
     { id: 'match', label: 'Maç & Check-In', icon: Trophy },
     { id: 'tactics', label: 'Taktik Tahtası', icon: Flame },
     { id: 'locker', label: 'Soyunma Odası', icon: MessageSquare },

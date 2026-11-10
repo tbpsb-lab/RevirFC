@@ -9,6 +9,7 @@ import {
   CheckInEntry,
   MatchRatingVote,
   MatchAwards,
+  PlayerScoutingEntry,
 } from './types';
 import {
   INITIAL_PLAYERS,
@@ -36,6 +37,8 @@ import { ChemistryMatrix } from './components/stats/ChemistryMatrix';
 import { EgoIndexCard } from './components/stats/EgoIndexCard';
 import { DessertLedger } from './components/stats/DessertLedger';
 import { AdminApprovalPanel } from './components/admin/AdminApprovalPanel';
+import { ScoutingWizard } from './components/scouting/ScoutingWizard';
+import { ScoutingAdminDashboard } from './components/scouting/ScoutingAdminDashboard';
 
 function MainApp() {
   const { currentUser, allUsers, approveUser, rejectUser } = useAuth();
@@ -77,7 +80,32 @@ function MainApp() {
     return saved ? JSON.parse(saved) : MOCK_DEBTS;
   });
 
-  const [activeTab, setActiveTab] = useState<NavTab>('squad');
+  const [activeTab, setActiveTab] = useState<NavTab>(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get('tab') === 'scouting' || url.searchParams.get('kurul')) {
+      return 'scouting';
+    }
+    return 'squad';
+  });
+
+  // Scouting committee state
+  const [evaluatorName, setEvaluatorName] = useState<string>(() => {
+    const url = new URL(window.location.href);
+    const param = url.searchParams.get('kurul');
+    if (param) return param;
+    return currentUser?.displayName?.split(' ')[0] || 'Mert';
+  });
+
+  const [scoutingView, setScoutingView] = useState<'wizard' | 'dashboard'>('wizard');
+
+  const [savedScoutingEntries, setSavedScoutingEntries] = useState<PlayerScoutingEntry[]>(() => {
+    const saved = localStorage.getItem('revirfc_scouting_v1');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('revirfc_scouting_v1', JSON.stringify(savedScoutingEntries));
+  }, [savedScoutingEntries]);
 
   // Modals state
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
@@ -349,6 +377,21 @@ function MainApp() {
     setDebts((prev) => [newDebt, ...prev]);
   };
 
+  // Save scouting entry from committee member
+  const handleSaveScoutingEntry = (entry: PlayerScoutingEntry) => {
+    setSavedScoutingEntries((prev) => {
+      const filtered = prev.filter(
+        (e) => !(e.playerId === entry.playerId && e.evaluatorName === entry.evaluatorName)
+      );
+      return [...filtered, entry];
+    });
+  };
+
+  // Apply consensus to all 20 FC 27 cards
+  const handleApplyConsensusToPlayers = (updatedPlayers: Player[]) => {
+    setPlayers(updatedPlayers);
+  };
+
   return (
     <div className="min-h-screen bg-black text-white flex flex-col font-sans selection:bg-amber-500 selection:text-black">
       {/* Navbar */}
@@ -367,6 +410,27 @@ function MainApp() {
             players={players}
             onSelectPlayer={(p) => setEditingPlayer(p)}
           />
+        )}
+
+        {activeTab === 'scouting' && (
+          scoutingView === 'wizard' ? (
+            <ScoutingWizard
+              players={players}
+              evaluatorName={evaluatorName}
+              onEvaluatorChange={setEvaluatorName}
+              savedEntries={savedScoutingEntries}
+              onSaveEntry={handleSaveScoutingEntry}
+              onFinishAll={() => setScoutingView('dashboard')}
+              onSwitchToDashboard={() => setScoutingView('dashboard')}
+            />
+          ) : (
+            <ScoutingAdminDashboard
+              players={players}
+              savedEntries={savedScoutingEntries}
+              onApplyConsensusToPlayers={handleApplyConsensusToPlayers}
+              onBackToWizard={() => setScoutingView('wizard')}
+            />
+          )
         )}
 
         {activeTab === 'match' && (

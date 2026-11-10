@@ -159,3 +159,35 @@ export interface DessertDebt {
   status: 'pending' | 'paid';
   createdAt: string;
 }
+
+export type GoalkeeperWillingness = 'yes' | 'emergency_only' | 'never';
+
+export interface PlayerScoutingEntry {
+  playerId: string;
+  evaluatorName: string;
+  pac: number; // 1 - 10
+  sho: number;
+  pas: number;
+  dri: number;
+  def: number;
+  phy: number;
+  gkRole: GoalkeeperWillingness;
+  playstyles: PlayStyle[];
+  secretNote?: string;
+  updatedAt: string;
+}
+
+export interface CommitteeConsensus {
+  playerId: string;
+  avgPac: number;
+  avgSho: number;
+  avgPas: number;
+  avgDri: number;
+  avgDef: number;
+  avgPhy: number;
+  calculatedOVR: number;
+  votesCount: number;
+  gkScore: { yes: number; emergency: number; never: number };
+  popularPlaystyles: PlayStyle[];
+  notes: { evaluator: string; note: string }[];
+}
