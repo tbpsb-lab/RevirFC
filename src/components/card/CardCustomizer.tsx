@@ -3,7 +3,7 @@ import { Player, PlayStyle, PreferredPosition } from '../../types';
 import { FCCard } from './FCCard';
 import { PLAYSTYLE_CONFIG } from './PlayStyleBadge';
 import imageCompression from 'browser-image-compression';
-import { Upload, Sparkles, Check, RefreshCw } from 'lucide-react';
+import { Upload, Sparkles, Check, RefreshCw, ZoomIn, Move, RotateCcw } from 'lucide-react';
 
 interface Props {
   player: Player;
@@ -16,6 +16,30 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
   const [editedPlayer, setEditedPlayer] = useState<Player>({ ...player });
   const [isCompressing, setIsCompressing] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(player.photoUrl);
+
+  const [adjustments, setAdjustments] = useState({
+    x: player.photoAdjustments?.x ?? 0,
+    y: player.photoAdjustments?.y ?? 0,
+    scale: player.photoAdjustments?.scale ?? 1.0,
+  });
+
+  const updateAdjustment = (key: 'x' | 'y' | 'scale', value: number) => {
+    const next = { ...adjustments, [key]: value };
+    setAdjustments(next);
+    setEditedPlayer((prev) => ({
+      ...prev,
+      photoAdjustments: next,
+    }));
+  };
+
+  const resetAdjustments = () => {
+    const initial = { x: 0, y: 0, scale: 1.0 };
+    setAdjustments(initial);
+    setEditedPlayer((prev) => ({
+      ...prev,
+      photoAdjustments: initial,
+    }));
+  };
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -125,6 +149,81 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
                 </label>
                 {isCompressing && <RefreshCw className="w-4 h-4 text-amber-400 animate-spin" />}
               </div>
+            </div>
+
+            {/* Interactive Photo Cropper & Adjustment Panel */}
+            <div className="bg-neutral-800/60 p-4 rounded-xl border border-neutral-700/60 space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-neutral-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <Move className="w-3.5 h-3.5 text-amber-400" /> Fotoğrafı Konumlandır & Kırp (Kadraj)
+                </label>
+                <button
+                  type="button"
+                  onClick={resetAdjustments}
+                  className="text-[10px] text-neutral-400 hover:text-white flex items-center gap-1 bg-neutral-900 px-2 py-0.5 rounded border border-neutral-700 cursor-pointer"
+                >
+                  <RotateCcw className="w-3 h-3" /> Sıfırla & Ortala
+                </button>
+              </div>
+
+              {/* Sliders Grid */}
+              <div className="space-y-2.5 bg-neutral-950 p-3 rounded-xl border border-neutral-850">
+                {/* Zoom */}
+                <div>
+                  <div className="flex justify-between items-center text-[11px] mb-1">
+                    <span className="text-neutral-300 font-semibold flex items-center gap-1">
+                      <ZoomIn className="w-3 h-3 text-amber-400" /> Büyüt / Küçült (Ölçek):
+                    </span>
+                    <span className="font-mono text-amber-400 font-bold">{adjustments.scale.toFixed(2)}x</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0.8"
+                    max="2.5"
+                    step="0.05"
+                    value={adjustments.scale}
+                    onChange={(e) => updateAdjustment('scale', parseFloat(e.target.value))}
+                    className="w-full accent-amber-500 h-1.5 bg-neutral-800 rounded cursor-pointer"
+                  />
+                </div>
+
+                {/* Horizontal (X) */}
+                <div>
+                  <div className="flex justify-between items-center text-[11px] mb-1">
+                    <span className="text-neutral-300 font-semibold">↔️ Sağa / Sola Kaydır (X Ekseni):</span>
+                    <span className="font-mono text-amber-400 font-bold">{adjustments.x > 0 ? `+${adjustments.x}%` : `${adjustments.x}%`}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="-50"
+                    max="50"
+                    step="1"
+                    value={adjustments.x}
+                    onChange={(e) => updateAdjustment('x', parseInt(e.target.value))}
+                    className="w-full accent-amber-500 h-1.5 bg-neutral-800 rounded cursor-pointer"
+                  />
+                </div>
+
+                {/* Vertical (Y) */}
+                <div>
+                  <div className="flex justify-between items-center text-[11px] mb-1">
+                    <span className="text-neutral-300 font-semibold">↕️ Yukarı / Aşağı Kaydır (Y Ekseni):</span>
+                    <span className="font-mono text-amber-400 font-bold">{adjustments.y > 0 ? `+${adjustments.y}%` : `${adjustments.y}%`}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="-50"
+                    max="50"
+                    step="1"
+                    value={adjustments.y}
+                    onChange={(e) => updateAdjustment('y', parseInt(e.target.value))}
+                    className="w-full accent-amber-500 h-1.5 bg-neutral-800 rounded cursor-pointer"
+                  />
+                </div>
+              </div>
+              <p className="text-[10px] text-neutral-400 italic">
+                * WhatsApp fotoğraflarında yüzü kartın ortasına tam oturtmak için kaydırıcıları kullanın. Soldaki kartta canlı olarak önizlenir.
+              </p>
             </div>
 
             {/* Nickname & Position */}

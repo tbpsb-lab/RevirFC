@@ -47,6 +47,12 @@ export type PlayStyle =
 
 export type PreferredPosition = 'GK' | 'DEF' | 'MID' | 'FWD';
 
+export interface PhotoAdjustments {
+  x: number;      // -50% to +50%
+  y: number;      // -50% to +50%
+  scale: number;  // 0.8x to 3.0x
+}
+
 export interface Player {
   id: string;
   name: string;
@@ -54,6 +60,7 @@ export interface Player {
   position: PreferredPosition;
   number: number;
   photoUrl: string;
+  photoAdjustments?: PhotoAdjustments;
   baseOVR: number;
   currentOVR: number;
   stats: PlayerStats;

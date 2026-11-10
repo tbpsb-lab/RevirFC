@@ -215,7 +215,13 @@ export const FCCard: React.FC<Props> = ({
                 <img
                   src={player.photoUrl}
                   alt={player.name}
-                  className="w-full h-full object-cover object-top transition-transform duration-300 group-hover:scale-105"
+                  style={{
+                    transform: player.photoAdjustments
+                      ? `scale(${player.photoAdjustments.scale}) translate(${player.photoAdjustments.x}%, ${player.photoAdjustments.y}%)`
+                      : undefined,
+                    transformOrigin: 'center center',
+                  }}
+                  className="w-full h-full object-cover object-top transition-transform duration-150"
                   onError={(e) => {
                     // Fallback avatar
                     (e.target as HTMLImageElement).src =
