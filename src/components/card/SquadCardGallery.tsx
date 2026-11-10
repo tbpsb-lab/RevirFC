@@ -24,6 +24,31 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
 
   return (
     <div className="space-y-6">
+      {/* Club Banner with Official Logo */}
+      <div className="bg-gradient-to-r from-neutral-900 via-neutral-900/90 to-emerald-950/30 border border-neutral-800 rounded-3xl p-5 shadow-2xl flex flex-wrap items-center justify-between gap-5">
+        <div className="flex items-center gap-4">
+          <img
+            src="/logo.jpg"
+            alt="Revir FC Logo"
+            className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover border-2 border-amber-400/60 shadow-xl shadow-amber-500/20"
+          />
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl md:text-2xl font-black text-white tracking-tight">REVIR FC</h1>
+              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono">
+                FC 27 • 22 KİŞİLİK KADRO
+              </span>
+            </div>
+            <p className="text-xs text-amber-400/90 font-mono font-semibold tracking-wider mt-0.5">
+              RUBOR, CALOR, DOLOR • KAPALI DEVRE HALI SAHA KULÜBÜ
+            </p>
+            <p className="text-[11px] text-neutral-400 mt-1">
+              Oyuncuların kartlarına tıklayarak fotoğraflarını doğrudan kart üzerinden kadrajlayabilir, lakap ve niteliklerini güncelleyebilirsiniz.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Filters Header */}
       <div className="bg-neutral-900/90 border border-neutral-800 rounded-3xl p-5 shadow-xl flex flex-wrap items-center justify-between gap-4">
         {/* Search */}
@@ -50,7 +75,7 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
                   : 'text-neutral-400 hover:text-white'
               }`}
             >
-              {pos === 'ALL' ? 'Tümü (20)' : pos}
+              {pos === 'ALL' ? `Tümü (${players.length})` : pos}
             </button>
           ))}
         </div>

@@ -143,11 +143,11 @@ export const Navbar: React.FC<Props> = ({
           onClick={() => setActiveTab('squad')}
           className="flex items-center gap-3 cursor-pointer group"
         >
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-600 to-yellow-400 p-[2px] shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform">
-            <div className="w-full h-full bg-black rounded-[14px] flex items-center justify-center font-black text-amber-400 text-sm tracking-tighter">
-              RFC
-            </div>
-          </div>
+          <img
+            src="/logo.jpg"
+            alt="Revir FC Logo"
+            className="w-11 h-11 rounded-full object-cover shadow-lg shadow-amber-500/20 border-2 border-amber-400/50 group-hover:scale-105 group-hover:border-amber-300 transition-all"
+          />
           <div>
             <div className="flex items-center gap-1.5">
               <span className="font-black text-lg text-white tracking-tight">REVIR</span>
@@ -156,8 +156,8 @@ export const Navbar: React.FC<Props> = ({
                 27
               </span>
             </div>
-            <p className="text-[10px] text-neutral-400 -mt-1 font-mono tracking-wider">
-              KAPALI DEVRE FUTBOL KULÜBÜ
+            <p className="text-[10px] text-amber-400/80 -mt-1 font-mono tracking-wider font-semibold">
+              RUBOR, CALOR, DOLOR
             </p>
           </div>
         </div>

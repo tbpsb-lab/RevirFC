@@ -171,7 +171,12 @@ export const FCCard: React.FC<Props> = ({
 
           {/* Top Banner: Club & Card Theme */}
           <div className="flex items-center justify-between z-10">
-            <span className="text-[10px] tracking-wider uppercase font-black px-2 py-0.5 rounded-full bg-black/40 border border-white/10 backdrop-blur-sm">
+            <span className="text-[10px] tracking-wider uppercase font-black px-2 py-0.5 rounded-full bg-black/40 border border-white/10 backdrop-blur-sm flex items-center gap-1.5">
+              <img
+                src="/logo.jpg"
+                alt="RFC"
+                className="w-3.5 h-3.5 rounded-full object-cover border border-amber-400/50"
+              />
               REVIR FC • 27
             </span>
             <div className="flex items-center gap-1">

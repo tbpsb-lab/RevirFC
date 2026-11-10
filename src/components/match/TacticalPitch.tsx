@@ -171,9 +171,11 @@ export const TacticalPitch: React.FC<Props> = ({
         {/* Header inside the image */}
         <div className="relative z-10 flex flex-wrap items-center justify-between border-b border-white/10 pb-3 mb-4 text-white">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center font-black text-emerald-400 text-sm">
-              RFC
-            </div>
+            <img
+              src="/logo.jpg"
+              alt="Revir FC"
+              className="w-11 h-11 rounded-full object-cover border-2 border-emerald-400/60 shadow-lg shadow-emerald-500/30"
+            />
             <div>
               <h2 className="text-sm md:text-base font-black tracking-tight text-white">{matchTitle}</h2>
               <p className="text-[11px] text-emerald-300 font-mono">
@@ -222,8 +224,14 @@ export const TacticalPitch: React.FC<Props> = ({
         <div className="relative border-2 border-white/40 rounded-2xl min-h-[580px] p-4 flex flex-col justify-between overflow-hidden bg-emerald-950/30">
           {/* Center Line and Circle */}
           <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white/40 -translate-y-1/2" />
-          <div className="absolute top-1/2 left-1/2 w-28 h-28 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/40" />
-          <div className="absolute top-1/2 left-1/2 w-2 h-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/60" />
+          <div className="absolute top-1/2 left-1/2 w-28 h-28 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/40 flex items-center justify-center overflow-hidden">
+            <img
+              src="/logo.jpg"
+              alt="Center Circle Watermark"
+              className="w-24 h-24 rounded-full object-cover opacity-25 pointer-events-none select-none mix-blend-screen"
+            />
+          </div>
+          <div className="absolute top-1/2 left-1/2 w-2 h-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/60 pointer-events-none" />
 
           {/* Top Penalty Area (Yeşil Takım Kalesi) */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-24 border-b-2 border-x-2 border-white/40 rounded-b-xl" />

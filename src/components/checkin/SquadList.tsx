@@ -87,25 +87,32 @@ export const SquadList: React.FC<Props> = ({
       {/* Match Header Banner */}
       <div className="bg-gradient-to-r from-neutral-900 via-neutral-900 to-amber-950/30 border border-neutral-800 rounded-3xl p-6 shadow-2xl relative overflow-hidden">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 text-xs text-amber-400 font-mono font-bold uppercase mb-1">
-              <Clock className="w-4 h-4" /> 12 Kişilik Maç Anketi & Canlı Kadro
-            </div>
-            <h2 className="text-xl md:text-2xl font-black text-white tracking-tight">{match.title}</h2>
-            <div className="flex flex-wrap items-center gap-4 mt-2 text-xs text-neutral-400">
-              <span className="flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5 text-amber-400" /> {match.pitchName}
-              </span>
-              <span>•</span>
-              <span className="font-mono text-neutral-300">
-                {new Date(match.date).toLocaleDateString('tr-TR', {
-                  weekday: 'long',
-                  day: 'numeric',
-                  month: 'long',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </span>
+          <div className="flex items-center gap-4">
+            <img
+              src="/logo.jpg"
+              alt="Revir FC"
+              className="w-14 h-14 md:w-16 md:h-16 rounded-full object-cover border-2 border-amber-400/50 shadow-lg shadow-amber-500/20 shrink-0"
+            />
+            <div>
+              <div className="flex items-center gap-2 text-xs text-amber-400 font-mono font-bold uppercase mb-1">
+                <Clock className="w-4 h-4" /> 12 Kişilik Maç Anketi & Canlı Kadro
+              </div>
+              <h2 className="text-xl md:text-2xl font-black text-white tracking-tight">{match.title}</h2>
+              <div className="flex flex-wrap items-center gap-4 mt-2 text-xs text-neutral-400">
+                <span className="flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5 text-amber-400" /> {match.pitchName}
+                </span>
+                <span>•</span>
+                <span className="font-mono text-neutral-300">
+                  {new Date(match.date).toLocaleDateString('tr-TR', {
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'long',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </span>
+              </div>
             </div>
           </div>
 
