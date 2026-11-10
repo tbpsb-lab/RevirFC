@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Player, PreferredPosition, CardTheme } from '../../types';
 import { FCCard } from './FCCard';
-import { Search, Filter, Sparkles, Crown, Flame, Bandage, Shield } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { Search, Filter, Sparkles, Crown, Flame, Bandage, Shield, Star } from 'lucide-react';
 
 interface Props {
   players: Player[];
@@ -9,11 +10,44 @@ interface Props {
 }
 
 export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) => {
+  const { currentUser } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [posFilter, setPosFilter] = useState<string>('ALL');
   const [themeFilter, setThemeFilter] = useState<string>('ALL');
 
-  const filtered = players.filter((p) => {
+  // Find the logged-in user's claimed player ID
+  const myPlayerId = currentUser?.claimedPlayerId;
+
+  // 1. Calculate squad-wide rating leaderboard rank for each player
+  const leaderboard = [...players].sort((a, b) => {
+    if (b.currentOVR !== a.currentOVR) {
+      return b.currentOVR - a.currentOVR;
+    }
+    return a.name.localeCompare(b.name, 'tr');
+  });
+
+  const rankMap = new Map<string, number>();
+  leaderboard.forEach((p, idx) => {
+    rankMap.set(p.id, idx + 1);
+  });
+
+  // 2. Base list order:
+  //    - First: Logged-in user's own card (myPlayer)
+  //    - Followed by: All other players sorted strictly by score (OVR descending)
+  const myPlayer = myPlayerId ? players.find((p) => p.id === myPlayerId) : undefined;
+  const otherPlayers = players
+    .filter((p) => p.id !== myPlayerId)
+    .sort((a, b) => {
+      if (b.currentOVR !== a.currentOVR) {
+        return b.currentOVR - a.currentOVR;
+      }
+      return a.name.localeCompare(b.name, 'tr');
+    });
+
+  const orderedPlayers = myPlayer ? [myPlayer, ...otherPlayers] : leaderboard;
+
+  // 3. Filter by search, position, and theme
+  const filtered = orderedPlayers.filter((p) => {
     const matchesSearch =
       p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       p.nickname.toLowerCase().includes(searchTerm.toLowerCase());
@@ -147,24 +181,80 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
 
       {/* Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 justify-items-center">
-        {filtered.map((player) => (
-          <div key={player.id} className="flex flex-col items-center">
-            <FCCard
-              player={player}
-              size="md"
-              interactive={true}
-              onClick={() => onSelectPlayer(player)}
-            />
-            <div className="mt-2 text-center">
-              <button
-                onClick={() => onSelectPlayer(player)}
-                className="text-xs text-amber-400 hover:text-amber-300 font-semibold"
-              >
-                Kartı İncele & Düzenle →
-              </button>
+        {filtered.map((player) => {
+          const isMyCard = player.id === myPlayerId;
+          const rank = rankMap.get(player.id) || 1;
+
+          return (
+            <div
+              key={player.id}
+              className={`relative flex flex-col items-center transition-transform duration-300 ${
+                isMyCard ? 'z-20 scale-[1.02]' : 'z-10'
+              }`}
+            >
+              {/* Top Badge: "Senin Kartın" or Score Rank */}
+              {isMyCard ? (
+                <div className="flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/30 to-amber-500/20 border border-amber-400/70 shadow-lg shadow-amber-500/25 text-amber-300 text-[11px] font-black tracking-wide uppercase mb-2.5 animate-pulse">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-spin-slow" />
+                  <span>Senin Kartın</span>
+                  <span className="text-amber-200/70 font-mono text-[10px] font-normal">#{rank}</span>
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                  </span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-neutral-900/80 border border-neutral-800 text-neutral-400 text-[10px] font-mono font-bold mb-2.5">
+                  <span className="text-neutral-500">Sıra #{rank}</span>
+                  <span className="text-neutral-600">•</span>
+                  <span className="text-amber-400/90 font-extrabold">{player.currentOVR} OVR</span>
+                </div>
+              )}
+
+              {/* Card Wrapper with Looping Background Animation for User's Own Card */}
+              <div className={`relative ${isMyCard ? 'animate-card-float' : ''}`}>
+                {isMyCard && (
+                  <div className="absolute -inset-4 sm:-inset-6 pointer-events-none -z-10 flex items-center justify-center">
+                    {/* Layer 1: Continuous Smooth Rotating Conic Aurora (Amber, Gold, Emerald, Cyan) */}
+                    <div
+                      className="absolute inset-0 rounded-[2.8rem] opacity-50 blur-2xl animate-card-spin-slow"
+                      style={{
+                        background:
+                          'conic-gradient(from 0deg at 50% 50%, rgba(245, 158, 11, 0.65) 0deg, rgba(234, 88, 12, 0.4) 60deg, rgba(16, 185, 129, 0.5) 140deg, rgba(6, 182, 212, 0.45) 210deg, rgba(217, 119, 6, 0.55) 290deg, rgba(245, 158, 11, 0.65) 360deg)',
+                      }}
+                    />
+
+                    {/* Layer 2: Gentle Breathing Glow Pulse (Luminous Ambient Aura) */}
+                    <div className="absolute -inset-2 rounded-[2.4rem] bg-gradient-to-tr from-amber-500/25 via-emerald-500/20 to-cyan-500/25 blur-xl animate-card-aura" />
+
+                    {/* Layer 3: Expanding Hologram Beam Wave Ripple */}
+                    <div className="absolute inset-0 rounded-[2rem] border-2 border-amber-400/40 animate-card-ripple" />
+                  </div>
+                )}
+
+                <FCCard
+                  player={player}
+                  size="md"
+                  interactive={true}
+                  onClick={() => onSelectPlayer(player)}
+                />
+              </div>
+
+              <div className="mt-2 text-center">
+                <button
+                  onClick={() => onSelectPlayer(player)}
+                  className={`text-xs font-semibold transition-colors ${
+                    isMyCard
+                      ? 'text-amber-300 hover:text-amber-200 underline underline-offset-4 decoration-amber-500/50'
+                      : 'text-amber-400 hover:text-amber-300'
+                  }`}
+                >
+                  {isMyCard ? 'Kartını Düzenle & Fotoğrafı Kadrajla →' : 'Kartı İncele & Düzenle →'}
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

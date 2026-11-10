@@ -30,3 +30,68 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #555555;
 }
+
+/* ==========================================================================
+   Hero Personal Card Looping Animations (Smooth, 60fps, Non-Straining Aura)
+   ========================================================================== */
+
+@keyframes card-spin-slow {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes card-float-gentle {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes card-aura-breathe {
+  0%, 100% {
+    opacity: 0.40;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0.70;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes card-ripple-wave {
+  0% {
+    transform: scale(0.96);
+    opacity: 0.60;
+  }
+  60% {
+    transform: scale(1.06);
+    opacity: 0.18;
+  }
+  100% {
+    transform: scale(1.12);
+    opacity: 0;
+  }
+}
+
+.animate-card-float {
+  animation: card-float-gentle 5s ease-in-out infinite;
+}
+
+.animate-card-spin-slow {
+  animation: card-spin-slow 14s linear infinite;
+}
+
+.animate-card-aura {
+  animation: card-aura-breathe 6s ease-in-out infinite;
+}
+
+.animate-card-ripple {
+  animation: card-ripple-wave 3.5s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
