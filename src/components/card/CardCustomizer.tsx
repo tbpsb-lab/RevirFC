@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Player, PlayStyle, PreferredPosition, CardTheme } from '../../types';
 import { FCCard } from './FCCard';
-import { PLAYSTYLE_CONFIG } from './PlayStyleBadge';
+import { PLAYSTYLE_CONFIG, PLAYSTYLE_CATEGORIES } from './PlayStyleBadge';
 import { removeImageBackground } from '../../services/backgroundRemoval';
 import imageCompression from 'browser-image-compression';
 import {
@@ -28,6 +28,7 @@ interface Props {
 
 export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdmin = false }) => {
   const [editedPlayer, setEditedPlayer] = useState<Player>({ ...player });
+  const [selectedPlaystyleCategory, setSelectedPlaystyleCategory] = useState<'all' | 'tactical' | 'status' | 'humor'>('all');
   const [isCompressing, setIsCompressing] = useState(false);
   const [isRemovingBg, setIsRemovingBg] = useState(false);
   const [removalProgress, setRemovalProgress] = useState(0);
@@ -493,29 +494,66 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
               </div>
             </div>
 
-            {/* PlayStyles Picker with internal scroll for neat height */}
+            {/* PlayStyles Picker with Category Filters */}
             <div>
-              <label className="block text-xs font-bold text-neutral-300 mb-1.5">
-                PlayStyles+ Rozetleri (Maksimum 2 Rozet)
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-bold text-neutral-300">
+                  PlayStyles+ Rozetleri (Maksimum 2 Rozet)
+                </label>
+                <span className="text-[10px] text-amber-400 font-semibold">
+                  {editedPlayer.playstyles.length}/2 Seçildi
+                </span>
+              </div>
+
+              {/* Category Filter Tabs */}
+              <div className="flex gap-1 mb-2 overflow-x-auto pb-1">
+                {PLAYSTYLE_CATEGORIES.map((cat) => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => setSelectedPlaystyleCategory(cat.id)}
+                    className={`text-[11px] px-2 py-0.5 rounded-full font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1 ${
+                      selectedPlaystyleCategory === cat.id
+                        ? 'bg-amber-400 text-black shadow-sm'
+                        : 'bg-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-700'
+                    }`}
+                  >
+                    <span>{cat.icon}</span>
+                    <span>{cat.label}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Badges List */}
               <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-2 bg-neutral-950/60 rounded-xl border border-neutral-800">
-                {(Object.keys(PLAYSTYLE_CONFIG) as PlayStyle[]).map((style) => {
-                  const active = editedPlayer.playstyles.includes(style);
-                  return (
-                    <button
-                      key={style}
-                      type="button"
-                      onClick={() => togglePlayStyle(style)}
-                      className={`text-xs px-2.5 py-1 rounded-md border transition-all cursor-pointer ${
-                        active
-                          ? 'bg-amber-500 text-black font-bold border-amber-400 shadow-md shadow-amber-500/20'
-                          : 'bg-neutral-800/80 text-neutral-300 border-neutral-700 hover:border-neutral-500'
-                      }`}
-                    >
-                      {PLAYSTYLE_CONFIG[style].label} {active && '✓'}
-                    </button>
-                  );
-                })}
+                {(Object.keys(PLAYSTYLE_CONFIG) as PlayStyle[])
+                  .filter((style) => {
+                    if (selectedPlaystyleCategory === 'all') return true;
+                    return PLAYSTYLE_CONFIG[style].category === selectedPlaystyleCategory;
+                  })
+                  .map((style) => {
+                    const cfg = PLAYSTYLE_CONFIG[style];
+                    const active = editedPlayer.playstyles.includes(style);
+                    const Icon = cfg.icon;
+                    return (
+                      <button
+                        key={style}
+                        type="button"
+                        onClick={() => togglePlayStyle(style)}
+                        title={`${cfg.label}: ${cfg.description}`}
+                        className={`text-xs px-2.5 py-1 rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 ${
+                          active
+                            ? 'bg-amber-500 text-black font-bold border-amber-400 shadow-md shadow-amber-500/20'
+                            : 'bg-neutral-800/80 text-neutral-300 border-neutral-700 hover:border-neutral-500'
+                        }`}
+                      >
+                        <span className="text-[12px] leading-none select-none">{cfg.emoji}</span>
+                        <Icon className="w-3 h-3 shrink-0" />
+                        <span className="truncate">{cfg.label}</span>
+                        {active && <span className="font-black text-black ml-0.5">✓</span>}
+                      </button>
+                    );
+                  })}
               </div>
             </div>
 

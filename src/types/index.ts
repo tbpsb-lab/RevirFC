@@ -25,25 +25,50 @@ export interface PlayerStats {
   phy: number; // Fizik / Mücadele & Direnç
 }
 
+export type PlayStyleCategory = 'tactical' | 'status' | 'humor';
+
 export type PlayStyle = 
-  | 'relentless'    // Ciğersiz (Bitmeyen Kondisyon)
-  | 'power_shot'    // Balyoz (Uzaktan Şut)
-  | 'octopus'       // Ahtapot (Kaleci Refleksi)
-  | 'wall'          // Beton Duvar (Geçilmez Stoper)
-  | 'poacher'       // Kampçı / İleride Bekleyen (Geriye Koşmayan Forvet)
-  | 'maestro'       // Orkestra Şefi (Akıl Almaz Paslar)
-  | 'trickster'     // Ayak Tenisçisi (Dar Alanda Çalım)
-  | 'speedster'     // Roket / Sprinter (Hızlı Deparcı)
-  | 'first_touch'   // Mıknatıs (Yumuşak İlk Dokunuş)
-  | 'tiki_taka'     // Karekod Pasör (Tek Pas Ustası)
-  | 'trivela'       // Dış Füze (Ayak Dışı Vuruş)
-  | 'interceptor'   // Kademe Tilkisi (Pas Arası Canavarı)
-  | 'finesse_shot'  // Falso Ustası (Plase Vuruş)
-  | 'slide_tackler' // Kasap Süpürücü (Sert Müdahale)
-  | 'commander'     // Saha İçi Komutan (Bağıran Kaptan)
-  | 'ice_cold'      // Soğukkanlı Bitirici (Karşı Karşıya Affetmeyen)
-  | 'late_bloomer'  // Son 15 Dakika Adamı (İkinci Yarı Açılan)
-  | 'fragile';      // Müzmin Revirlik (Her Maç Bandajlı);
+  // Saha İçi Yetenek ve Taktik Rozetleri
+  | 'relentless'         // Ciğersiz (Bitmeyen Kondisyon)
+  | 'power_shot'         // Balyoz (Uzaktan Şut)
+  | 'octopus'            // Ahtapot (Kaleci Refleksi)
+  | 'wall'               // Beton Duvar (Geçilmez Stoper)
+  | 'poacher'            // Kampçı / İleride Bekleyen (Geriye Koşmayan Forvet)
+  | 'maestro'            // Orkestra Şefi (Akıl Almaz Paslar)
+  | 'trickster'          // Ayak Tenisçisi (Dar Alanda Çalım)
+  | 'speedster'          // Roket / Sprinter (Hızlı Deparcı)
+  | 'first_touch'        // Mıknatıs (Yumuşak İlk Dokunuş)
+  | 'tiki_taka'          // Karekod Pasör (Tek Pas Ustası)
+  | 'trivela'            // Dış Füze (Ayak Dışı Vuruş)
+  | 'interceptor'        // Kademe Tilkisi (Pas Arası Canavarı)
+  | 'finesse_shot'       // Falso Ustası (Plase Vuruş)
+  | 'slide_tackler'      // Kasap Süpürücü (Sert Müdahale)
+  | 'commander'          // Saha İçi Komutan (Bağıran Kaptan)
+  | 'ice_cold'           // Soğukkanlı Bitirici (Karşı Karşıya Affetmeyen)
+  | 'late_bloomer'       // Son 15 Dakika Adamı (İkinci Yarı Açılan)
+  | 'ping_pong'          // Pimponcu (Duvar Pası - 🏓)
+  | 'weak_foot_wizard'   // Ters Ayak Büyücüsü (Ters Krampon - 👟)
+  | 'sneaky_winger'      // Sinsi Kanat (Gölge - 👥)
+  | 'box_to_box'         // İki Yönlü Ciğer (Sonsuzluk - ♾️)
+  | 'press_monster'      // Baskı Canavarı (Kurt Dişi - 🐺)
+  | 'key_passer'         // Kilit Açıcı (Anahtar - 🗝️)
+  | 'tower_header'       // Nöbetçi Kule (Deniz Feneri - 🗼)
+  | 'sponge_keeper'      // Sünger Kaleci (Yastık - 🧽)
+  | 'sliding_tackle_pro' // Kayarak Müdahale (Kıvılcım - ⚡)
+  | 'counter_dagger'     // Son Kontra Silahı (Hançer - 🗡️)
+  // Devamsızlık ve Durum Rozetleri
+  | 'fragile'            // Müzmin Revirlik (Her Maç Bandajlı)
+  | 'missing_person'     // Kayıp İlanı (Dedektif Rozeti - 🔍)
+  | 'shift_veteran'      // Nöbet Gazisi (Stetoskop - 🩺)
+  | 'whatsapp_captain'   // WhatsApp Kaptanı (Bildirim Zili - 🔔)
+  | 'jubilee_pending'    // Jübile Bekleyen (Baston / Saat - ⏳)
+  // Mizahi ve Taktik Karakteristik Rozetleri
+  | 'out_collector'      // Aut Koleksiyoncusu (Kuş Yuvası - 🕊️)
+  | 'selfish_maestro'    // Bencil Maestro (Ayna - 🪞)
+  | 'radio_striker'      // Telsiz Santrafor (Megafor - 📢)
+  | 'foul_magnet'        // Faul Mıknatısı (Sedye - 🩼)
+  | 'pitch_referee'      // Saha İçi Hakem (Düdük - 🪈)
+  | 'baklava_sponsor';   // Baklava Sponsoru (Tatlı Çatalı - 🍰)
 
 export type PreferredPosition = 'GK' | 'DEF' | 'MID' | 'FWD';
 
