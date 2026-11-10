@@ -504,9 +504,10 @@ export const FCCard: React.FC<Props> = ({
                       } h-full rounded-xl ${bStyle.cardBg} flex items-center justify-center gap-1.5 px-2.5`}
                       title={`${cfg.label}: ${cfg.description}`}
                     >
-                      <span className="text-[11px] leading-none select-none">{cfg.emoji}</span>
-                      <Icon className={`w-3.5 h-3.5 shrink-0 ${bStyle.iconColor}`} />
-                      <span className={`text-[9px] sm:text-[10px] md:text-[11px] font-bold ${bStyle.textColor} tracking-tight truncate`}>
+                      <span className="text-[12px] sm:text-[13.5px] leading-none select-none shrink-0 drop-shadow-sm">
+                        {cfg.emoji}
+                      </span>
+                      <span className={`text-[9.5px] sm:text-[10.5px] md:text-[11px] font-bold ${bStyle.textColor} tracking-tight truncate`}>
                         {cfg.label}
                       </span>
                     </div>

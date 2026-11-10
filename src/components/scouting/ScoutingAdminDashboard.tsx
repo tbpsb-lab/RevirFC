@@ -380,7 +380,7 @@ export const ScoutingAdminDashboard: React.FC<Props> = ({
                             key={ps}
                             className="text-[10px] bg-neutral-800 border border-neutral-700 text-amber-300 px-1.5 py-0.5 rounded"
                           >
-                            {PLAYSTYLE_CONFIG[ps]?.label || ps}
+                            {PLAYSTYLE_CONFIG[ps] ? `${PLAYSTYLE_CONFIG[ps].emoji} ${PLAYSTYLE_CONFIG[ps].label}` : ps}
                           </span>
                         ))}
                       </div>

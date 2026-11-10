@@ -659,8 +659,7 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
                             : 'bg-neutral-800/80 text-neutral-300 border-neutral-700 hover:border-neutral-500'
                         }`}
                       >
-                        <span className="text-[12px] leading-none select-none">{cfg.emoji}</span>
-                        <Icon className="w-3 h-3 shrink-0" />
+                        <span className="text-[13px] leading-none select-none">{cfg.emoji}</span>
                         <span className="truncate">{cfg.label}</span>
                         {active && <span className="font-black text-black ml-0.5">✓</span>}
                       </button>
