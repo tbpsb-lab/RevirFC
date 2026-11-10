@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Player, PlayStyle, PreferredPosition } from '../../types';
 import { FCCard } from './FCCard';
 import { PLAYSTYLE_CONFIG } from './PlayStyleBadge';
@@ -10,10 +10,7 @@ import {
   RefreshCw,
   ZoomIn,
   ZoomOut,
-  Move,
   RotateCcw,
-  Hand,
-  Crosshair,
 } from 'lucide-react';
 
 interface Props {
@@ -26,7 +23,6 @@ interface Props {
 export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdmin = false }) => {
   const [editedPlayer, setEditedPlayer] = useState<Player>({ ...player });
   const [isCompressing, setIsCompressing] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState(player.photoUrl);
 
   const [adjustments, setAdjustments] = useState({
     x: player.photoAdjustments?.x ?? 0,
@@ -57,7 +53,7 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
     }));
   };
 
-  // Direct mouse drag on photo
+  // Direct mouse drag on card photo
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
     setIsDragging(true);
@@ -69,32 +65,16 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
     };
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !dragStartRef.current) return;
-    const deltaX = (e.clientX - dragStartRef.current.startX) / (2.2 * adjustments.scale);
-    const deltaY = (e.clientY - dragStartRef.current.startY) / (2.2 * adjustments.scale);
-
-    const newX = Math.max(-50, Math.min(50, Math.round(dragStartRef.current.initX + deltaX)));
-    const newY = Math.max(-50, Math.min(50, Math.round(dragStartRef.current.initY + deltaY)));
-
-    updateAdjustment('x', newX);
-    updateAdjustment('y', newY);
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-    dragStartRef.current = null;
-  };
-
-  // Wheel zoom directly on photo
+  // Wheel zoom directly on card photo
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     const zoomDelta = e.deltaY < 0 ? 0.08 : -0.08;
     const nextScale = Math.max(0.7, Math.min(3.0, Math.round((adjustments.scale + zoomDelta) * 100) / 100));
     updateAdjustment('scale', nextScale);
   };
 
-  // Touch handlers for mobile & tablet (1 finger drag pan, 2 fingers pinch zoom)
+  // Touch handlers for mobile & tablet (1 finger pan, 2 fingers pinch)
   const handleTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 1) {
       setIsDragging(true);
@@ -116,32 +96,74 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
     }
   };
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (e.touches.length === 1 && isDragging && dragStartRef.current) {
-      const deltaX = (e.touches[0].clientX - dragStartRef.current.startX) / (2.0 * adjustments.scale);
-      const deltaY = (e.touches[0].clientY - dragStartRef.current.startY) / (2.0 * adjustments.scale);
+  // Window listeners so dragging smoothly continues even if mouse/finger leaves the card frame
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const onMouseMove = (e: MouseEvent) => {
+      if (!dragStartRef.current) return;
+      const deltaX = (e.clientX - dragStartRef.current.startX) / (1.8 * adjustments.scale);
+      const deltaY = (e.clientY - dragStartRef.current.startY) / (1.8 * adjustments.scale);
 
       const newX = Math.max(-50, Math.min(50, Math.round(dragStartRef.current.initX + deltaX)));
       const newY = Math.max(-50, Math.min(50, Math.round(dragStartRef.current.initY + deltaY)));
 
       updateAdjustment('x', newX);
       updateAdjustment('y', newY);
-    } else if (e.touches.length === 2 && touchDistRef.current) {
-      const currentDist = Math.hypot(
-        e.touches[0].clientX - e.touches[1].clientX,
-        e.touches[0].clientY - e.touches[1].clientY
-      );
-      const ratio = currentDist / touchDistRef.current;
-      const nextScale = Math.max(0.7, Math.min(3.0, Math.round(touchStartScaleRef.current * ratio * 100) / 100));
-      updateAdjustment('scale', nextScale);
-    }
-  };
+    };
 
-  const handleTouchEnd = () => {
-    setIsDragging(false);
-    dragStartRef.current = null;
-    touchDistRef.current = null;
-  };
+    const onMouseUp = () => {
+      setIsDragging(false);
+      dragStartRef.current = null;
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+  }, [isDragging, adjustments.scale]);
+
+  useEffect(() => {
+    if (!isDragging && !touchDistRef.current) return;
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 1 && isDragging && dragStartRef.current) {
+        const deltaX = (e.touches[0].clientX - dragStartRef.current.startX) / (1.8 * adjustments.scale);
+        const deltaY = (e.touches[0].clientY - dragStartRef.current.startY) / (1.8 * adjustments.scale);
+
+        const newX = Math.max(-50, Math.min(50, Math.round(dragStartRef.current.initX + deltaX)));
+        const newY = Math.max(-50, Math.min(50, Math.round(dragStartRef.current.initY + deltaY)));
+
+        updateAdjustment('x', newX);
+        updateAdjustment('y', newY);
+      } else if (e.touches.length === 2 && touchDistRef.current) {
+        const currentDist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        const ratio = currentDist / touchDistRef.current;
+        const nextScale = Math.max(0.7, Math.min(3.0, Math.round(touchStartScaleRef.current * ratio * 100) / 100));
+        updateAdjustment('scale', nextScale);
+      }
+    };
+
+    const onTouchEnd = () => {
+      setIsDragging(false);
+      dragStartRef.current = null;
+      touchDistRef.current = null;
+    };
+
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('touchend', onTouchEnd);
+    window.addEventListener('touchcancel', onTouchEnd);
+    return () => {
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
+      window.removeEventListener('touchcancel', onTouchEnd);
+    };
+  }, [isDragging, adjustments.scale]);
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -160,7 +182,6 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64Url = reader.result as string;
-        setPreviewUrl(base64Url);
         setEditedPlayer((prev) => ({ ...prev, photoUrl: base64Url }));
       };
       reader.readAsDataURL(compressedFile);
@@ -178,7 +199,6 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
         return { ...prev, playstyles: prev.playstyles.filter((s) => s !== style) };
       }
       if (prev.playstyles.length >= 2) {
-        // limit to 2 playstyles
         return { ...prev, playstyles: [prev.playstyles[1], style] };
       }
       return { ...prev, playstyles: [...prev.playstyles, style] };
@@ -189,7 +209,6 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
     const clamped = Math.max(30, Math.min(99, val));
     setEditedPlayer((prev) => {
       const newStats = { ...prev.stats, [key]: clamped };
-      // Recalculate average OVR if admin
       const avg = Math.round(
         (newStats.pac + newStats.sho + newStats.pas + newStats.dri + newStats.def + newStats.phy) / 6
       );
@@ -202,187 +221,101 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-neutral-900 border border-neutral-800 rounded-2xl max-w-4xl w-full p-6 text-white shadow-2xl relative">
-        <div className="flex items-center justify-between pb-4 border-b border-neutral-800 mb-6">
+    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md overflow-y-auto p-2 sm:p-4 md:p-6 flex justify-center items-start">
+      <div className="bg-neutral-900 border border-neutral-800 rounded-2xl max-w-4xl w-full p-4 sm:p-5 text-white shadow-2xl relative my-auto max-h-[94vh] flex flex-col">
+        {/* Modal Header */}
+        <div className="flex items-center justify-between pb-3 border-b border-neutral-800 mb-3 shrink-0">
           <div>
-            <h2 className="text-xl font-black text-amber-400 flex items-center gap-2">
-              <Sparkles className="w-5 h-5" /> FC 27 Kartı Düzenle & Fotoğraf Güncelle
+            <h2 className="text-lg font-black text-amber-400 flex items-center gap-2">
+              <Sparkles className="w-5 h-5" /> FC 27 Kartı Düzenle
             </h2>
-            <p className="text-xs text-neutral-400 mt-1">
-              Fotoğrafınız otomatik olarak WebP formatına sıkıştırılır ve kart şablonuna işlenir.
+            <p className="text-xs text-neutral-400">
+              Soldaki kartın fotoğrafını farenizle veya dokunarak doğrudan kaydırıp büyütebilirsiniz.
             </p>
           </div>
           <button
             onClick={onClose}
-            className="text-neutral-400 hover:text-white bg-neutral-800 hover:bg-neutral-700 rounded-lg p-2 text-sm"
+            className="text-neutral-400 hover:text-white bg-neutral-800 hover:bg-neutral-700 rounded-lg px-3 py-1.5 text-xs font-bold transition-colors cursor-pointer"
           >
             ✕ Kapat
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
-          {/* Card Preview */}
-          <div className="md:col-span-5 flex flex-col items-center justify-center">
-            <FCCard player={editedPlayer} size="md" interactive={false} />
-            <span className="text-[11px] text-neutral-400 mt-3 font-mono">
-              OVR: {editedPlayer.currentOVR} • {editedPlayer.position} #{editedPlayer.number}
-            </span>
-          </div>
+        {/* Modal Body */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 overflow-y-auto pr-1 flex-1">
+          {/* Left: Card + Direct Manipulation Controls */}
+          <div className="md:col-span-5 flex flex-col items-center justify-start">
+            <FCCard
+              player={editedPlayer}
+              size="md"
+              interactive={false}
+              photoInteractive={true}
+              onPhotoMouseDown={handleMouseDown}
+              onPhotoTouchStart={handleTouchStart}
+              onPhotoWheel={handleWheel}
+            />
 
-          {/* Form Controls */}
-          <div className="md:col-span-7 space-y-4">
-            {/* Photo Uploader */}
-            <div className="bg-neutral-800/60 p-4 rounded-xl border border-neutral-700/60">
-              <label className="block text-xs font-bold text-neutral-300 mb-2 uppercase tracking-wider">
-                Kart Fotoğrafı Yükle (Otomatik WebP Sıkıştırma)
-              </label>
-              <div className="flex items-center gap-4">
-                <label className="cursor-pointer bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs px-4 py-2.5 rounded-lg flex items-center gap-2 transition-colors">
-                  <Upload className="w-4 h-4" />
-                  {isCompressing ? 'Sıkıştırılıyor...' : 'Galeriden / Kameradan Seç'}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handlePhotoUpload}
-                    className="hidden"
-                    disabled={isCompressing}
-                  />
-                </label>
-                {isCompressing && <RefreshCw className="w-4 h-4 text-amber-400 animate-spin" />}
-              </div>
-            </div>
-
-            {/* Interactive Photo Cropper & Adjustment Panel */}
-            <div className="bg-neutral-800/60 p-4 rounded-xl border border-neutral-700/60 space-y-3">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <Move className="w-3.5 h-3.5" /> Canlı Kadraj & Fotoğraf Konumlandırma
-                </label>
+            {/* Quick scale & reset bar right under the card */}
+            <div className="w-64 mt-3 space-y-2">
+              <div className="flex items-center justify-between bg-neutral-950 px-2.5 py-1.5 rounded-lg border border-neutral-800 text-xs">
+                <span className="text-[11px] text-neutral-400 font-semibold">Ölçek:</span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => updateAdjustment('scale', Math.max(0.7, Math.round((adjustments.scale - 0.1) * 10) / 10))}
+                    className="p-1 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded text-xs font-bold cursor-pointer"
+                    title="Küçült"
+                  >
+                    <ZoomOut className="w-3.5 h-3.5" />
+                  </button>
+                  <span className="font-mono text-amber-400 font-bold text-xs min-w-10 text-center">
+                    {adjustments.scale.toFixed(2)}x
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => updateAdjustment('scale', Math.min(3.0, Math.round((adjustments.scale + 0.1) * 10) / 10))}
+                    className="p-1 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded text-xs font-bold cursor-pointer"
+                    title="Büyüt"
+                  >
+                    <ZoomIn className="w-3.5 h-3.5" />
+                  </button>
+                </div>
                 <button
                   type="button"
                   onClick={resetAdjustments}
-                  className="text-[10px] text-neutral-300 hover:text-white flex items-center gap-1 bg-neutral-900 px-2.5 py-1 rounded border border-neutral-700 cursor-pointer transition-colors"
+                  className="text-[11px] text-neutral-300 hover:text-white flex items-center gap-1 bg-neutral-800 hover:bg-neutral-700 px-2 py-0.5 rounded cursor-pointer transition-colors"
+                  title="Ortala ve Sıfırla"
                 >
-                  <RotateCcw className="w-3 h-3 text-amber-400" /> Sıfırla & Ortala
+                  <RotateCcw className="w-3 h-3 text-amber-400" /> Ortala
                 </button>
               </div>
 
-              {/* Direct Gesture Canvas Box */}
-              <div
-                className="relative w-full h-52 rounded-xl overflow-hidden bg-neutral-950 border-2 border-dashed border-amber-500/40 select-none cursor-grab active:cursor-grabbing flex items-center justify-center touch-none group shadow-inner"
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
-                onWheel={handleWheel}
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                title="Fotoğrafı farenizle veya parmağınızla sürükleyerek taşıyın, tekerlekle büyütün/küçültün"
-              >
-                {/* Photo Element */}
-                <img
-                  src={editedPlayer.photoUrl}
-                  alt={editedPlayer.name}
-                  className="max-w-none pointer-events-none select-none transition-transform duration-75 object-contain"
-                  style={{
-                    width: '200px',
-                    height: '200px',
-                    transform: `translate(${adjustments.x * 2.2}px, ${adjustments.y * 2.2}px) scale(${adjustments.scale})`,
-                    transformOrigin: 'center center',
-                  }}
-                  draggable={false}
+              {/* Photo Upload Button under the card */}
+              <label className="w-full cursor-pointer bg-neutral-800 hover:bg-neutral-750 border border-neutral-700 text-amber-400 font-bold text-xs py-2 px-3 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                <Upload className="w-3.5 h-3.5" />
+                {isCompressing ? 'Sıkıştırılıyor...' : 'Galeriden / Kameradan Fotoğraf Seç'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoUpload}
+                  className="hidden"
+                  disabled={isCompressing}
                 />
-
-                {/* Rule of thirds grid & Crosshair Overlay */}
-                <div className="absolute inset-0 pointer-events-none grid grid-cols-3 grid-rows-3 border border-amber-400/20">
-                  <div className="border-r border-b border-amber-400/15" />
-                  <div className="border-r border-b border-amber-400/15" />
-                  <div className="border-b border-amber-400/15" />
-                  <div className="border-r border-b border-amber-400/15" />
-                  <div className="border-r border-b border-amber-400/15 flex items-center justify-center">
-                    <Crosshair className="w-6 h-6 text-amber-400/30" />
-                  </div>
-                  <div className="border-b border-amber-400/15" />
-                  <div className="border-r border-amber-400/15" />
-                  <div className="border-r border-amber-400/15" />
-                  <div />
+              </label>
+              {isCompressing && (
+                <div className="flex items-center justify-center gap-1.5 text-xs text-amber-400">
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Fotoğraf WebP olarak optimize ediliyor...
                 </div>
+              )}
 
-                {/* Gesture Help Overlay pill */}
-                <div className="absolute bottom-2 left-2 right-2 pointer-events-none flex items-center justify-between">
-                  <span className="bg-black/75 backdrop-blur px-2 py-0.5 rounded text-[10px] text-neutral-300 font-mono border border-white/10 flex items-center gap-1">
-                    <Hand className="w-3 h-3 text-amber-400" /> Sürükle • Tekerlek / 2 Parmak Zoom
-                  </span>
-                  <span className="bg-amber-500/20 backdrop-blur px-2 py-0.5 rounded text-[10px] text-amber-400 font-mono border border-amber-500/30">
-                    {adjustments.scale.toFixed(2)}x
-                  </span>
-                </div>
-              </div>
-
-              {/* Quick Zoom Buttons & Sliders */}
-              <div className="space-y-2 bg-neutral-950 p-2.5 rounded-xl border border-neutral-800">
-                <div className="flex items-center justify-between text-[11px] pb-1 border-b border-neutral-800/80">
-                  <span className="text-neutral-400 font-medium">Hızlı Yakınlaştırma:</span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => updateAdjustment('scale', Math.max(0.7, Math.round((adjustments.scale - 0.1) * 10) / 10))}
-                      className="px-2 py-0.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-bold rounded border border-neutral-700 cursor-pointer flex items-center gap-1"
-                    >
-                      <ZoomOut className="w-3 h-3" /> -
-                    </button>
-                    <span className="font-mono text-amber-400 font-bold min-w-12 text-center">
-                      {adjustments.scale.toFixed(2)}x
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => updateAdjustment('scale', Math.min(3.0, Math.round((adjustments.scale + 0.1) * 10) / 10))}
-                      className="px-2 py-0.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-bold rounded border border-neutral-700 cursor-pointer flex items-center gap-1"
-                    >
-                      <ZoomIn className="w-3 h-3" /> +
-                    </button>
-                  </div>
-                </div>
-
-                {/* Precision Sliders */}
-                <div className="grid grid-cols-2 gap-3 pt-1">
-                  <div>
-                    <div className="flex justify-between items-center text-[10px] mb-0.5">
-                      <span className="text-neutral-400">↔️ Yatay (X):</span>
-                      <span className="font-mono text-amber-400">{adjustments.x > 0 ? `+${adjustments.x}%` : `${adjustments.x}%`}</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="-50"
-                      max="50"
-                      step="1"
-                      value={adjustments.x}
-                      onChange={(e) => updateAdjustment('x', parseInt(e.target.value))}
-                      className="w-full accent-amber-500 h-1 bg-neutral-800 rounded cursor-pointer"
-                    />
-                  </div>
-
-                  <div>
-                    <div className="flex justify-between items-center text-[10px] mb-0.5">
-                      <span className="text-neutral-400">↕️ Dikey (Y):</span>
-                      <span className="font-mono text-amber-400">{adjustments.y > 0 ? `+${adjustments.y}%` : `${adjustments.y}%`}</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="-50"
-                      max="50"
-                      step="1"
-                      value={adjustments.y}
-                      onChange={(e) => updateAdjustment('y', parseInt(e.target.value))}
-                      className="w-full accent-amber-500 h-1 bg-neutral-800 rounded cursor-pointer"
-                    />
-                  </div>
-                </div>
-              </div>
+              <p className="text-[10px] text-neutral-400 text-center leading-tight">
+                💡 Fotoğrafı kartın üzerinden fareyle sürükleyin veya tekerlekle büyütün.
+              </p>
             </div>
+          </div>
 
+          {/* Right: Clean form controls (NO separate cropper panel) */}
+          <div className="md:col-span-7 space-y-3.5">
             {/* Nickname & Position */}
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -411,12 +344,12 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
               </div>
             </div>
 
-            {/* PlayStyles Picker */}
+            {/* PlayStyles Picker with internal scroll for neat height */}
             <div>
               <label className="block text-xs font-bold text-neutral-300 mb-1.5">
                 PlayStyles+ Rozetleri (Maksimum 2 Rozet)
               </label>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-2 bg-neutral-950/60 rounded-xl border border-neutral-800">
                 {(Object.keys(PLAYSTYLE_CONFIG) as PlayStyle[]).map((style) => {
                   const active = editedPlayer.playstyles.includes(style);
                   return (
@@ -424,7 +357,7 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
                       key={style}
                       type="button"
                       onClick={() => togglePlayStyle(style)}
-                      className={`text-xs px-2.5 py-1 rounded-md border transition-all ${
+                      className={`text-xs px-2.5 py-1 rounded-md border transition-all cursor-pointer ${
                         active
                           ? 'bg-amber-500 text-black font-bold border-amber-400 shadow-md shadow-amber-500/20'
                           : 'bg-neutral-800/80 text-neutral-300 border-neutral-700 hover:border-neutral-500'
@@ -467,28 +400,28 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
                 ))}
               </div>
             </div>
-
-            {/* Save Button */}
-            <div className="flex justify-end gap-3 pt-3">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs font-bold"
-              >
-                İptal
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  onSave(editedPlayer);
-                  onClose();
-                }}
-                className="px-5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-xs font-black flex items-center gap-2 shadow-lg shadow-amber-500/25"
-              >
-                <Check className="w-4 h-4" /> Kartı Kaydet
-              </button>
-            </div>
           </div>
+        </div>
+
+        {/* Modal Footer with Actions */}
+        <div className="flex justify-end gap-3 pt-3 border-t border-neutral-800 mt-3 shrink-0">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs font-bold cursor-pointer"
+          >
+            İptal
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              onSave(editedPlayer);
+              onClose();
+            }}
+            className="px-5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-xs font-black flex items-center gap-2 shadow-lg shadow-amber-500/25 cursor-pointer"
+          >
+            <Check className="w-4 h-4" /> Kartı Kaydet
+          </button>
         </div>
       </div>
     </div>

@@ -11,6 +11,10 @@ interface Props {
   interactive?: boolean;
   onClick?: () => void;
   showBadges?: boolean;
+  photoInteractive?: boolean;
+  onPhotoMouseDown?: (e: React.MouseEvent) => void;
+  onPhotoTouchStart?: (e: React.TouchEvent) => void;
+  onPhotoWheel?: (e: React.WheelEvent) => void;
 }
 
 export const FCCard: React.FC<Props> = ({
@@ -21,6 +25,10 @@ export const FCCard: React.FC<Props> = ({
   interactive = true,
   onClick,
   showBadges = true,
+  photoInteractive = false,
+  onPhotoMouseDown,
+  onPhotoTouchStart,
+  onPhotoWheel,
 }) => {
   const [rotate, setRotate] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
@@ -211,7 +219,17 @@ export const FCCard: React.FC<Props> = ({
 
             {/* Player Photo with authentic FC cutout styling */}
             <div className="relative flex-1 flex justify-center items-end">
-              <div className={`relative ${sizeConfig.photoSize} overflow-hidden rounded-xl border border-white/10 shadow-lg`}>
+              <div
+                onMouseDown={photoInteractive ? onPhotoMouseDown : undefined}
+                onTouchStart={photoInteractive ? onPhotoTouchStart : undefined}
+                onWheel={photoInteractive ? onPhotoWheel : undefined}
+                className={`relative ${sizeConfig.photoSize} overflow-hidden rounded-xl border border-white/10 shadow-lg ${
+                  photoInteractive
+                    ? 'cursor-grab active:cursor-grabbing ring-2 ring-amber-400 shadow-amber-500/40 touch-none group/photo'
+                    : ''
+                }`}
+                title={photoInteractive ? 'Fotoğrafı farenizle veya parmağınızla sürükleyin, tekerlekle büyütün' : undefined}
+              >
                 <img
                   src={player.photoUrl}
                   alt={player.name}
@@ -221,7 +239,8 @@ export const FCCard: React.FC<Props> = ({
                       : undefined,
                     transformOrigin: 'center center',
                   }}
-                  className="w-full h-full object-cover object-top transition-transform duration-150"
+                  className="w-full h-full object-cover object-top transition-transform duration-75 pointer-events-none select-none"
+                  draggable={false}
                   onError={(e) => {
                     // Fallback avatar
                     (e.target as HTMLImageElement).src =
@@ -229,6 +248,20 @@ export const FCCard: React.FC<Props> = ({
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+
+                {photoInteractive && (
+                  <div className="absolute inset-0 pointer-events-none border border-amber-400/40 rounded-xl flex items-center justify-center">
+                    <div className="w-full h-full grid grid-cols-2 grid-rows-2">
+                      <div className="border-r border-b border-amber-400/20" />
+                      <div className="border-b border-amber-400/20" />
+                      <div className="border-r border-amber-400/20" />
+                      <div />
+                    </div>
+                    <span className="absolute bottom-1 bg-black/85 text-[8px] text-amber-300 font-bold px-1.5 py-0.5 rounded border border-amber-400/30 font-mono tracking-tight shadow">
+                      ✋ Sürükle / Zoom
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
