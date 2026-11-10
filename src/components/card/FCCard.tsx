@@ -142,7 +142,7 @@ export const FCCard: React.FC<Props> = ({
           statValColor: 'text-[#BAE6FD]',
           ovalTextColor: 'text-sky-200',
           ovalIconColor: 'text-sky-400',
-          nameTop: 'top-[52.0%]',
+          nameTop: 'top-[53.8%]',
           statTop: 'top-[82.4%]',
           statBounds: 'left-[11.3%] right-[11.3%]',
           ovalsTop: 'top-[65.2%]',
