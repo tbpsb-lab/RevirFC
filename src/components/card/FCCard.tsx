@@ -279,6 +279,7 @@ export const FCCard: React.FC<Props> = ({
         style={{
           transform: !photoInteractive ? `rotateX(${rotate.x}deg) rotateY(${rotate.y}deg)` : undefined,
           transition: isHovered && !photoInteractive ? 'none' : 'transform 0.3s ease-out',
+          transformStyle: 'preserve-3d',
         }}
         className={`relative ${sizeConfig.height} w-full bg-transparent ${
           isHovered ? 'drop-shadow-[0_15px_25px_rgba(245,158,11,0.35)]' : 'drop-shadow-xl'
@@ -288,15 +289,17 @@ export const FCCard: React.FC<Props> = ({
         <img
           src={themeConfig.template}
           alt={themeConfig.label}
+          style={{ transform: 'translateZ(0px)' }}
           className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none z-0"
         />
 
-        {/* KATMAN 2: OYUNCU FOTOĞRAFI (Cutout / Photo with Transform) */}
+        {/* KATMAN 2: OYUNCU FOTOĞRAFI (Cutout / Photo with Transform - Fotoğraf hariç dendiği için düz z-0 kalıyor) */}
         <div
           className={`absolute ${themeConfig.photoFrame} flex items-center justify-center z-10 overflow-hidden`}
           style={{
             maskImage: 'linear-gradient(to bottom, black 72%, transparent 100%)',
             WebkitMaskImage: 'linear-gradient(to bottom, black 72%, transparent 100%)',
+            transform: 'translateZ(0px)',
           }}
         >
           <div
@@ -333,15 +336,13 @@ export const FCCard: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* KATMAN 3: HOLOGRAFİK IŞIK PARLAMASI (Shimmer on Hover) */}
+        {/* KATMAN 3: ÜST METİN & CANLI VERİLER (3D Parallax Önde Yüzen Katmanlar) */}
+
+        {/* Sol Üst Bilgi Kolonu (OVR, Mevki, Forma No, Bayrak, Kulüp Arması - 3D Parallax: translateZ(30px)) */}
         <div
-          className="absolute inset-0 bg-gradient-to-tr from-amber-200/10 via-white/5 to-transparent opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-300 mix-blend-overlay z-15"
-        />
-
-        {/* KATMAN 4: ÜST METİN & CANLI VERİLER (Pixel-Perfect Alignment) */}
-
-        {/* Sol Üst Bilgi Kolonu (Merkezi: x=25.5%, y=13.5%..55%) */}
-        <div className="absolute top-[13.5%] left-[17%] w-[17%] flex flex-col items-center text-center z-20 pointer-events-none select-none">
+          className="absolute top-[13.5%] left-[17%] w-[17%] flex flex-col items-center text-center z-20 pointer-events-none select-none"
+          style={{ transform: 'translateZ(30px)' }}
+        >
           {/* OVR (86) */}
           <span className={`font-black tracking-tighter leading-none ${themeConfig.ovrColor} ${sizeConfig.ovrText} drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]`}>
             {ovr}
@@ -364,28 +365,67 @@ export const FCCard: React.FC<Props> = ({
               (e.currentTarget as HTMLImageElement).src = '/cards/flag_tr.png';
             }}
           />
-          {/* Kulüp / Takım Arması */}
-          <img
-            src={player.clubLogoUrl || getClubLogoUrl(player.clubId)}
-            alt={player.clubName || 'Revir FC'}
-            title={player.clubName || 'Revir FC'}
-            className={`${sizeConfig.logoWidth} object-contain rounded-full shadow-md mt-1.5 border border-amber-400/30 bg-black/25 p-0.5`}
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = '/cards/logo_badge.png';
-            }}
-          />
+          {/* Kulüp / Takım Arması (Metalik Parlama Efekti ile) */}
+          <div className={`relative ${sizeConfig.logoWidth} mt-1.5 rounded-full overflow-hidden shadow-md border border-amber-400/40 bg-black/30 p-0.5`}>
+            <img
+              src={player.clubLogoUrl || getClubLogoUrl(player.clubId)}
+              alt={player.clubName || 'Revir FC'}
+              title={player.clubName || 'Revir FC'}
+              className="w-full h-full object-contain rounded-full"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = '/cards/logo_badge.png';
+              }}
+            />
+            {/* Kulüp Logosu Üzerinde Metalik Yansıma Işığı */}
+            <div className="absolute inset-0 pointer-events-none mix-blend-color-dodge transition-opacity duration-300 opacity-0 group-hover:opacity-100">
+              <div
+                className="w-[200%] h-[200%] -top-[50%] -left-[50%] absolute bg-gradient-to-tr from-transparent via-white/70 to-transparent"
+                style={{
+                  transform: `translate(${rotate.y * 3.0}%, ${rotate.x * -3.0}%) rotate(35deg)`,
+                  transition: isHovered ? 'none' : 'transform 0.3s ease-out',
+                }}
+              />
+            </div>
+          </div>
         </div>
 
-        {/* Sağ Üst Tema Kalkanı (Tüm temalarda en üst katman z-30 overlay) */}
-        <img
-          src={THEME_SHIELDS[theme]}
-          alt={`${theme} Crest`}
-          className={`absolute top-[13.0%] right-[13.5%] ${sizeConfig.shieldSize} object-contain pointer-events-none z-30 opacity-95 drop-shadow-md select-none`}
-        />
+        {/* Sağ Üst Tema Kalkanı (3D Parallax: translateZ(36px) + Sadece Kalkan Şekline Kilitli Metalik Parlama) */}
+        <div
+          className={`absolute top-[13.0%] right-[13.5%] ${sizeConfig.shieldSize} pointer-events-none z-30 select-none`}
+          style={{ transform: 'translateZ(36px)' }}
+        >
+          <img
+            src={THEME_SHIELDS[theme]}
+            alt={`${theme} Crest`}
+            className="w-full h-full object-contain opacity-95 drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)]"
+          />
+          {/* Sadece Kalkan Şekline Kilitli Metalik Parlama (Arka plana veya dikdörtgene ASLA taşmaz) */}
+          <div
+            className="absolute inset-0 pointer-events-none mix-blend-color-dodge transition-opacity duration-300 opacity-0 group-hover:opacity-100"
+            style={{
+              maskImage: `url(${THEME_SHIELDS[theme]})`,
+              WebkitMaskImage: `url(${THEME_SHIELDS[theme]})`,
+              maskSize: 'contain',
+              WebkitMaskSize: 'contain',
+              maskRepeat: 'no-repeat',
+              maskPosition: 'center',
+              WebkitMaskPosition: 'center',
+            }}
+          >
+            <div
+              className="w-[200%] h-[200%] -top-[50%] -left-[50%] absolute bg-gradient-to-tr from-transparent via-white/75 to-transparent"
+              style={{
+                transform: `translate(${rotate.y * 3.0}%, ${rotate.x * -3.0}%) rotate(35deg)`,
+                transition: isHovered ? 'none' : 'transform 0.3s ease-out',
+              }}
+            />
+          </div>
+        </div>
 
-        {/* Oyuncu Adı ve Halı Saha Lakabı */}
+        {/* Oyuncu Adı ve Halı Saha Lakabı (3D Parallax: translateZ(26px)) */}
         <div
           className={`absolute left-0 right-0 ${themeConfig.nameTop} flex flex-col items-center justify-center text-center z-20 pointer-events-none`}
+          style={{ transform: 'translateZ(26px)' }}
         >
           {/* Lakap: İsmin üstünde, resmin alt kısmına doğru */}
           <p
@@ -411,12 +451,15 @@ export const FCCard: React.FC<Props> = ({
           </h3>
         </div>
 
-        {/* PlayStyles Rozetleri */}
+        {/* PlayStyles Rozetleri (3D Parallax: translateZ(32px)) */}
         {showBadges && (
           <>
             {themeConfig.isGold ? (
               /* Altın Kart: Sağ/Orta Alt Rozetleri */
-              <div className="absolute bottom-[4.8%] right-[8%] left-[8%] flex justify-end items-center gap-1.5 z-20 pointer-events-none select-none">
+              <div
+                className="absolute bottom-[4.8%] right-[8%] left-[8%] flex justify-end items-center gap-1.5 z-20 pointer-events-none select-none"
+                style={{ transform: 'translateZ(32px)' }}
+              >
                 {player.playstyles.slice(0, 2).map((ps, idx) => {
                   const cfg = PLAYSTYLE_CONFIG[ps];
                   if (!cfg) return null;
@@ -439,6 +482,7 @@ export const FCCard: React.FC<Props> = ({
               /* Diğer Tüm Tematik Kartlar: Köşeleri Yuvarlatılmış Geniş Yatay Dikdörtgen Rozetler */
               <div
                 className={`absolute ${themeConfig.ovalsTop} ${themeConfig.ovalsBounds} ${themeConfig.ovalsHeight} flex justify-center items-center gap-2 z-20 pointer-events-none select-none`}
+                style={{ transform: 'translateZ(32px)' }}
               >
                 {player.playstyles.slice(0, 2).map((ps, idx) => {
                   const cfg = PLAYSTYLE_CONFIG[ps];
@@ -508,9 +552,10 @@ export const FCCard: React.FC<Props> = ({
           </>
         )}
 
-        {/* 6 Temel Saha İstatistiği (Tam Olarak HIZ ŞUT PAS DRİ SAV FİZ Kolonlarının Altında) */}
+        {/* 6 Temel Saha İstatistiği (3D Parallax: translateZ(24px)) */}
         <div
           className={`absolute ${themeConfig.statBounds} ${themeConfig.statTop} grid grid-cols-6 text-center pointer-events-none select-none z-20`}
+          style={{ transform: 'translateZ(24px)' }}
         >
           {[
             { val: stats.pac },
