@@ -10,6 +10,7 @@ import {
   getClubById,
   getClubLogoUrl,
   getNationFlagUrl,
+  getShortCountry,
   DEFAULT_NATION,
 } from '../../data/teamsAndNations';
 import { removeImageBackground } from '../../services/backgroundRemoval';
@@ -39,6 +40,7 @@ interface Props {
 export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdmin = false }) => {
   const [editedPlayer, setEditedPlayer] = useState<Player>({ ...player });
   const [selectedPlaystyleCategory, setSelectedPlaystyleCategory] = useState<'all' | 'tactical' | 'status' | 'humor'>('all');
+  const [teamCategory, setTeamCategory] = useState<'all' | 'big4' | 'other_tr' | 'world'>('all');
   const [isCompressing, setIsCompressing] = useState(false);
   const [isRemovingBg, setIsRemovingBg] = useState(false);
   const [removalProgress, setRemovalProgress] = useState(0);
@@ -548,10 +550,61 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
 
               {/* Takım / Kulüp */}
               <div>
-                <label className="block text-xs font-bold text-neutral-300 mb-1 flex items-center justify-between">
-                  <span>⚽ Takım / Kulüp</span>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-bold text-neutral-300 flex items-center gap-1">
+                    <span>⚽ Takım / Kulüp</span>
+                  </label>
                   <span className="text-[10px] text-amber-400/80 font-normal">Arma karta yansır</span>
-                </label>
+                </div>
+
+                {/* 2 Satırlı Kompakt Kategori Başlıkları */}
+                <div className="grid grid-cols-2 gap-1 mb-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setTeamCategory(teamCategory === 'big4' ? 'all' : 'big4')}
+                    className={`text-[10px] px-2 py-0.5 rounded-md font-bold transition-all text-center truncate cursor-pointer ${
+                      teamCategory === 'big4'
+                        ? 'bg-amber-400 text-black shadow-xs font-black'
+                        : 'bg-neutral-800/90 text-neutral-300 hover:bg-neutral-700'
+                    }`}
+                  >
+                    🇹🇷 4 Büyükler
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTeamCategory(teamCategory === 'other_tr' ? 'all' : 'other_tr')}
+                    className={`text-[10px] px-2 py-0.5 rounded-md font-bold transition-all text-center truncate cursor-pointer ${
+                      teamCategory === 'other_tr'
+                        ? 'bg-amber-400 text-black shadow-xs font-black'
+                        : 'bg-neutral-800/90 text-neutral-300 hover:bg-neutral-700'
+                    }`}
+                  >
+                    🇹🇷 Diğer Türk (46)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTeamCategory(teamCategory === 'world' ? 'all' : 'world')}
+                    className={`text-[10px] px-2 py-0.5 rounded-md font-bold transition-all text-center truncate cursor-pointer ${
+                      teamCategory === 'world'
+                        ? 'bg-amber-400 text-black shadow-xs font-black'
+                        : 'bg-neutral-800/90 text-neutral-300 hover:bg-neutral-700'
+                    }`}
+                  >
+                    🌍 Dünya Devleri (94)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTeamCategory('all')}
+                    className={`text-[10px] px-2 py-0.5 rounded-md font-bold transition-all text-center truncate cursor-pointer ${
+                      teamCategory === 'all'
+                        ? 'bg-neutral-700 text-amber-300 font-black'
+                        : 'bg-neutral-800/90 text-neutral-400 hover:bg-neutral-700'
+                    }`}
+                  >
+                    ⭐ Tümü / Revir FC
+                  </button>
+                </div>
+
                 <div className="relative flex items-center">
                   <div className="absolute left-2.5 pointer-events-none flex items-center z-10">
                     <img
@@ -575,32 +628,47 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
                         clubLogoUrl: club.logoUrl,
                       });
                     }}
-                    className="w-full bg-neutral-800 border border-neutral-700 rounded-lg pl-9 pr-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-400 cursor-pointer truncate"
+                    className="w-full bg-neutral-800 border border-neutral-700 rounded-lg pl-9 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-400 cursor-pointer truncate"
                   >
-                    <optgroup label="⭐ Özel Halı Saha Kulübü">
-                      <option value="revir_fc">Revir FC (Varsayılan)</option>
-                    </optgroup>
-                    <optgroup label="🇹🇷 Türk Takımları (4 Büyükler • Alfabetik)">
-                      {BIG_FOUR_TR_CLUBS.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="🇹🇷 Diğer Türk Takımları (Transfermarkt Değeri Sırasıyla)">
-                      {OTHER_TR_CLUBS.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="🌍 Transfermarkt En Değerli Kulüpler Listesi">
-                      {WORLD_TOP_CLUBS.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name} ({c.country})
-                        </option>
-                      ))}
-                    </optgroup>
+                    {(teamCategory === 'all' || teamCategory === 'big4') && (
+                      <>
+                        {teamCategory === 'all' && (
+                          <optgroup label="⭐ Özel Halı Saha">
+                            <option value="revir_fc">Revir FC (Varsayılan)</option>
+                          </optgroup>
+                        )}
+                        <optgroup label="🇹🇷 4 Büyükler (Alfabetik)">
+                          {BIG_FOUR_TR_CLUBS.map((c) => (
+                            <option key={c.id} value={c.id}>
+                              {c.name}
+                            </option>
+                          ))}
+                        </optgroup>
+                      </>
+                    )}
+                    {(teamCategory === 'all' || teamCategory === 'other_tr') && (
+                      <optgroup label="🇹🇷 Diğer Türk (TM Sırası)">
+                        {OTHER_TR_CLUBS.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </optgroup>
+                    )}
+                    {(teamCategory === 'all' || teamCategory === 'world') && (
+                      <optgroup label="🌍 Dünya Devleri (TM Sırası)">
+                        {WORLD_TOP_CLUBS.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name} [{getShortCountry(c.country)}]
+                          </option>
+                        ))}
+                      </optgroup>
+                    )}
+                    {teamCategory !== 'all' && (
+                      <optgroup label="⭐ Diğer">
+                        <option value="revir_fc">Revir FC (Varsayılan)</option>
+                      </optgroup>
+                    )}
                   </select>
                 </div>
               </div>
