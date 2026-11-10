@@ -44,7 +44,7 @@ export const Navbar: React.FC<Props> = ({
   const { currentUser, switchMockRole, isFirebaseMode, logout } = useAuth();
 
   const navItems: { id: NavTab; label: string; icon: React.FC<{ className?: string }>; adminOnly?: boolean }[] = [
-    { id: 'squad', label: '21 Kişilik Kadro', icon: Users },
+    { id: 'squad', label: '22 Kişilik Kadro', icon: Users },
     { id: 'scouting', label: '⭐ Kurul Puanlama', icon: Sliders },
     { id: 'match', label: 'Maç & Check-In', icon: Trophy },
     { id: 'tactics', label: 'Taktik Tahtası', icon: Flame },

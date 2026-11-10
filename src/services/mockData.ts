@@ -444,6 +444,27 @@ export const INITIAL_PLAYERS: Player[] = [
     egoIndex: 0.6,
     formTrend: 'up',
   },
+  {
+    id: 'p22',
+    name: 'Ferhun',
+    nickname: 'Dinamik Ferhun',
+    position: 'MID',
+    number: 20,
+    photoUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&auto=format&fit=crop&q=80',
+    baseOVR: 78,
+    currentOVR: 78,
+    stats: { pac: 79, sho: 72, pas: 80, dri: 78, def: 68, phy: 75 },
+    theme: 'gold',
+    playstyles: ['relentless', 'tiki_taka'],
+    matchesPlayed: 16,
+    wins: 9,
+    draws: 2,
+    losses: 5,
+    goals: 7,
+    assists: 11,
+    egoIndex: 0.1,
+    formTrend: 'stable',
+  },
 ];
 
 export const MOCK_ACTIVE_MATCH: Match = {
@@ -453,7 +474,7 @@ export const MOCK_ACTIVE_MATCH: Match = {
   pitchName: 'Olimpiyat Halı Saha - 1 Nolu Açık Saha',
   stage: 'check_in',
   starters: ['p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8', 'p9', 'p10', 'p11', 'p12'],
-  waitlist: ['p13', 'p14', 'p15', 'p16', 'p17', 'p18', 'p19', 'p20', 'p21'],
+  waitlist: ['p13', 'p14', 'p15', 'p16', 'p17', 'p18', 'p19', 'p20', 'p21', 'p22'],
   checkIns: {
     p1: { playerId: 'p1', timestamp: Date.now() - 3600000, status: 'full' },
     p2: { playerId: 'p2', timestamp: Date.now() - 3500000, status: 'extra_fit', note: 'Formum zirvede, çift forvet oynayabiliriz!' },
@@ -600,6 +621,15 @@ export const MOCK_USERS: UserProfile[] = [
     status: 'approved',
     claimedPlayerId: 'p5',
     createdAt: '2026-10-03T00:00:00.000Z',
+  },
+  {
+    uid: 'user-ferhun',
+    email: 'ferhun@revirfc.com',
+    displayName: 'Ferhun (Oyuncu)',
+    role: 'player',
+    status: 'approved',
+    claimedPlayerId: 'p22',
+    createdAt: '2026-10-04T00:00:00.000Z',
   },
   {
     uid: 'user-pending',

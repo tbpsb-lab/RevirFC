@@ -47,7 +47,15 @@ function MainApp() {
   // Local state persisted in localStorage
   const [players, setPlayers] = useState<Player[]>(() => {
     const saved = localStorage.getItem('revirfc_players_v1');
-    return saved ? JSON.parse(saved) : INITIAL_PLAYERS;
+    if (!saved) return INITIAL_PLAYERS;
+    try {
+      const parsed: Player[] = JSON.parse(saved);
+      const existingIds = new Set(parsed.map((p) => p.id));
+      const missing = INITIAL_PLAYERS.filter((p) => !existingIds.has(p.id));
+      return [...parsed, ...missing];
+    } catch {
+      return INITIAL_PLAYERS;
+    }
   });
 
   const [match, setMatch] = useState<Match>(() => {
