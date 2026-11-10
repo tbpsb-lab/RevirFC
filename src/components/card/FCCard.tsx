@@ -92,6 +92,8 @@ export const FCCard: React.FC<Props> = ({
           nameColor: 'text-white',
           nicknameColor: 'text-[#FBBF24]',
           statValColor: 'text-[#FDE68A]',
+          ovalTextColor: 'text-amber-200',
+          ovalIconColor: 'text-amber-300',
           nameTop: 'top-[54.6%]',
           statTop: 'top-[81.8%]',
           statBounds: 'left-[11.3%] right-[11.3%]',
@@ -109,6 +111,8 @@ export const FCCard: React.FC<Props> = ({
           nameColor: 'text-white',
           nicknameColor: 'text-[#F97316]',
           statValColor: 'text-[#FED7AA]',
+          ovalTextColor: 'text-orange-200',
+          ovalIconColor: 'text-orange-400',
           nameTop: 'top-[54.6%]',
           statTop: 'top-[81.8%]',
           statBounds: 'left-[11.3%] right-[11.3%]',
@@ -126,6 +130,8 @@ export const FCCard: React.FC<Props> = ({
           nameColor: 'text-white',
           nicknameColor: 'text-[#38BDF8]',
           statValColor: 'text-[#BAE6FD]',
+          ovalTextColor: 'text-sky-200',
+          ovalIconColor: 'text-sky-400',
           nameTop: 'top-[54.6%]',
           statTop: 'top-[81.8%]',
           statBounds: 'left-[11.3%] right-[11.3%]',
@@ -139,17 +145,19 @@ export const FCCard: React.FC<Props> = ({
       case 'legend':
         return {
           template: '/cards/card_legend.png',
-          ovrColor: 'text-[#854D0E]',
+          ovrColor: 'text-[#FEF08A]',
           nameColor: 'text-[#1E293B]',
           nicknameColor: 'text-[#B45309]',
-          statValColor: 'text-[#854D0E]',
-          nameTop: 'top-[55.2%]',
-          statTop: 'top-[81.8%]',
+          statValColor: 'text-[#78350F]',
+          ovalTextColor: 'text-[#78350F]',
+          ovalIconColor: 'text-[#B45309]',
+          nameTop: 'top-[60.6%]',
+          statTop: 'top-[84.2%]',
           statBounds: 'left-[11.3%] right-[11.3%]',
-          ovalsTop: 'top-[65.2%]',
-          ovalsBounds: 'left-[29.5%] right-[29.5%]',
-          ovalsHeight: 'h-[7.2%]',
-          photoFrame: 'top-[11%] left-[12%] right-[8%] h-[44%]',
+          ovalsTop: 'top-[69.4%]',
+          ovalsBounds: 'left-[22.5%] right-[22.5%]',
+          ovalsHeight: 'h-[7.8%]',
+          photoFrame: 'top-[12%] left-[16%] right-[16%] h-[46%]',
           isGold: false,
           label: 'EFSANE • ICON 👑',
         };
@@ -160,6 +168,8 @@ export const FCCard: React.FC<Props> = ({
           nameColor: 'text-[#292524]',
           nicknameColor: 'text-[#78350F]',
           statValColor: 'text-[#78350F]',
+          ovalTextColor: 'text-amber-200',
+          ovalIconColor: 'text-amber-400',
           nameTop: 'top-[54.6%]',
           statTop: 'top-[81.8%]',
           statBounds: 'left-[11.3%] right-[11.3%]',
@@ -178,6 +188,8 @@ export const FCCard: React.FC<Props> = ({
           nameColor: 'text-white',
           nicknameColor: 'text-[#E5C07B]',
           statValColor: 'text-[#E5C07B]',
+          ovalTextColor: 'text-[#5eead4]',
+          ovalIconColor: 'text-[#5eead4]',
           nameTop: 'top-[57.8%]',
           statTop: 'top-[78.2%]',
           statBounds: 'left-[17%] right-[17%]',
@@ -359,10 +371,10 @@ export const FCCard: React.FC<Props> = ({
         <div
           className={`absolute left-0 right-0 ${themeConfig.nameTop} flex flex-col items-center justify-center text-center z-20 pointer-events-none`}
         >
-          <h3 className={`font-black uppercase tracking-wide ${themeConfig.nameColor} ${sizeConfig.nameText} drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] truncate w-full px-4`}>
+          <h3 className={`font-black uppercase tracking-wide ${themeConfig.nameColor} ${theme === 'legend' ? 'text-lg sm:text-xl' : sizeConfig.nameText} ${theme === 'legend' ? 'drop-shadow-none' : 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]'} truncate w-full px-4`}>
             {player.name}
           </h3>
-          <p className={`font-bold italic ${themeConfig.nicknameColor} ${sizeConfig.nicknameText} drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] mt-0.5 truncate w-full px-4`}>
+          <p className={`font-bold italic ${themeConfig.nicknameColor} ${theme === 'legend' ? 'text-xs' : sizeConfig.nicknameText} ${theme === 'legend' ? 'drop-shadow-none' : 'drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]'} mt-0.5 truncate w-full px-4`}>
             "{player.nickname}"
           </p>
         </div>
@@ -403,11 +415,11 @@ export const FCCard: React.FC<Props> = ({
                     const Icon = cfg.icon;
                     return (
                       <div
-                        className="w-full h-full flex items-center justify-center gap-1 text-amber-300 drop-shadow-sm px-1"
+                        className="w-full h-full flex items-center justify-center gap-1 drop-shadow-sm px-1"
                         title={`${cfg.label}: ${cfg.description}`}
                       >
-                        <Icon className="w-3.5 h-3.5 shrink-0 text-amber-300" />
-                        <span className="text-[10px] font-bold text-amber-200 tracking-tight truncate max-w-[65%]">
+                        <Icon className={`w-3.5 h-3.5 shrink-0 ${themeConfig.ovalIconColor}`} />
+                        <span className={`text-[10px] font-bold ${themeConfig.ovalTextColor} tracking-tight truncate max-w-[65%]`}>
                           {cfg.label}
                         </span>
                       </div>
@@ -422,11 +434,11 @@ export const FCCard: React.FC<Props> = ({
                     const Icon = cfg.icon;
                     return (
                       <div
-                        className="w-full h-full flex items-center justify-center gap-1 text-amber-300 drop-shadow-sm px-1"
+                        className="w-full h-full flex items-center justify-center gap-1 drop-shadow-sm px-1"
                         title={`${cfg.label}: ${cfg.description}`}
                       >
-                        <Icon className="w-3.5 h-3.5 shrink-0 text-amber-300" />
-                        <span className="text-[10px] font-bold text-amber-200 tracking-tight truncate max-w-[65%]">
+                        <Icon className={`w-3.5 h-3.5 shrink-0 ${themeConfig.ovalIconColor}`} />
+                        <span className={`text-[10px] font-bold ${themeConfig.ovalTextColor} tracking-tight truncate max-w-[65%]`}>
                           {cfg.label}
                         </span>
                       </div>
