@@ -86,6 +86,12 @@ export interface Player {
   number: number;
   photoUrl: string;
   photoAdjustments?: PhotoAdjustments;
+  nationality?: string; // Country code e.g. 'tr', 'de', 'br'
+  nationName?: string;  // e.g. 'Türkiye', 'Almanya'
+  flagUrl?: string;     // Specific flag url
+  clubId?: string;      // Club id e.g. 'revir_fc', 'galatasaray', 'real_madrid'
+  clubName?: string;    // e.g. 'Revir FC', 'Galatasaray'
+  clubLogoUrl?: string; // Specific club logo url
   baseOVR: number;
   currentOVR: number;
   stats: PlayerStats;

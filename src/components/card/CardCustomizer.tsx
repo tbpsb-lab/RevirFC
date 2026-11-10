@@ -2,6 +2,16 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Player, PlayStyle, PreferredPosition, CardTheme } from '../../types';
 import { FCCard } from './FCCard';
 import { PLAYSTYLE_CONFIG, PLAYSTYLE_CATEGORIES } from './PlayStyleBadge';
+import {
+  NATIONS,
+  SUPER_LIG_CLUBS,
+  LIG_1_CLUBS,
+  WORLD_TOP_CLUBS,
+  getClubById,
+  getClubLogoUrl,
+  getNationFlagUrl,
+  DEFAULT_NATION,
+} from '../../data/teamsAndNations';
 import { removeImageBackground } from '../../services/backgroundRemoval';
 import imageCompression from 'browser-image-compression';
 import {
@@ -491,6 +501,108 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
                   <option value="DEF">DEF (Defans)</option>
                   <option value="GK">GK (Kaleci)</option>
                 </select>
+              </div>
+            </div>
+
+            {/* Country (Bayrak) & Team (Arma) Selection */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-neutral-950/40 p-2.5 rounded-xl border border-neutral-800">
+              {/* Ülke / Milliyet */}
+              <div>
+                <label className="block text-xs font-bold text-neutral-300 mb-1 flex items-center justify-between">
+                  <span>🌍 Ülke / Milliyet</span>
+                  <span className="text-[10px] text-amber-400/80 font-normal">Bayrak karta yansır</span>
+                </label>
+                <div className="relative flex items-center">
+                  <div className="absolute left-2.5 pointer-events-none flex items-center z-10">
+                    <img
+                      src={editedPlayer.flagUrl || getNationFlagUrl(editedPlayer.nationality)}
+                      alt="Bayrak"
+                      className="w-6 h-4 object-cover rounded-[1px] border border-white/20 shadow-xs"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = '/cards/flag_tr.png';
+                      }}
+                    />
+                  </div>
+                  <select
+                    value={editedPlayer.nationality || 'tr'}
+                    onChange={(e) => {
+                      const code = e.target.value;
+                      const nat = NATIONS.find((n) => n.code === code) || DEFAULT_NATION;
+                      setEditedPlayer({
+                        ...editedPlayer,
+                        nationality: nat.code,
+                        nationName: nat.name,
+                        flagUrl: nat.flagUrl,
+                      });
+                    }}
+                    className="w-full bg-neutral-800 border border-neutral-700 rounded-lg pl-10 pr-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-400 cursor-pointer"
+                  >
+                    {NATIONS.map((nat) => (
+                      <option key={nat.code} value={nat.code}>
+                        {nat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Takım / Kulüp */}
+              <div>
+                <label className="block text-xs font-bold text-neutral-300 mb-1 flex items-center justify-between">
+                  <span>⚽ Takım / Kulüp</span>
+                  <span className="text-[10px] text-amber-400/80 font-normal">Arma karta yansır</span>
+                </label>
+                <div className="relative flex items-center">
+                  <div className="absolute left-2.5 pointer-events-none flex items-center z-10">
+                    <img
+                      src={editedPlayer.clubLogoUrl || getClubLogoUrl(editedPlayer.clubId)}
+                      alt="Logo"
+                      className="w-5 h-5 object-contain rounded-full shadow-xs bg-black/40 p-0.5"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = '/cards/logo_badge.png';
+                      }}
+                    />
+                  </div>
+                  <select
+                    value={editedPlayer.clubId || 'revir_fc'}
+                    onChange={(e) => {
+                      const id = e.target.value;
+                      const club = getClubById(id);
+                      setEditedPlayer({
+                        ...editedPlayer,
+                        clubId: club.id,
+                        clubName: club.name,
+                        clubLogoUrl: club.logoUrl,
+                      });
+                    }}
+                    className="w-full bg-neutral-800 border border-neutral-700 rounded-lg pl-9 pr-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-400 cursor-pointer truncate"
+                  >
+                    <optgroup label="⭐ Özel Halı Saha Kulübü">
+                      <option value="revir_fc">Revir FC (Varsayılan)</option>
+                    </optgroup>
+                    <optgroup label="🇹🇷 Trendyol Süper Lig">
+                      {SUPER_LIG_CLUBS.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="🇹🇷 Trendyol 1. Lig">
+                      {LIG_1_CLUBS.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="🌍 Dünyanın En Önemli 100 Takımı">
+                      {WORLD_TOP_CLUBS.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name} ({c.country})
+                        </option>
+                      ))}
+                    </optgroup>
+                  </select>
+                </div>
               </div>
             </div>
 

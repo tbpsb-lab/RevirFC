@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Player, CardTheme, PlayerStats } from '../../types';
 import { PLAYSTYLE_CONFIG } from './PlayStyleBadge';
+import { getNationFlagUrl, getClubLogoUrl } from '../../data/teamsAndNations';
 import { Download } from 'lucide-react';
 import { toPng } from 'html-to-image';
 
@@ -344,17 +345,25 @@ export const FCCard: React.FC<Props> = ({
           <span className={`font-mono font-bold text-[#A09886] ${sizeConfig.numberText} mt-0.5`}>
             #{player.number}
           </span>
-          {/* Türk Bayrağı */}
+          {/* Ülke Bayrağı */}
           <img
-            src="/cards/flag_tr.png"
-            alt="TR"
+            src={player.flagUrl || getNationFlagUrl(player.nationality)}
+            alt={player.nationName || player.nationality || 'TR'}
+            title={player.nationName || 'Türkiye'}
             className={`${sizeConfig.flagWidth} object-cover rounded-[1px] shadow-sm mt-2 border border-white/20`}
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = '/cards/flag_tr.png';
+            }}
           />
-          {/* Revir FC Dairesel Arması */}
+          {/* Kulüp / Takım Arması */}
           <img
-            src="/cards/logo_badge.png"
-            alt="Revir FC"
-            className={`${sizeConfig.logoWidth} rounded-full object-cover shadow-md mt-1.5 border border-amber-400/30`}
+            src={player.clubLogoUrl || getClubLogoUrl(player.clubId)}
+            alt={player.clubName || 'Revir FC'}
+            title={player.clubName || 'Revir FC'}
+            className={`${sizeConfig.logoWidth} object-contain rounded-full shadow-md mt-1.5 border border-amber-400/30 bg-black/25 p-0.5`}
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = '/cards/logo_badge.png';
+            }}
           />
         </div>
 
