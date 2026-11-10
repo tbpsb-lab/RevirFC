@@ -512,7 +512,7 @@ export const ScoutingWizard: React.FC<Props> = ({
                           : 'bg-neutral-900 text-neutral-300 border-neutral-800 hover:border-neutral-700'
                       }`}
                     >
-                      <span className="text-sm select-none">{cfg.emoji}</span>
+                      <Icon className="w-3.5 h-3.5 shrink-0" />
                       <span>{cfg.label}</span>
                       {isSelected && <span className="font-black text-black ml-0.5">✓</span>}
                     </button>

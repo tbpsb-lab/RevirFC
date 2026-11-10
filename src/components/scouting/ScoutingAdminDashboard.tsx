@@ -375,14 +375,20 @@ export const ScoutingAdminDashboard: React.FC<Props> = ({
 
                     <td className="p-3.5">
                       <div className="flex flex-wrap gap-1">
-                        {item.popularPlaystyles.map((ps) => (
-                          <span
-                            key={ps}
-                            className="text-[10px] bg-neutral-800 border border-neutral-700 text-amber-300 px-1.5 py-0.5 rounded"
-                          >
-                            {PLAYSTYLE_CONFIG[ps] ? `${PLAYSTYLE_CONFIG[ps].emoji} ${PLAYSTYLE_CONFIG[ps].label}` : ps}
-                          </span>
-                        ))}
+                        {item.popularPlaystyles.map((ps) => {
+                          const cfg = PLAYSTYLE_CONFIG[ps];
+                          if (!cfg) return <span key={ps}>{ps}</span>;
+                          const Icon = cfg.icon;
+                          return (
+                            <span
+                              key={ps}
+                              className="text-[10px] bg-neutral-800 border border-neutral-700 text-amber-300 px-1.5 py-0.5 rounded inline-flex items-center gap-1"
+                            >
+                              <Icon className="w-2.5 h-2.5 shrink-0" />
+                              {cfg.label}
+                            </span>
+                          );
+                        })}
                       </div>
                     </td>
 

@@ -377,14 +377,16 @@ export const PlayStyleBadge: React.FC<Props> = ({ styleName, size = 'sm' }) => {
   const config = PLAYSTYLE_CONFIG[styleName];
   if (!config) return null;
 
+  const Icon = config.icon;
+
   return (
     <div
       title={`${config.label}: ${config.description}`}
-      className={`inline-flex items-center gap-1 font-semibold rounded-lg border transition-transform hover:scale-105 cursor-help ${
+      className={`inline-flex items-center gap-1.5 font-semibold rounded-lg border transition-transform hover:scale-105 cursor-help ${
         config.color
       } ${size === 'sm' ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'}`}
     >
-      <span className="text-xs sm:text-sm leading-none select-none">{config.emoji}</span>
+      <Icon className={size === 'sm' ? 'w-3 h-3 shrink-0' : 'w-4 h-4 shrink-0'} />
       <span>{config.label}</span>
     </div>
   );

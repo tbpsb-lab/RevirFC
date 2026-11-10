@@ -420,8 +420,7 @@ export const FCCard: React.FC<Props> = ({
                       className="bg-[#0c312d]/95 border border-[#14b8a6]/70 rounded-xl px-2.5 py-1 flex items-center gap-1.5 shadow-md shadow-[#042f2e]/60 flex-1 min-w-0 max-w-[49%]"
                       title={`${cfg.label}: ${cfg.description}`}
                     >
-                      <span className="text-[11px] leading-none select-none">{cfg.emoji}</span>
-                      <Icon className="w-3.5 h-3.5 text-[#5eead4] shrink-0" />
+                      <Icon className="w-3.5 h-3.5 text-[#5eead4] shrink-0 drop-shadow" />
                       <span className="font-bold text-[#5eead4] truncate tracking-tight text-[10px] sm:text-[11px]">
                         {cfg.label}
                       </span>
@@ -490,9 +489,7 @@ export const FCCard: React.FC<Props> = ({
                       } h-full rounded-xl ${bStyle.cardBg} flex items-center justify-center gap-1.5 px-2.5`}
                       title={`${cfg.label}: ${cfg.description}`}
                     >
-                      <span className="text-[12px] sm:text-[13.5px] leading-none select-none shrink-0 drop-shadow-sm">
-                        {cfg.emoji}
-                      </span>
+                      <Icon className={`w-3.5 h-3.5 ${bStyle.iconColor} shrink-0 drop-shadow`} />
                       <span className={`text-[9.5px] sm:text-[10.5px] md:text-[11px] font-bold ${bStyle.textColor} tracking-tight truncate`}>
                         {cfg.label}
                       </span>
