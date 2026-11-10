@@ -14,6 +14,8 @@ import {
   LogOut,
   Sparkles,
   Sliders,
+  Clock,
+  Eye,
 } from 'lucide-react';
 
 export type NavTab =
@@ -99,11 +101,11 @@ export const Navbar: React.FC<Props> = ({
               onClick={() => switchMockRole('pending')}
               className={`px-2 py-0.5 rounded text-[11px] font-bold transition-all ${
                 currentUser?.status === 'pending'
-                  ? 'bg-rose-500 text-white shadow-sm'
-                  : 'bg-neutral-800 text-rose-400 hover:text-white'
+                  ? 'bg-amber-500 text-black shadow-sm font-black'
+                  : 'bg-neutral-800 text-amber-400 hover:text-white'
               }`}
             >
-              🔒 Onay Bekleyen (Kilitli)
+              👁️ Onay Bekleyen (Vitrin / Seyirci)
             </button>
           </div>
         </div>
@@ -123,16 +125,22 @@ export const Navbar: React.FC<Props> = ({
           </button>
 
           {/* User badge */}
-          {claimedPlayer && (
+          {currentUser?.status === 'pending' ? (
+            <div className="flex items-center gap-1.5 bg-amber-500/15 border border-amber-500/35 px-2.5 py-0.5 rounded-full text-amber-300 text-[11px] font-bold">
+              <Clock className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+              <span>Onay Bekliyor (Seyirci)</span>
+            </div>
+          ) : claimedPlayer ? (
             <button
               onClick={onOpenCardEdit}
-              className="flex items-center gap-1.5 bg-neutral-800/80 hover:bg-neutral-800 px-2.5 py-0.5 rounded-full border border-neutral-700 text-white"
+              className="flex items-center gap-1.5 bg-neutral-800/80 hover:bg-neutral-800 px-2.5 py-0.5 rounded-full border border-neutral-700 text-white cursor-pointer transition-colors"
+              title="Kendi Kartını Düzenle"
             >
               <img src={claimedPlayer.photoUrl} alt="Avatar" className="w-4 h-4 rounded-full object-cover" />
               <span className="font-bold text-[11px]">{claimedPlayer.name}</span>
               <span className="text-amber-400 font-mono text-[10px]">OVR {claimedPlayer.currentOVR}</span>
             </button>
-          )}
+          ) : null}
         </div>
       </div>
 

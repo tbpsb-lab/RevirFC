@@ -21,6 +21,7 @@ interface Props {
   savedEntries: PlayerScoutingEntry[];
   onApplyConsensusToPlayers: (updatedPlayers: Player[]) => void;
   onBackToWizard: () => void;
+  isReadOnly?: boolean;
 }
 
 export const ScoutingAdminDashboard: React.FC<Props> = ({
@@ -28,6 +29,7 @@ export const ScoutingAdminDashboard: React.FC<Props> = ({
   savedEntries,
   onApplyConsensusToPlayers,
   onBackToWizard,
+  isReadOnly = false,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -217,26 +219,30 @@ export const ScoutingAdminDashboard: React.FC<Props> = ({
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            onClick={onBackToWizard}
-            className="flex items-center gap-1.5 text-xs bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-bold px-3.5 py-2.5 rounded-xl border border-neutral-700"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" /> Puanlamaya Dön
-          </button>
+          {!isReadOnly && (
+            <button
+              onClick={onBackToWizard}
+              className="flex items-center gap-1.5 text-xs bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-bold px-3.5 py-2.5 rounded-xl border border-neutral-700 cursor-pointer"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" /> Puanlamaya Dön
+            </button>
+          )}
 
           <button
             onClick={handleExportCSV}
-            className="flex items-center gap-1.5 text-xs bg-neutral-800 hover:bg-neutral-700 text-amber-300 font-bold px-3.5 py-2.5 rounded-xl border border-amber-500/30"
+            className="flex items-center gap-1.5 text-xs bg-neutral-800 hover:bg-neutral-700 text-amber-300 font-bold px-3.5 py-2.5 rounded-xl border border-amber-500/30 cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" /> E-Tablolar (CSV) İndir
           </button>
 
-          <button
-            onClick={handleApplyConsensus}
-            className="flex items-center gap-2 text-xs bg-amber-500 hover:bg-amber-400 text-black font-black px-4 py-2.5 rounded-xl shadow-lg shadow-amber-500/20 active:scale-95 transition-transform"
-          >
-            <Lock className="w-4 h-4" /> Reytingleri Kilitle ve Sisteme Uygula
-          </button>
+          {!isReadOnly && (
+            <button
+              onClick={handleApplyConsensus}
+              className="flex items-center gap-2 text-xs bg-amber-500 hover:bg-amber-400 text-black font-black px-4 py-2.5 rounded-xl shadow-lg shadow-amber-500/20 active:scale-95 transition-transform cursor-pointer"
+            >
+              <Lock className="w-4 h-4" /> Reytingleri Kilitle ve Sisteme Uygula
+            </button>
+          )}
         </div>
       </div>
 

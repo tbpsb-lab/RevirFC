@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { LockerPost, Player } from '../../types';
-import { Flame, Laugh, Siren, HelpCircle, Send, MessageCircle, Pin, Sparkles } from 'lucide-react';
+import { Flame, Laugh, Siren, HelpCircle, Send, MessageCircle, Pin, Sparkles, Lock } from 'lucide-react';
 
 interface Props {
   posts: LockerPost[];
-  currentPlayer: Player;
+  currentPlayer?: Player;
   onAddPost: (text: string, isAnonymous: boolean) => void;
   onReact: (postId: string, reactionType: keyof LockerPost['reactions']) => void;
+  isReadOnly?: boolean;
 }
 
 export const LockerRoomFeed: React.FC<Props> = ({
@@ -14,6 +15,7 @@ export const LockerRoomFeed: React.FC<Props> = ({
   currentPlayer,
   onAddPost,
   onReact,
+  isReadOnly = false,
 }) => {
   const [newText, setNewText] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
@@ -69,51 +71,61 @@ export const LockerRoomFeed: React.FC<Props> = ({
       )}
 
       {/* New Post Box */}
-      <form
-        onSubmit={handleSubmit}
-        className="bg-neutral-900/90 border border-neutral-800 rounded-2xl p-4 shadow-xl"
-      >
-        <div className="flex items-center gap-3 mb-3">
-          <img
-            src={currentPlayer.photoUrl}
-            alt={currentPlayer.name}
-            className="w-9 h-9 rounded-full object-cover border border-white/20"
+      {isReadOnly || !currentPlayer ? (
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 text-xs text-amber-300 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <Lock className="w-4 h-4 text-amber-400 shrink-0" />
+            <span>Paylaşım yapabilmek için üyeliğinizin onaylanması gerekmektedir. Paylaşılan gönderileri aşağıdan okuyabilirsiniz.</span>
+          </div>
+          <span className="text-[10px] bg-amber-500/20 text-amber-200 px-2.5 py-0.5 rounded-full font-bold shrink-0">Seyirci Modu</span>
+        </div>
+      ) : (
+        <form
+          onSubmit={handleSubmit}
+          className="bg-neutral-900/90 border border-neutral-800 rounded-2xl p-4 shadow-xl"
+        >
+          <div className="flex items-center gap-3 mb-3">
+            <img
+              src={currentPlayer.photoUrl}
+              alt={currentPlayer.name}
+              className="w-9 h-9 rounded-full object-cover border border-white/20"
+            />
+            <span className="text-xs font-bold text-neutral-300">
+              {isAnonymous ? 'Anonim Soyunma Odası Fısıltısı olarak yazıyorsunuz 🕵️' : `${currentPlayer.name} olarak konuş`}
+            </span>
+          </div>
+
+          <textarea
+            rows={3}
+            value={newText}
+            onChange={(e) => setNewText(e.target.value)}
+            placeholder="Maç taktiği, pas alamayan forvete sitem veya maç sonu muhabbeti..."
+            className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 resize-none"
           />
-          <span className="text-xs font-bold text-neutral-300">
-            {isAnonymous ? 'Anonim Soyunma Odası Fısıltısı olarak yazıyorsunuz 🕵️' : `${currentPlayer.name} olarak konuş`}
-          </span>
-        </div>
 
-        <textarea
-          rows={3}
-          value={newText}
-          onChange={(e) => setNewText(e.target.value)}
-          placeholder="Maç taktiği, pas alamayan forvete sitem veya maç sonu muhabbeti..."
-          className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 resize-none"
-        />
+          <div className="flex items-center justify-between mt-3">
+            <button
+              type="button"
+              onClick={() => setIsAnonymous(!isAnonymous)}
+              className={`text-xs px-3 py-1.5 rounded-xl border font-bold transition-all ${
+                isAnonymous
+                  ? 'bg-purple-900/60 border-purple-500 text-purple-200 shadow-md shadow-purple-900/40'
+                  : 'bg-neutral-800 border-neutral-700 text-neutral-400 hover:text-white'
+              }`}
+            >
+              {isAnonymous ? '🕵️ Anonim Fısıltı Aktif' : '👤 Açık İsimle Paylaş'}
+            </button>
 
-        <div className="flex items-center justify-between mt-3">
-          <button
-            type="button"
-            onClick={() => setIsAnonymous(!isAnonymous)}
-            className={`text-xs px-3 py-1.5 rounded-xl border font-bold transition-all ${
-              isAnonymous
-                ? 'bg-purple-900/60 border-purple-500 text-purple-200 shadow-md shadow-purple-900/40'
-                : 'bg-neutral-800 border-neutral-700 text-neutral-400 hover:text-white'
-            }`}
-          >
-            {isAnonymous ? '🕵️ Anonim Fısıltı Aktif' : '👤 Açık İsimle Paylaş'}
-          </button>
-
-          <button
-            type="submit"
-            disabled={!newText.trim()}
-            className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:hover:bg-amber-500 text-black text-xs font-black flex items-center gap-2 shadow-lg shadow-amber-500/20"
-          >
-            <Send className="w-3.5 h-3.5" /> Odaya Gönder
-          </button>
-        </div>
-      </form>
+            <button
+              type="submit"
+              disabled={!newText.trim()}
+              className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:hover:bg-amber-500 text-black text-xs font-black flex items-center gap-2 shadow-lg shadow-amber-500/20"
+            >
+              <Send className="w-3.5 h-3.5" /> Odaya Gönder
+            </button>
+          </div>
+        </form>
+      )}
 
       {/* Post Timeline */}
       <div className="space-y-4">
@@ -164,11 +176,15 @@ export const LockerRoomFeed: React.FC<Props> = ({
             <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-neutral-800/80 mt-3">
               {reactionButtons.map((btn) => {
                 const count = post.reactions[btn.key]?.length || 0;
-                const hasReacted = post.reactions[btn.key]?.includes(currentPlayer.id);
+                const hasReacted = currentPlayer ? (post.reactions[btn.key]?.includes(currentPlayer.id) ?? false) : false;
                 return (
                   <button
                     key={btn.key}
-                    onClick={() => onReact(post.id, btn.key)}
+                    onClick={() => {
+                      if (!isReadOnly && currentPlayer) {
+                        onReact(post.id, btn.key);
+                      }
+                    }}
                     className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs border transition-all ${
                       hasReacted
                         ? 'bg-amber-500/20 border-amber-400 text-amber-300 font-bold'

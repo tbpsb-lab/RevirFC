@@ -15,6 +15,7 @@ import {
   Sparkles,
   Trophy,
   Bell,
+  Lock,
 } from 'lucide-react';
 
 interface Props {
@@ -26,6 +27,8 @@ interface Props {
   onOpenRating: () => void;
   onToggleParticipation: (playerId: string) => void;
   onOpenReminderHub?: () => void;
+  isPendingUser?: boolean;
+  isAdmin?: boolean;
 }
 
 export const SquadList: React.FC<Props> = ({
@@ -37,6 +40,8 @@ export const SquadList: React.FC<Props> = ({
   onOpenRating,
   onToggleParticipation,
   onOpenReminderHub,
+  isPendingUser = false,
+  isAdmin = false,
 }) => {
   const starters = players.filter((p) => match.starters.includes(p.id));
   const waitlist = players.filter((p) => match.waitlist.includes(p.id));
@@ -118,7 +123,12 @@ export const SquadList: React.FC<Props> = ({
 
           {/* Quick Action Button for current user */}
           <div className="flex items-center gap-2">
-            {claimedPlayer && (
+            {isPendingUser ? (
+              <div className="bg-amber-500/10 border border-amber-500/30 px-3.5 py-2 rounded-xl text-amber-300 text-xs flex items-center gap-2">
+                <Lock className="w-4 h-4 text-amber-400 shrink-0" />
+                <span>Hesabınız onay bekliyor. Onaylandığınızda maç kadrosuna katılabilirsiniz.</span>
+              </div>
+            ) : claimedPlayer ? (
               <button
                 onClick={() => onOpenCheckIn(claimedPlayer)}
                 className="bg-amber-500 hover:bg-amber-400 text-black font-black text-xs px-4 py-2.5 rounded-xl shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-transform active:scale-95 cursor-pointer"
@@ -126,14 +136,16 @@ export const SquadList: React.FC<Props> = ({
                 <Bandage className="w-4 h-4" />
                 {userCheckIn ? 'Revir / Durumumu Güncelle' : 'Sağlık Raporu & Check-In'}
               </button>
-            )}
+            ) : null}
 
-            <button
-              onClick={onRunBalancing}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-600/25 flex items-center gap-2 transition-transform active:scale-95 cursor-pointer"
-            >
-              <Sparkles className="w-4 h-4" /> 462 Kadro Dengelemeyi Çalıştır
-            </button>
+            {isAdmin && (
+              <button
+                onClick={onRunBalancing}
+                className="bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-600/25 flex items-center gap-2 transition-transform active:scale-95 cursor-pointer"
+              >
+                <Sparkles className="w-4 h-4" /> 462 Kadro Dengelemeyi Çalıştır
+              </button>
+            )}
 
             <button
               onClick={onOpenRating}
@@ -196,22 +208,24 @@ export const SquadList: React.FC<Props> = ({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => onOpenCheckIn(player)}
-                      title="Revir & Sağlık Durumunu Değiştir"
-                      className="p-1.5 text-neutral-400 hover:text-amber-400 hover:bg-neutral-800 rounded-lg transition-colors"
-                    >
-                      <Bandage className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => onToggleParticipation(player.id)}
-                      title="Sakatlandım / Çıkıyorum (1. Yedek otomatik asil kadroya girer)"
-                      className="p-1.5 text-neutral-500 hover:text-rose-400 hover:bg-neutral-800 rounded-lg text-xs"
-                    >
-                      ✕
-                    </button>
-                  </div>
+                  {(isAdmin || (claimedPlayer && claimedPlayer.id === player.id)) && (
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => onOpenCheckIn(player)}
+                        title="Revir & Sağlık Durumunu Değiştir"
+                        className="p-1.5 text-neutral-400 hover:text-amber-400 hover:bg-neutral-800 rounded-lg transition-colors cursor-pointer"
+                      >
+                        <Bandage className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => onToggleParticipation(player.id)}
+                        title="Sakatlandım / Çıkıyorum (1. Yedek otomatik asil kadroya girer)"
+                        className="p-1.5 text-neutral-500 hover:text-rose-400 hover:bg-neutral-800 rounded-lg text-xs cursor-pointer"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -256,12 +270,14 @@ export const SquadList: React.FC<Props> = ({
                       </span>
                     </div>
                   </div>
-                  <button
-                    onClick={() => onToggleParticipation(player.id)}
-                    className="text-xs text-emerald-400 hover:text-emerald-300 font-bold"
-                  >
-                    Asile Al ↑
-                  </button>
+                  {isAdmin && (
+                    <button
+                      onClick={() => onToggleParticipation(player.id)}
+                      className="text-xs text-emerald-400 hover:text-emerald-300 font-bold cursor-pointer"
+                    >
+                      Asile Al ↑
+                    </button>
+                  )}
                 </div>
               ))
             )}

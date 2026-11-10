@@ -15,8 +15,12 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
   const [posFilter, setPosFilter] = useState<string>('ALL');
   const [themeFilter, setThemeFilter] = useState<string>('ALL');
 
+  const isAdminOrCaptain = currentUser?.role === 'admin' || currentUser?.role === 'captain';
+  const isApproved = currentUser?.status === 'approved';
+  const isPending = currentUser?.status === 'pending';
+
   // Find the logged-in user's claimed player ID
-  const myPlayerId = currentUser?.claimedPlayerId;
+  const myPlayerId = isApproved ? currentUser?.claimedPlayerId : undefined;
 
   // 1. Calculate squad-wide rating leaderboard rank for each player
   const leaderboard = [...players].sort((a, b) => {
@@ -77,7 +81,11 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
               RUBOR, CALOR, DOLOR • KAPALI DEVRE HALI SAHA KULÜBÜ
             </p>
             <p className="text-[11px] text-neutral-400 mt-1">
-              Oyuncuların kartlarına tıklayarak fotoğraflarını doğrudan kart üzerinden kadrajlayabilir, lakap ve niteliklerini güncelleyebilirsiniz.
+              {isPending
+                ? '👋 Seyirci Modu: Hesabınız onay bekliyor. Tüm kadronun 3D kartlarını inceleyebilir ve filtrelerle gezinebilirsiniz.'
+                : isAdminOrCaptain
+                ? '👑 Kurul Yetkisi: Tüm oyuncuların kartlarını, temalarını, PlayStyles rozetlerini ve istatistiklerini denetleyip düzenleyebilirsiniz.'
+                : '✨ Kendi kartınızı özgürce kişiselleştirebilir, lakap, takım ve rozetinizi seçebilirsiniz. Arkadaşlarınızın kartlarını salt okunur inceleyebilirsiniz.'}
             </p>
           </div>
         </div>
@@ -241,16 +249,28 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
               </div>
 
               <div className="mt-2 text-center">
-                <button
-                  onClick={() => onSelectPlayer(player)}
-                  className={`text-xs font-semibold transition-colors ${
-                    isMyCard
-                      ? 'text-amber-300 hover:text-amber-200 underline underline-offset-4 decoration-amber-500/50'
-                      : 'text-amber-400 hover:text-amber-300'
-                  }`}
-                >
-                  {isMyCard ? 'Kartını Düzenle & Fotoğrafı Kadrajla →' : 'Kartı İncele & Düzenle →'}
-                </button>
+                {isMyCard ? (
+                  <button
+                    onClick={() => onSelectPlayer(player)}
+                    className="text-xs font-semibold text-amber-300 hover:text-amber-200 underline underline-offset-4 decoration-amber-500/50 cursor-pointer"
+                  >
+                    Kartını Düzenle & Fotoğrafı Kadrajla →
+                  </button>
+                ) : isAdminOrCaptain ? (
+                  <button
+                    onClick={() => onSelectPlayer(player)}
+                    className="text-xs font-semibold text-amber-400 hover:text-amber-300 cursor-pointer"
+                  >
+                    👑 Kartı İncele & Düzenle (Yetkili) →
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => onSelectPlayer(player)}
+                    className="text-xs font-semibold text-neutral-400 hover:text-amber-300 cursor-pointer"
+                  >
+                    {isPending ? '👁️ Kartı İncele (Seyirci) →' : '🔍 Kartı İncele (Önizleme) →'}
+                  </button>
+                )}
               </div>
             </div>
           );

@@ -107,7 +107,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const user = allUsers.find((u) => u.role === 'captain') || MOCK_USERS[1];
       setCurrentUser(user);
     } else if (type === 'pending') {
-      const user = allUsers.find((u) => u.status === 'pending') || MOCK_USERS[3];
+      const user = allUsers.find((u) => u.status === 'pending') || MOCK_USERS.find((u) => u.status === 'pending') || MOCK_USERS[MOCK_USERS.length - 1];
       setCurrentUser(user);
     } else {
       const user = allUsers.find((u) => u.role === 'player' && u.status === 'approved') || MOCK_USERS[2];

@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { PhotoArchiveItem, Player } from '../../types';
 import imageCompression from 'browser-image-compression';
-import { Camera, Heart, Tag, Upload, RefreshCw, Sparkles } from 'lucide-react';
+import { Camera, Heart, Tag, Upload, RefreshCw, Sparkles, Eye } from 'lucide-react';
 
 interface Props {
   photos: PhotoArchiveItem[];
   players: Player[];
-  currentPlayer: Player;
+  currentPlayer?: Player;
   onAddPhoto: (photo: Omit<PhotoArchiveItem, 'id' | 'createdAt' | 'likes'>) => void;
   onLikePhoto: (photoId: string) => void;
+  isReadOnly?: boolean;
 }
 
 export const PhotoGallery: React.FC<Props> = ({
@@ -17,6 +18,7 @@ export const PhotoGallery: React.FC<Props> = ({
   currentPlayer,
   onAddPhoto,
   onLikePhoto,
+  isReadOnly = false,
 }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -67,7 +69,7 @@ export const PhotoGallery: React.FC<Props> = ({
       imageUrl: selectedImage,
       caption: caption.trim() || 'Maç sonu anı pozu',
       taggedPlayerIds,
-      uploadedBy: currentPlayer.name,
+      uploadedBy: currentPlayer?.name || 'Kulüp Üyesi',
     });
 
     setSelectedImage(null);
@@ -88,18 +90,25 @@ export const PhotoGallery: React.FC<Props> = ({
             Otomatik WebP sıkıştırma sayesinde telefonunuzdaki 10 MB fotoğraflar anında ~180 KB'a düşer ve arşivlenir.
           </p>
         </div>
-        <button
-          onClick={() => setShowUploadModal(true)}
-          className="bg-amber-500 hover:bg-amber-400 text-black text-xs font-black px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-lg shadow-amber-500/20"
-        >
-          <Upload className="w-4 h-4" /> Fotoğraf Yükle & Etiketle
-        </button>
+        {isReadOnly || !currentPlayer ? (
+          <div className="flex items-center gap-2 bg-amber-500/15 border border-amber-500/35 px-3 py-2 rounded-xl text-amber-300 text-xs font-bold">
+            <Eye className="w-4 h-4 text-amber-400" />
+            <span>Seyirci Modu: Arşiv Açık</span>
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowUploadModal(true)}
+            className="bg-amber-500 hover:bg-amber-400 text-black text-xs font-black px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-lg shadow-amber-500/20 cursor-pointer"
+          >
+            <Upload className="w-4 h-4" /> Fotoğraf Yükle & Etiketle
+          </button>
+        )}
       </div>
 
       {/* Photo Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {photos.map((item) => {
-          const hasLiked = item.likes.includes(currentPlayer.id);
+          const hasLiked = currentPlayer ? item.likes.includes(currentPlayer.id) : false;
           const taggedPlayers = players.filter((p) => item.taggedPlayerIds.includes(p.id));
 
           return (

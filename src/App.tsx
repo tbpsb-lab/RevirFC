@@ -40,6 +40,7 @@ import { AdminApprovalPanel } from './components/admin/AdminApprovalPanel';
 import { ScoutingWizard } from './components/scouting/ScoutingWizard';
 import { ScoutingAdminDashboard } from './components/scouting/ScoutingAdminDashboard';
 import { ReminderHubModal } from './components/reminder/ReminderHubModal';
+import { Lock, Clock } from 'lucide-react';
 
 function MainApp() {
   const { currentUser, allUsers, approveUser, rejectUser } = useAuth();
@@ -209,24 +210,14 @@ function MainApp() {
     localStorage.setItem('revirfc_debts_v2', JSON.stringify(debts));
   }, [debts]);
 
-  // Current logged in member's claimed player
-  const claimedPlayer = players.find((p) => p.id === currentUser?.claimedPlayerId) || players[0];
+  const isPendingUser = currentUser?.status === 'pending';
+  const isAdminOrCaptain = currentUser?.role === 'admin' || currentUser?.role === 'captain';
+  const isApprovedUser = currentUser?.status === 'approved';
 
-  // 1. Approval Gate Check: If pending, block all club data!
-  if (currentUser?.status === 'pending') {
-    return (
-      <div className="min-h-screen bg-black text-white">
-        <Navbar
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          claimedPlayer={undefined}
-          onOpenFirebaseModal={() => setShowFirebaseModal(true)}
-        />
-        <PendingApprovalGate />
-        {showFirebaseModal && <FirebaseSetupModal onClose={() => setShowFirebaseModal(false)} />}
-      </div>
-    );
-  }
+  // Current logged in member's claimed player
+  const claimedPlayer = currentUser?.claimedPlayerId
+    ? players.find((p) => p.id === currentUser.claimedPlayerId)
+    : (isAdminOrCaptain ? players[0] : undefined);
 
   // Handle Check-in Save
   const handleSaveCheckIn = (checkIn: CheckInEntry) => {
@@ -376,12 +367,14 @@ function MainApp() {
 
   // Add post to locker room
   const handleAddPost = (text: string, isAnonymous: boolean) => {
+    const authorId = isAnonymous ? 'anonymous' : (claimedPlayer?.id || 'guest');
+    const authorName = isAnonymous ? 'Anonim Soyunma Odası Fısıltısı' : (claimedPlayer?.name || 'Misafir Oyuncu');
     const newPost: LockerPost = {
       id: `post-${Date.now()}`,
       matchId: match.id,
-      authorPlayerId: isAnonymous ? 'anonymous' : claimedPlayer.id,
-      authorName: isAnonymous ? 'Anonim Soyunma Odası Fısıltısı' : claimedPlayer.name,
-      authorPhoto: isAnonymous ? undefined : claimedPlayer.photoUrl,
+      authorPlayerId: authorId,
+      authorName,
+      authorPhoto: isAnonymous ? undefined : claimedPlayer?.photoUrl,
       text,
       isAnonymous,
       reactions: { fire: [], laugh: [], violin: [], revir: [], goat: [] },
@@ -392,15 +385,16 @@ function MainApp() {
 
   // React to locker room post
   const handleReactPost = (postId: string, reactionType: keyof LockerPost['reactions']) => {
+    const raterId = claimedPlayer?.id || 'guest';
     setPosts((prev) =>
       prev.map((p) => {
         if (p.id !== postId) return p;
         const currentList = p.reactions[reactionType] || [];
-        const hasReacted = currentList.includes(claimedPlayer.id);
+        const hasReacted = currentList.includes(raterId);
 
         const updatedList = hasReacted
-          ? currentList.filter((id) => id !== claimedPlayer.id)
-          : [...currentList, claimedPlayer.id];
+          ? currentList.filter((id) => id !== raterId)
+          : [...currentList, raterId];
 
         return {
           ...p,
@@ -418,7 +412,7 @@ function MainApp() {
     const item: PhotoArchiveItem = {
       ...newPhoto,
       id: `photo-${Date.now()}`,
-      likes: [claimedPlayer.id],
+      likes: claimedPlayer ? [claimedPlayer.id] : [],
       createdAt: new Date().toISOString(),
     };
     setPhotos((prev) => [item, ...prev]);
@@ -426,6 +420,7 @@ function MainApp() {
 
   // Like photo
   const handleLikePhoto = (photoId: string) => {
+    if (!claimedPlayer) return;
     setPhotos((prev) =>
       prev.map((p) => {
         if (p.id !== photoId) return p;
@@ -480,9 +475,28 @@ function MainApp() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         claimedPlayer={claimedPlayer}
-        onOpenCardEdit={() => setEditingPlayer(claimedPlayer)}
+        onOpenCardEdit={() => claimedPlayer && setEditingPlayer(claimedPlayer)}
         onOpenFirebaseModal={() => setShowFirebaseModal(true)}
       />
+
+      {/* Pending User Showcase Notification Banner */}
+      {isPendingUser && (
+        <div className="bg-gradient-to-r from-amber-600 via-amber-500 to-orange-600 text-black px-4 py-3 shadow-lg border-b border-amber-300/40">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2.5">
+              <span className="text-xl">👋</span>
+              <p className="font-bold text-neutral-950 text-xs sm:text-sm">
+                <strong>Hoş geldin!</strong> Hesabın Kurul onayı bekliyor. Bu sırada takımı ve arkadaşlarının kartlarını inceleyebilirsin. Onaylandığında kendi kartını yönetebilecek ve maç kadrolarına katılabileceksin.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="bg-black/85 text-amber-300 text-[11px] font-black px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
+                <Clock className="w-3.5 h-3.5 text-amber-400" /> Seyirci / Gözlemci Modu
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-6">
@@ -494,23 +508,42 @@ function MainApp() {
         )}
 
         {activeTab === 'scouting' && (
-          scoutingView === 'wizard' ? (
-            <ScoutingWizard
-              players={players}
-              evaluatorName={evaluatorName}
-              onEvaluatorChange={setEvaluatorName}
-              savedEntries={savedScoutingEntries}
-              onSaveEntry={handleSaveScoutingEntry}
-              onFinishAll={() => setScoutingView('dashboard')}
-              onSwitchToDashboard={() => setScoutingView('dashboard')}
-            />
+          isPendingUser ? (
+            <div className="space-y-6">
+              <div className="bg-amber-500/10 border border-amber-500/30 rounded-3xl p-6 text-center shadow-lg">
+                <Lock className="w-8 h-8 text-amber-400 mx-auto mb-2" />
+                <h3 className="text-base font-bold text-white">⭐ Kurul & Scouting Değerlendirmesi</h3>
+                <p className="text-xs text-neutral-300 mt-1.5 max-w-lg mx-auto leading-relaxed">
+                  Maç sonu scouting değerlendirmesi yapabilmek ve puan verebilmek için Kurul tarafından onaylanmış üye olmalısınız. Aşağıdaki konsensüs tablosundan mevcut puanları inceleyebilirsiniz.
+                </p>
+              </div>
+              <ScoutingAdminDashboard
+                players={players}
+                savedEntries={savedScoutingEntries}
+                onApplyConsensusToPlayers={() => {}}
+                onBackToWizard={() => {}}
+                isReadOnly={true}
+              />
+            </div>
           ) : (
-            <ScoutingAdminDashboard
-              players={players}
-              savedEntries={savedScoutingEntries}
-              onApplyConsensusToPlayers={handleApplyConsensusToPlayers}
-              onBackToWizard={() => setScoutingView('wizard')}
-            />
+            scoutingView === 'wizard' ? (
+              <ScoutingWizard
+                players={players}
+                evaluatorName={evaluatorName}
+                onEvaluatorChange={setEvaluatorName}
+                savedEntries={savedScoutingEntries}
+                onSaveEntry={handleSaveScoutingEntry}
+                onFinishAll={() => setScoutingView('dashboard')}
+                onSwitchToDashboard={() => setScoutingView('dashboard')}
+              />
+            ) : (
+              <ScoutingAdminDashboard
+                players={players}
+                savedEntries={savedScoutingEntries}
+                onApplyConsensusToPlayers={handleApplyConsensusToPlayers}
+                onBackToWizard={() => setScoutingView('wizard')}
+              />
+            )
           )
         )}
 
@@ -524,6 +557,8 @@ function MainApp() {
             onOpenRating={() => setShowRatingModal(true)}
             onToggleParticipation={handleToggleParticipation}
             onOpenReminderHub={() => setShowReminderModal(true)}
+            isPendingUser={isPendingUser}
+            isAdmin={isAdminOrCaptain}
           />
         )}
 
@@ -546,6 +581,7 @@ function MainApp() {
             currentPlayer={claimedPlayer}
             onAddPost={handleAddPost}
             onReact={handleReactPost}
+            isReadOnly={isPendingUser}
           />
         )}
 
@@ -556,6 +592,7 @@ function MainApp() {
             currentPlayer={claimedPlayer}
             onAddPhoto={handleAddPhoto}
             onLikePhoto={handleLikePhoto}
+            isReadOnly={isPendingUser}
           />
         )}
 
@@ -563,12 +600,24 @@ function MainApp() {
           <div className="space-y-8">
             <ChemistryMatrix players={players} />
             <EgoIndexCard players={players} />
-            <DessertLedger
-              debts={debts}
-              players={players}
-              onToggleDebt={handleToggleDebt}
-              onAddDebt={handleAddDebt}
-            />
+            {isPendingUser ? (
+              <div className="bg-neutral-900/90 border border-neutral-800 rounded-3xl p-8 text-center shadow-xl">
+                <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto mb-3">
+                  <Lock className="w-6 h-6" />
+                </div>
+                <h3 className="text-base font-bold text-white">Kulüp Kasası ve Tatlı Çetelesi</h3>
+                <p className="text-xs text-neutral-400 mt-1.5 max-w-md mx-auto leading-relaxed">
+                  Aidat, kasa bakiyesi ve tatlı borçları yalnızca onaylı kulüp üyelerine açıktır.
+                </p>
+              </div>
+            ) : (
+              <DessertLedger
+                debts={debts}
+                players={players}
+                onToggleDebt={handleToggleDebt}
+                onAddDebt={handleAddDebt}
+              />
+            )}
           </div>
         )}
 
@@ -586,7 +635,10 @@ function MainApp() {
       {editingPlayer && (
         <CardCustomizer
           player={editingPlayer}
-          isAdmin={currentUser?.role === 'admin'}
+          isAdmin={isAdminOrCaptain}
+          isPendingUser={isPendingUser}
+          isOwnCard={Boolean(currentUser?.claimedPlayerId && currentUser.claimedPlayerId === editingPlayer.id)}
+          canEdit={Boolean(isAdminOrCaptain || (isApprovedUser && currentUser?.claimedPlayerId === editingPlayer.id))}
           onSave={(updated) => {
             setPlayers((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
           }}
@@ -606,7 +658,7 @@ function MainApp() {
       {showRatingModal && (
         <MatchRatingModal
           match={match}
-          currentRaterPlayer={claimedPlayer}
+          currentRaterPlayer={claimedPlayer || players[0]}
           players={players}
           onSaveRatings={handleSaveRatings}
           onClose={() => setShowRatingModal(false)}
