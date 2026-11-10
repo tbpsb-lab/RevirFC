@@ -102,8 +102,9 @@ export const FCCard: React.FC<Props> = ({
           nameColor: 'text-white',
           nicknameColor: 'text-[#FBBF24]',
           statValColor: 'text-[#FDE68A]',
-          ovalTextColor: 'text-amber-200',
-          ovalIconColor: 'text-amber-400',
+          ovalTextColor: 'text-[#FEF08A]',
+          ovalIconColor: 'text-[#FACC15]',
+          ovalDropShadow: 'drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)]',
           nameTop: 'top-[52.0%]',
           statTop: 'top-[82.2%]',
           statBounds: 'left-[11.3%] right-[11.3%]',
@@ -121,8 +122,9 @@ export const FCCard: React.FC<Props> = ({
           nameColor: 'text-white',
           nicknameColor: 'text-[#FB923C]',
           statValColor: 'text-[#FED7AA]',
-          ovalTextColor: 'text-orange-200',
-          ovalIconColor: 'text-orange-400',
+          ovalTextColor: 'text-[#FFEDD5]',
+          ovalIconColor: 'text-[#FB923C]',
+          ovalDropShadow: 'drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)]',
           nameTop: 'top-[53.8%]',
           statTop: 'top-[82.4%]',
           statBounds: 'left-[11.3%] right-[11.3%]',
@@ -140,8 +142,9 @@ export const FCCard: React.FC<Props> = ({
           nameColor: 'text-white',
           nicknameColor: 'text-[#38BDF8]',
           statValColor: 'text-[#BAE6FD]',
-          ovalTextColor: 'text-sky-200',
-          ovalIconColor: 'text-sky-400',
+          ovalTextColor: 'text-[#E0F2FE]',
+          ovalIconColor: 'text-[#38BDF8]',
+          ovalDropShadow: 'drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)]',
           nameTop: 'top-[53.8%]',
           statTop: 'top-[82.4%]',
           statBounds: 'left-[11.3%] right-[11.3%]',
@@ -161,12 +164,13 @@ export const FCCard: React.FC<Props> = ({
           statValColor: 'text-[#0F172A]',
           ovalTextColor: 'text-[#78350F]',
           ovalIconColor: 'text-[#B45309]',
+          ovalDropShadow: 'drop-shadow-[0_1px_0_rgba(255,255,255,0.8)]',
           nameTop: 'top-[54.5%]',
           statTop: 'top-[82.0%]',
           statBounds: 'left-[11.3%] right-[11.3%]',
-          ovalsTop: 'top-[69.5%]',
+          ovalsTop: 'top-[69.0%]',
           ovalsBounds: 'left-[11.5%] right-[11.5%]',
-          ovalsHeight: 'h-[6.8%]',
+          ovalsHeight: 'h-[5.8%]',
           photoFrame: 'top-[12%] left-[16%] right-[16%] h-[46%]',
           isGold: false,
           label: 'EFSANE • ICON 👑',
@@ -178,8 +182,9 @@ export const FCCard: React.FC<Props> = ({
           nameColor: 'text-[#1C1917]',
           nicknameColor: 'text-[#FBBF24]',
           statValColor: 'text-[#1C1917]',
-          ovalTextColor: 'text-amber-200',
-          ovalIconColor: 'text-amber-400',
+          ovalTextColor: 'text-[#FBBF24]',
+          ovalIconColor: 'text-[#F59E0B]',
+          ovalDropShadow: 'drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)]',
           nameTop: 'top-[50.8%]',
           statTop: 'top-[79.6%]',
           statBounds: 'left-[11.3%] right-[11.3%]',
@@ -200,6 +205,7 @@ export const FCCard: React.FC<Props> = ({
           statValColor: 'text-[#E5C07B]',
           ovalTextColor: 'text-[#5eead4]',
           ovalIconColor: 'text-[#5eead4]',
+          ovalDropShadow: 'drop-shadow-[0_1px_2px_rgba(0,0,0,0.95)]',
           nameTop: 'top-[53.5%]',
           statTop: 'top-[78.2%]',
           statBounds: 'left-[17%] right-[17%]',
@@ -438,13 +444,13 @@ export const FCCard: React.FC<Props> = ({
           </h3>
         </div>
 
-        {/* PlayStyles Rozetleri (3D Parallax: translateZ(4px)) */}
+        {/* PlayStyles Rozetleri (3D Parallax: translateZ(4px)) - Sadece Simge ve Yazı, Kutusuz ve Çerçevesiz */}
         {showBadges && (
           <>
             {themeConfig.isGold ? (
               /* Altın Kart: Sağ/Orta Alt Rozetleri */
               <div
-                className="absolute bottom-[4.8%] right-[8%] left-[8%] flex justify-end items-center gap-1.5 z-20 pointer-events-none select-none"
+                className="absolute bottom-[4.8%] right-[8%] left-[8%] flex justify-end items-center gap-2 z-20 pointer-events-none select-none"
                 style={{
                   transform: `translateZ(4px) translate3d(${pX * 0.04}px, ${pY * 0.04}px, 0)`,
                   transition: isHovered ? 'none' : 'transform 0.35s ease-out',
@@ -457,11 +463,11 @@ export const FCCard: React.FC<Props> = ({
                   return (
                     <div
                       key={idx}
-                      className="bg-[#0c312d]/95 border border-[#14b8a6]/70 rounded-xl px-2.5 py-1 flex items-center gap-1.5 shadow-md shadow-[#042f2e]/60 flex-1 min-w-0 max-w-[49%]"
+                      className="flex items-center justify-end gap-1.5 flex-1 min-w-0 max-w-[49%]"
                       title={`${cfg.label}: ${cfg.description}`}
                     >
-                      <Icon className="w-3.5 h-3.5 text-[#5eead4] shrink-0 drop-shadow" />
-                      <span className="font-bold text-[#5eead4] truncate tracking-tight text-[10px] sm:text-[11px]">
+                      <Icon className={`w-3.5 h-3.5 ${themeConfig.ovalIconColor} shrink-0 ${themeConfig.ovalDropShadow}`} />
+                      <span className={`font-bold ${themeConfig.ovalTextColor} ${themeConfig.ovalDropShadow} truncate tracking-tight text-[10px] sm:text-[11px]`}>
                         {cfg.label}
                       </span>
                     </div>
@@ -469,9 +475,9 @@ export const FCCard: React.FC<Props> = ({
                 })}
               </div>
             ) : (
-              /* Diğer Tüm Tematik Kartlar: Köşeleri Yuvarlatılmış Geniş Yatay Dikdörtgen Rozetler */
+              /* Diğer Tüm Tematik Kartlar: Şablon Yuvaları Üzerinde Saf Simge ve Yazı */
               <div
-                className={`absolute ${themeConfig.ovalsTop} ${themeConfig.ovalsBounds} ${themeConfig.ovalsHeight} flex justify-center items-center gap-2 z-20 pointer-events-none select-none`}
+                className={`absolute ${themeConfig.ovalsTop} ${themeConfig.ovalsBounds} ${themeConfig.ovalsHeight} grid grid-cols-2 gap-2 z-20 pointer-events-none select-none`}
                 style={{
                   transform: `translateZ(4px) translate3d(${pX * 0.04}px, ${pY * 0.04}px, 0)`,
                   transition: isHovered ? 'none' : 'transform 0.35s ease-out',
@@ -481,60 +487,15 @@ export const FCCard: React.FC<Props> = ({
                   const cfg = PLAYSTYLE_CONFIG[ps];
                   if (!cfg) return null;
                   const Icon = cfg.icon;
-                  const isSingle = player.playstyles.slice(0, 2).length === 1;
-
-                  // Temaya özel rozet kutucuk stilleri
-                  const bStyle = (() => {
-                    switch (theme) {
-                      case 'totw':
-                        return {
-                          cardBg: 'bg-gradient-to-r from-neutral-950/95 via-[#1a1610]/95 to-neutral-950/95 border border-amber-400/60 shadow-lg shadow-black/80',
-                          textColor: 'text-amber-200',
-                          iconColor: 'text-amber-400',
-                        };
-                      case 'inform':
-                        return {
-                          cardBg: 'bg-gradient-to-r from-[#220707]/95 via-[#3b0b0b]/95 to-[#220707]/95 border border-orange-500/60 shadow-lg shadow-red-950/80',
-                          textColor: 'text-orange-200',
-                          iconColor: 'text-orange-400',
-                        };
-                      case 'revir':
-                        return {
-                          cardBg: 'bg-gradient-to-r from-[#031525]/95 via-[#082f49]/95 to-[#031525]/95 border border-sky-400/60 shadow-lg shadow-sky-950/80',
-                          textColor: 'text-sky-200',
-                          iconColor: 'text-sky-400',
-                        };
-                      case 'legend':
-                        return {
-                          cardBg: 'bg-gradient-to-r from-[#fefce8]/95 via-[#fef08a]/95 to-[#fefce8]/95 border border-amber-600/60 shadow-lg shadow-amber-900/30',
-                          textColor: 'text-[#78350F]',
-                          iconColor: 'text-[#B45309]',
-                        };
-                      case 'bidon':
-                        return {
-                          cardBg: 'bg-gradient-to-r from-[#1c1917]/95 via-[#292524]/95 to-[#1c1917]/95 border border-amber-700/60 shadow-lg shadow-black/80',
-                          textColor: 'text-amber-300',
-                          iconColor: 'text-amber-500',
-                        };
-                      default:
-                        return {
-                          cardBg: 'bg-neutral-900/95 border border-amber-400/50',
-                          textColor: 'text-amber-200',
-                          iconColor: 'text-amber-400',
-                        };
-                    }
-                  })();
 
                   return (
                     <div
                       key={idx}
-                      className={`${
-                        isSingle ? 'w-[65%]' : 'flex-1 min-w-0'
-                      } h-full rounded-xl ${bStyle.cardBg} flex items-center justify-center gap-1.5 px-2.5`}
+                      className="h-full w-full flex items-center justify-center gap-1.5 px-1"
                       title={`${cfg.label}: ${cfg.description}`}
                     >
-                      <Icon className={`w-3.5 h-3.5 ${bStyle.iconColor} shrink-0 drop-shadow`} />
-                      <span className={`text-[9.5px] sm:text-[10.5px] md:text-[11px] font-bold ${bStyle.textColor} tracking-tight truncate`}>
+                      <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${themeConfig.ovalIconColor} shrink-0 ${themeConfig.ovalDropShadow}`} />
+                      <span className={`text-[10px] sm:text-[11px] md:text-xs font-bold tracking-tight truncate ${themeConfig.ovalTextColor} ${themeConfig.ovalDropShadow}`}>
                         {cfg.label}
                       </span>
                     </div>
