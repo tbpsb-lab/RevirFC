@@ -95,7 +95,7 @@ export const FCCard: React.FC<Props> = ({
           statValColor: 'text-[#FDE68A]',
           ovalTextColor: 'text-amber-200',
           ovalIconColor: 'text-amber-400',
-          nameTop: 'top-[52.2%]',
+          nameTop: 'top-[52.0%]',
           statTop: 'top-[82.2%]',
           statBounds: 'left-[11.3%] right-[11.3%]',
           ovalsTop: 'top-[65.2%]',
@@ -114,11 +114,11 @@ export const FCCard: React.FC<Props> = ({
           statValColor: 'text-[#FED7AA]',
           ovalTextColor: 'text-orange-200',
           ovalIconColor: 'text-orange-400',
-          nameTop: 'top-[54.6%]',
+          nameTop: 'top-[52.0%]',
           statTop: 'top-[82.2%]',
           statBounds: 'left-[11.3%] right-[11.3%]',
           ovalsTop: 'top-[65.2%]',
-          ovalsBounds: 'left-[29.5%] right-[29.5%]',
+          ovalsBounds: 'left-[10.5%] right-[10.5%]',
           ovalsHeight: 'h-[7.2%]',
           photoFrame: 'top-[11%] left-[12%] right-[8%] h-[44%]',
           isGold: false,
@@ -133,12 +133,12 @@ export const FCCard: React.FC<Props> = ({
           statValColor: 'text-[#BAE6FD]',
           ovalTextColor: 'text-sky-200',
           ovalIconColor: 'text-sky-400',
-          nameTop: 'top-[54.6%]',
+          nameTop: 'top-[52.0%]',
           statTop: 'top-[82.4%]',
           statBounds: 'left-[11.3%] right-[11.3%]',
-          ovalsTop: 'top-[65.4%]',
-          ovalsBounds: 'left-[20.0%] right-[20.0%]',
-          ovalsHeight: 'h-[7.5%]',
+          ovalsTop: 'top-[65.2%]',
+          ovalsBounds: 'left-[10.5%] right-[10.5%]',
+          ovalsHeight: 'h-[7.2%]',
           photoFrame: 'top-[11%] left-[12%] right-[8%] h-[44%]',
           isGold: false,
           label: 'REVİR RAPORLU 🩹',
@@ -152,12 +152,12 @@ export const FCCard: React.FC<Props> = ({
           statValColor: 'text-[#78350F]',
           ovalTextColor: 'text-[#78350F]',
           ovalIconColor: 'text-[#B45309]',
-          nameTop: 'top-[60.6%]',
+          nameTop: 'top-[55.5%]',
           statTop: 'top-[84.2%]',
           statBounds: 'left-[11.3%] right-[11.3%]',
-          ovalsTop: 'top-[69.4%]',
-          ovalsBounds: 'left-[22.5%] right-[22.5%]',
-          ovalsHeight: 'h-[7.8%]',
+          ovalsTop: 'top-[68.8%]',
+          ovalsBounds: 'left-[10.5%] right-[10.5%]',
+          ovalsHeight: 'h-[7.2%]',
           photoFrame: 'top-[12%] left-[16%] right-[16%] h-[46%]',
           isGold: false,
           label: 'EFSANE • ICON 👑',
@@ -171,12 +171,12 @@ export const FCCard: React.FC<Props> = ({
           statValColor: 'text-[#78350F]',
           ovalTextColor: 'text-amber-200',
           ovalIconColor: 'text-amber-400',
-          nameTop: 'top-[57.0%]',
+          nameTop: 'top-[53.2%]',
           statTop: 'top-[81.2%]',
           statBounds: 'left-[11.3%] right-[11.3%]',
-          ovalsTop: 'top-[66.0%]',
-          ovalsBounds: 'left-[21.0%] right-[21.0%]',
-          ovalsHeight: 'h-[7.8%]',
+          ovalsTop: 'top-[65.6%]',
+          ovalsBounds: 'left-[10.5%] right-[10.5%]',
+          ovalsHeight: 'h-[7.2%]',
           photoFrame: 'top-[11%] left-[12%] right-[8%] h-[44%]',
           isGold: false,
           label: 'GÜNÜN BİDONU 🛢️',
@@ -191,7 +191,7 @@ export const FCCard: React.FC<Props> = ({
           statValColor: 'text-[#E5C07B]',
           ovalTextColor: 'text-[#5eead4]',
           ovalIconColor: 'text-[#5eead4]',
-          nameTop: 'top-[57.8%]',
+          nameTop: 'top-[53.5%]',
           statTop: 'top-[78.2%]',
           statBounds: 'left-[17%] right-[17%]',
           ovalsTop: '',
@@ -367,76 +367,62 @@ export const FCCard: React.FC<Props> = ({
           />
         </div>
 
-        {/* Altın Kart İçin Sağ Üstteki Orijinal Altın Kalkan Arması */}
-        {themeConfig.isGold && (
+        {/* Sağ Üst Tema Kalkanı (Altın, Alev, Revir) */}
+        {theme === 'gold' && (
           <img
             src="/cards/gold_shield.png"
             alt="Golden Crest"
             className={`absolute top-[13.5%] right-[14%] ${sizeConfig.shieldSize} object-contain pointer-events-none z-20 opacity-95 drop-shadow-md select-none`}
           />
         )}
+        {theme === 'inform' && (
+          <img
+            src="/cards/inform_shield.png"
+            alt="Alev Crest"
+            className={`absolute top-[13.0%] right-[13.5%] ${sizeConfig.shieldSize} object-contain pointer-events-none z-20 opacity-95 drop-shadow-[0_2px_8px_rgba(234,88,12,0.7)] select-none`}
+          />
+        )}
+        {theme === 'revir' && (
+          <img
+            src="/cards/revir_shield.png"
+            alt="Revir Crest"
+            className={`absolute top-[13.0%] right-[13.5%] ${sizeConfig.shieldSize} object-contain pointer-events-none z-20 opacity-95 drop-shadow-[0_2px_8px_rgba(56,189,248,0.7)] select-none`}
+          />
+        )}
 
         {/* Oyuncu Adı ve Halı Saha Lakabı */}
-        {theme === 'totw' ? (
-          <div className="absolute left-0 right-0 top-[52.0%] flex flex-col items-center justify-center text-center z-20 pointer-events-none">
-            {/* Lakap: İsmin üstünde, resmin üzerine doğru */}
-            <p className="font-bold italic text-[#FBBF24] text-[11px] sm:text-xs tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] mb-1 truncate w-full px-4">
-              "{player.nickname}"
-            </p>
-            {/* İsim: Tam isimlik kısmının ortasında */}
-            <h3 className={`font-black uppercase tracking-wide text-white ${sizeConfig.nameText} drop-shadow-[0_2px_5px_rgba(0,0,0,0.95)] truncate w-full px-4`}>
-              {player.name}
-            </h3>
-          </div>
-        ) : (
-          <div
-            className={`absolute left-0 right-0 ${themeConfig.nameTop} flex flex-col items-center justify-center text-center z-20 pointer-events-none`}
+        <div
+          className={`absolute left-0 right-0 ${themeConfig.nameTop} flex flex-col items-center justify-center text-center z-20 pointer-events-none`}
+        >
+          {/* Lakap: İsmin üstünde, resmin alt kısmına doğru */}
+          <p
+            className={`font-bold italic ${themeConfig.nicknameColor} text-[11px] sm:text-xs tracking-wide ${
+              theme === 'legend' || theme === 'bidon'
+                ? 'drop-shadow-none'
+                : 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)]'
+            } mb-0.5 truncate w-full px-4`}
           >
-            <h3 className={`font-black uppercase tracking-wide ${themeConfig.nameColor} ${
+            "{player.nickname}"
+          </p>
+          {/* İsim: Tam isimlik kısmının ortasında */}
+          <h3
+            className={`font-black uppercase tracking-wide ${themeConfig.nameColor} ${
               theme === 'legend' || theme === 'bidon' ? 'text-lg sm:text-xl' : sizeConfig.nameText
-            } ${theme === 'legend' || theme === 'bidon' ? 'drop-shadow-none' : 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]'} truncate w-full px-4`}>
-              {player.name}
-            </h3>
-            <p className={`font-bold italic ${themeConfig.nicknameColor} ${
-              theme === 'legend' || theme === 'bidon' ? 'text-[11px]' : sizeConfig.nicknameText
-            } ${theme === 'legend' || theme === 'bidon' ? 'drop-shadow-none' : 'drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]'} mt-0.5 truncate w-full px-4`}>
-              "{player.nickname}"
-            </p>
-          </div>
-        )}
+            } ${
+              theme === 'legend' || theme === 'bidon'
+                ? 'drop-shadow-none'
+                : 'drop-shadow-[0_2px_5px_rgba(0,0,0,0.95)]'
+            } truncate w-full px-4`}
+          >
+            {player.name}
+          </h3>
+        </div>
 
         {/* PlayStyles Rozetleri */}
         {showBadges && (
           <>
-            {theme === 'totw' ? (
-              /* TOTW Kartı: Köşeleri Yuvarlatılmış Geniş Yatay Dikdörtgen Rozetler */
-              <div
-                className={`absolute ${themeConfig.ovalsTop} ${themeConfig.ovalsBounds} ${themeConfig.ovalsHeight} flex justify-center items-center gap-2 z-20 pointer-events-none select-none`}
-              >
-                {player.playstyles.slice(0, 2).map((ps, idx) => {
-                  const cfg = PLAYSTYLE_CONFIG[ps];
-                  if (!cfg) return null;
-                  const Icon = cfg.icon;
-                  const isSingle = player.playstyles.slice(0, 2).length === 1;
-                  return (
-                    <div
-                      key={idx}
-                      className={`${
-                        isSingle ? 'w-[65%]' : 'flex-1 min-w-0'
-                      } h-full rounded-xl bg-gradient-to-r from-neutral-950/95 via-[#1a1610]/95 to-neutral-950/95 border border-amber-400/60 shadow-lg shadow-black/80 flex items-center justify-center gap-1.5 px-2.5`}
-                      title={`${cfg.label}: ${cfg.description}`}
-                    >
-                      <span className="text-[11px] leading-none select-none">{cfg.emoji}</span>
-                      <Icon className="w-3.5 h-3.5 shrink-0 text-amber-400" />
-                      <span className="text-[9px] sm:text-[10px] md:text-[11px] font-bold text-amber-200 tracking-tight truncate">
-                        {cfg.label}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : themeConfig.isGold ? (
-              /* Altın Kart: Sağ/Orta Alt Hap Rozetleri (1 veya 2 adet yan yana) */
+            {themeConfig.isGold ? (
+              /* Altın Kart: Sağ/Orta Alt Rozetleri */
               <div className="absolute bottom-[4.8%] right-[8%] left-[8%] flex justify-end items-center gap-1.5 z-20 pointer-events-none select-none">
                 {player.playstyles.slice(0, 2).map((ps, idx) => {
                   const cfg = PLAYSTYLE_CONFIG[ps];
@@ -445,11 +431,12 @@ export const FCCard: React.FC<Props> = ({
                   return (
                     <div
                       key={idx}
-                      className="bg-[#0c312d]/95 border border-[#14b8a6]/70 rounded-full px-2.5 py-0.5 flex items-center gap-1 shadow-md shadow-[#042f2e]/60 max-w-[48%]"
+                      className="bg-[#0c312d]/95 border border-[#14b8a6]/70 rounded-xl px-2.5 py-1 flex items-center gap-1.5 shadow-md shadow-[#042f2e]/60 flex-1 min-w-0 max-w-[49%]"
                       title={`${cfg.label}: ${cfg.description}`}
                     >
-                      <Icon className="w-3 h-3 text-[#5eead4] shrink-0" />
-                      <span className="font-bold text-[#5eead4] truncate tracking-tight text-[11px]">
+                      <span className="text-[11px] leading-none select-none">{cfg.emoji}</span>
+                      <Icon className="w-3.5 h-3.5 text-[#5eead4] shrink-0" />
+                      <span className="font-bold text-[#5eead4] truncate tracking-tight text-[10px] sm:text-[11px]">
                         {cfg.label}
                       </span>
                     </div>
@@ -457,47 +444,74 @@ export const FCCard: React.FC<Props> = ({
                 })}
               </div>
             ) : (
-              /* Diğer Kartlar: Şablonda Önceden Çizilmiş 2 Oval Rozet Yuvasına Tam Oturan Tasarım */
+              /* Diğer Tüm Tematik Kartlar: Köşeleri Yuvarlatılmış Geniş Yatay Dikdörtgen Rozetler */
               <div
-                className={`absolute ${themeConfig.ovalsTop} ${themeConfig.ovalsBounds} ${themeConfig.ovalsHeight} flex justify-between items-center z-20 pointer-events-none select-none`}
+                className={`absolute ${themeConfig.ovalsTop} ${themeConfig.ovalsBounds} ${themeConfig.ovalsHeight} flex justify-center items-center gap-2 z-20 pointer-events-none select-none`}
               >
-                {/* Sol Oval Rozet */}
-                <div className="w-[46%] h-full flex items-center justify-center">
-                  {player.playstyles[0] && PLAYSTYLE_CONFIG[player.playstyles[0]] && (() => {
-                    const cfg = PLAYSTYLE_CONFIG[player.playstyles[0]];
-                    const Icon = cfg.icon;
-                    return (
-                      <div
-                        className="w-full h-full flex items-center justify-center gap-1 drop-shadow-sm px-1"
-                        title={`${cfg.label}: ${cfg.description}`}
-                      >
-                        <Icon className={`w-3.5 h-3.5 shrink-0 ${themeConfig.ovalIconColor}`} />
-                        <span className={`text-[9px] sm:text-[10px] font-bold ${themeConfig.ovalTextColor} tracking-tight truncate`}>
-                          {cfg.label}
-                        </span>
-                      </div>
-                    );
-                  })()}
-                </div>
+                {player.playstyles.slice(0, 2).map((ps, idx) => {
+                  const cfg = PLAYSTYLE_CONFIG[ps];
+                  if (!cfg) return null;
+                  const Icon = cfg.icon;
+                  const isSingle = player.playstyles.slice(0, 2).length === 1;
 
-                {/* Sağ Oval Rozet */}
-                <div className="w-[46%] h-full flex items-center justify-center">
-                  {player.playstyles[1] && PLAYSTYLE_CONFIG[player.playstyles[1]] && (() => {
-                    const cfg = PLAYSTYLE_CONFIG[player.playstyles[1]];
-                    const Icon = cfg.icon;
-                    return (
-                      <div
-                        className="w-full h-full flex items-center justify-center gap-1 drop-shadow-sm px-1"
-                        title={`${cfg.label}: ${cfg.description}`}
-                      >
-                        <Icon className={`w-3.5 h-3.5 shrink-0 ${themeConfig.ovalIconColor}`} />
-                        <span className={`text-[9px] sm:text-[10px] font-bold ${themeConfig.ovalTextColor} tracking-tight truncate`}>
-                          {cfg.label}
-                        </span>
-                      </div>
-                    );
-                  })()}
-                </div>
+                  // Temaya özel rozet kutucuk stilleri
+                  const bStyle = (() => {
+                    switch (theme) {
+                      case 'totw':
+                        return {
+                          cardBg: 'bg-gradient-to-r from-neutral-950/95 via-[#1a1610]/95 to-neutral-950/95 border border-amber-400/60 shadow-lg shadow-black/80',
+                          textColor: 'text-amber-200',
+                          iconColor: 'text-amber-400',
+                        };
+                      case 'inform':
+                        return {
+                          cardBg: 'bg-gradient-to-r from-[#220707]/95 via-[#3b0b0b]/95 to-[#220707]/95 border border-orange-500/60 shadow-lg shadow-red-950/80',
+                          textColor: 'text-orange-200',
+                          iconColor: 'text-orange-400',
+                        };
+                      case 'revir':
+                        return {
+                          cardBg: 'bg-gradient-to-r from-[#031525]/95 via-[#082f49]/95 to-[#031525]/95 border border-sky-400/60 shadow-lg shadow-sky-950/80',
+                          textColor: 'text-sky-200',
+                          iconColor: 'text-sky-400',
+                        };
+                      case 'legend':
+                        return {
+                          cardBg: 'bg-gradient-to-r from-[#fefce8]/95 via-[#fef08a]/95 to-[#fefce8]/95 border border-amber-600/60 shadow-lg shadow-amber-900/30',
+                          textColor: 'text-[#78350F]',
+                          iconColor: 'text-[#B45309]',
+                        };
+                      case 'bidon':
+                        return {
+                          cardBg: 'bg-gradient-to-r from-[#1c1917]/95 via-[#292524]/95 to-[#1c1917]/95 border border-amber-700/60 shadow-lg shadow-black/80',
+                          textColor: 'text-amber-300',
+                          iconColor: 'text-amber-500',
+                        };
+                      default:
+                        return {
+                          cardBg: 'bg-neutral-900/95 border border-amber-400/50',
+                          textColor: 'text-amber-200',
+                          iconColor: 'text-amber-400',
+                        };
+                    }
+                  })();
+
+                  return (
+                    <div
+                      key={idx}
+                      className={`${
+                        isSingle ? 'w-[65%]' : 'flex-1 min-w-0'
+                      } h-full rounded-xl ${bStyle.cardBg} flex items-center justify-center gap-1.5 px-2.5`}
+                      title={`${cfg.label}: ${cfg.description}`}
+                    >
+                      <span className="text-[11px] leading-none select-none">{cfg.emoji}</span>
+                      <Icon className={`w-3.5 h-3.5 shrink-0 ${bStyle.iconColor}`} />
+                      <span className={`text-[9px] sm:text-[10px] md:text-[11px] font-bold ${bStyle.textColor} tracking-tight truncate`}>
+                        {cfg.label}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </>
