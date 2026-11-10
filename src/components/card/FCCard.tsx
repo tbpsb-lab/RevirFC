@@ -158,11 +158,11 @@ export const FCCard: React.FC<Props> = ({
           ovrColor: 'text-[#FEF08A]',
           nameColor: 'text-[#1E293B]',
           nicknameColor: 'text-[#B45309]',
-          statValColor: 'text-[#78350F]',
+          statValColor: 'text-[#0F172A]',
           ovalTextColor: 'text-[#78350F]',
           ovalIconColor: 'text-[#B45309]',
-          nameTop: 'top-[57.2%]',
-          statTop: 'top-[84.6%]',
+          nameTop: 'top-[54.5%]',
+          statTop: 'top-[82.0%]',
           statBounds: 'left-[11.3%] right-[11.3%]',
           ovalsTop: 'top-[69.5%]',
           ovalsBounds: 'left-[11.5%] right-[11.5%]',
@@ -562,7 +562,15 @@ export const FCCard: React.FC<Props> = ({
             { val: stats.phy },
           ].map((item, idx) => (
             <div key={idx} className="flex justify-center items-center">
-              <span className={`font-black font-mono tracking-tight ${themeConfig.statValColor} ${sizeConfig.statVal} drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]`}>
+              <span
+                className={`font-black font-mono tracking-tight ${sizeConfig.statVal} ${
+                  theme === 'legend'
+                    ? 'text-[#0F172A] drop-shadow-[0_1px_0_rgba(255,255,255,0.85)]'
+                    : theme === 'bidon'
+                    ? 'text-[#1C1917] drop-shadow-none'
+                    : `${themeConfig.statValColor} drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]`
+                }`}
+              >
                 {item.val}
               </span>
             </div>
