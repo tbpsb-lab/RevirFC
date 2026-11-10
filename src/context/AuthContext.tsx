@@ -18,19 +18,45 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const LOCAL_STORAGE_USERS_KEY = 'revirfc_users_v1';
-const LOCAL_STORAGE_CURRENT_KEY = 'revirfc_current_user_v1';
+const LOCAL_STORAGE_USERS_KEY = 'revirfc_users_v2';
+const LOCAL_STORAGE_CURRENT_KEY = 'revirfc_current_user_v2';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Clear legacy mock cache if present
+  useEffect(() => {
+    try {
+      localStorage.removeItem('revirfc_users_v1');
+      localStorage.removeItem('revirfc_current_user_v1');
+    } catch {}
+  }, []);
+
   const [allUsers, setAllUsers] = useState<UserProfile[]>(() => {
     const saved = localStorage.getItem(LOCAL_STORAGE_USERS_KEY);
-    return saved ? JSON.parse(saved) : MOCK_USERS;
+    if (!saved) return MOCK_USERS;
+    try {
+      const parsed: UserProfile[] = JSON.parse(saved);
+      // If legacy dummy users exist, reset to current real users
+      if (parsed.some((u) => u.displayName.includes('Mert Kayra'))) {
+        return MOCK_USERS;
+      }
+      return parsed;
+    } catch {
+      return MOCK_USERS;
+    }
   });
 
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     const saved = localStorage.getItem(LOCAL_STORAGE_CURRENT_KEY);
-    if (saved) return JSON.parse(saved);
-    return MOCK_USERS[0]; // Default to Admin for full exploration
+    if (!saved) return MOCK_USERS[0]; // Alper
+    try {
+      const parsed: UserProfile = JSON.parse(saved);
+      if (parsed.displayName.includes('Mert Kayra')) {
+        return MOCK_USERS[0];
+      }
+      return parsed;
+    } catch {
+      return MOCK_USERS[0];
+    }
   });
 
   const [loading, setLoading] = useState<boolean>(false);

@@ -44,12 +44,20 @@ import { ReminderHubModal } from './components/reminder/ReminderHubModal';
 function MainApp() {
   const { currentUser, allUsers, approveUser, rejectUser } = useAuth();
 
-  // Local state persisted in localStorage
+  // Local state persisted in localStorage (version 2 for real 22 players)
   const [players, setPlayers] = useState<Player[]>(() => {
-    const saved = localStorage.getItem('revirfc_players_v1');
+    try {
+      localStorage.removeItem('revirfc_players_v1');
+    } catch {}
+
+    const saved = localStorage.getItem('revirfc_players_v2');
     if (!saved) return INITIAL_PLAYERS;
     try {
       const parsed: Player[] = JSON.parse(saved);
+      // If old dummy players exist in storage, purge and reload real 22 players
+      if (parsed.some((p) => p.name === 'Mert Kayra' || p.name === 'Burak Demir')) {
+        return INITIAL_PLAYERS;
+      }
       const existingIds = new Set(parsed.map((p) => p.id));
       const missing = INITIAL_PLAYERS.filter((p) => !existingIds.has(p.id));
       return [...parsed, ...missing];
@@ -59,10 +67,20 @@ function MainApp() {
   });
 
   const [match, setMatch] = useState<Match>(() => {
-    const saved = localStorage.getItem('revirfc_match_v1');
-    if (saved) return JSON.parse(saved);
+    try {
+      localStorage.removeItem('revirfc_match_v1');
+    } catch {}
 
-    // Initial default squads balanced with 462 algorithm
+    const saved = localStorage.getItem('revirfc_match_v2');
+    if (saved) {
+      try {
+        const parsed: Match = JSON.parse(saved);
+        if (parsed.starters.includes('p1') && parsed.starters.length === 12) {
+          return parsed;
+        }
+      } catch {}
+    }
+
     const startersList = INITIAL_PLAYERS.filter((p) =>
       MOCK_ACTIVE_MATCH.starters.includes(p.id)
     );
@@ -75,17 +93,26 @@ function MainApp() {
   });
 
   const [posts, setPosts] = useState<LockerPost[]>(() => {
-    const saved = localStorage.getItem('revirfc_posts_v1');
+    try {
+      localStorage.removeItem('revirfc_posts_v1');
+    } catch {}
+    const saved = localStorage.getItem('revirfc_posts_v2');
     return saved ? JSON.parse(saved) : MOCK_POSTS;
   });
 
   const [photos, setPhotos] = useState<PhotoArchiveItem[]>(() => {
-    const saved = localStorage.getItem('revirfc_photos_v1');
+    try {
+      localStorage.removeItem('revirfc_photos_v1');
+    } catch {}
+    const saved = localStorage.getItem('revirfc_photos_v2');
     return saved ? JSON.parse(saved) : MOCK_PHOTOS;
   });
 
   const [debts, setDebts] = useState<DessertDebt[]>(() => {
-    const saved = localStorage.getItem('revirfc_debts_v1');
+    try {
+      localStorage.removeItem('revirfc_debts_v1');
+    } catch {}
+    const saved = localStorage.getItem('revirfc_debts_v2');
     return saved ? JSON.parse(saved) : MOCK_DEBTS;
   });
 
@@ -102,18 +129,18 @@ function MainApp() {
     const url = new URL(window.location.href);
     const param = url.searchParams.get('kurul');
     if (param) return param;
-    return currentUser?.displayName?.split(' ')[0] || 'Mert';
+    return currentUser?.displayName?.split(' ')[0] || 'Alper';
   });
 
   const [scoutingView, setScoutingView] = useState<'wizard' | 'dashboard'>('wizard');
 
   const [savedScoutingEntries, setSavedScoutingEntries] = useState<PlayerScoutingEntry[]>(() => {
-    const saved = localStorage.getItem('revirfc_scouting_v1');
+    const saved = localStorage.getItem('revirfc_scouting_v2');
     return saved ? JSON.parse(saved) : [];
   });
 
   useEffect(() => {
-    localStorage.setItem('revirfc_scouting_v1', JSON.stringify(savedScoutingEntries));
+    localStorage.setItem('revirfc_scouting_v2', JSON.stringify(savedScoutingEntries));
   }, [savedScoutingEntries]);
 
   // Modals state
@@ -134,23 +161,23 @@ function MainApp() {
 
   // Sync state to LocalStorage
   useEffect(() => {
-    localStorage.setItem('revirfc_players_v1', JSON.stringify(players));
+    localStorage.setItem('revirfc_players_v2', JSON.stringify(players));
   }, [players]);
 
   useEffect(() => {
-    localStorage.setItem('revirfc_match_v1', JSON.stringify(match));
+    localStorage.setItem('revirfc_match_v2', JSON.stringify(match));
   }, [match]);
 
   useEffect(() => {
-    localStorage.setItem('revirfc_posts_v1', JSON.stringify(posts));
+    localStorage.setItem('revirfc_posts_v2', JSON.stringify(posts));
   }, [posts]);
 
   useEffect(() => {
-    localStorage.setItem('revirfc_photos_v1', JSON.stringify(photos));
+    localStorage.setItem('revirfc_photos_v2', JSON.stringify(photos));
   }, [photos]);
 
   useEffect(() => {
-    localStorage.setItem('revirfc_debts_v1', JSON.stringify(debts));
+    localStorage.setItem('revirfc_debts_v2', JSON.stringify(debts));
   }, [debts]);
 
   // Current logged in member's claimed player
