@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Player, PlayStyle, PreferredPosition } from '../../types';
+import { Player, PlayStyle, PreferredPosition, CardTheme } from '../../types';
 import { FCCard } from './FCCard';
 import { PLAYSTYLE_CONFIG } from './PlayStyleBadge';
+import { removeImageBackground } from '../../services/backgroundRemoval';
 import imageCompression from 'browser-image-compression';
 import {
   Upload,
@@ -11,6 +12,7 @@ import {
   ZoomIn,
   ZoomOut,
   RotateCcw,
+  Wand2,
 } from 'lucide-react';
 
 interface Props {
@@ -23,6 +25,8 @@ interface Props {
 export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdmin = false }) => {
   const [editedPlayer, setEditedPlayer] = useState<Player>({ ...player });
   const [isCompressing, setIsCompressing] = useState(false);
+  const [isRemovingBg, setIsRemovingBg] = useState(false);
+  const [removalProgress, setRemovalProgress] = useState(0);
 
   const [adjustments, setAdjustments] = useState({
     x: player.photoAdjustments?.x ?? 0,
@@ -192,6 +196,26 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
     }
   };
 
+  const handleRemoveBackground = async () => {
+    if (!editedPlayer.photoUrl) return;
+    try {
+      setIsRemovingBg(true);
+      setRemovalProgress(15);
+      const cutout = await removeImageBackground(editedPlayer.photoUrl, {
+        onProgress: (_step, pct) => {
+          setRemovalProgress(pct);
+        },
+      });
+      setEditedPlayer((prev) => ({ ...prev, photoUrl: cutout }));
+    } catch (err) {
+      console.error('AI background removal error:', err);
+      alert('Arka plan silme işlemi bu görselde tamamlanamadı. Lütfen doğrudan fotoğrafınızı kart üzerinde kadrajlayarak kullanın.');
+    } finally {
+      setIsRemovingBg(false);
+      setRemovalProgress(0);
+    }
+  };
+
   const togglePlayStyle = (style: PlayStyle) => {
     setEditedPlayer((prev) => {
       const exists = prev.playstyles.includes(style);
@@ -290,18 +314,41 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
                 </button>
               </div>
 
-              {/* Photo Upload Button under the card */}
-              <label className="w-full cursor-pointer bg-neutral-800 hover:bg-neutral-750 border border-neutral-700 text-amber-400 font-bold text-xs py-2 px-3 rounded-lg flex items-center justify-center gap-2 transition-colors">
-                <Upload className="w-3.5 h-3.5" />
-                {isCompressing ? 'Sıkıştırılıyor...' : 'Galeriden / Kameradan Fotoğraf Seç'}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handlePhotoUpload}
-                  className="hidden"
-                  disabled={isCompressing}
-                />
-              </label>
+              {/* Photo Upload & AI Dekupe Buttons */}
+              <div className="grid grid-cols-2 gap-2">
+                <label className="cursor-pointer bg-neutral-800 hover:bg-neutral-750 border border-neutral-700 text-amber-400 font-bold text-xs py-2 px-2.5 rounded-lg flex items-center justify-center gap-1.5 transition-colors text-center">
+                  <Upload className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">{isCompressing ? 'Sıkıştırılıyor...' : 'Fotoğraf Seç'}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoUpload}
+                    className="hidden"
+                    disabled={isCompressing || isRemovingBg}
+                  />
+                </label>
+
+                <button
+                  type="button"
+                  onClick={handleRemoveBackground}
+                  disabled={isRemovingBg || isCompressing}
+                  className="bg-gradient-to-r from-purple-900/60 to-indigo-900/60 hover:from-purple-800/80 hover:to-indigo-800/80 border border-purple-500/40 text-purple-200 font-bold text-xs py-2 px-2.5 rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-center disabled:opacity-50"
+                  title="Yapay zeka ile fotoğrafın arka planını otomatik temizler ve dekupe eder"
+                >
+                  {isRemovingBg ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-purple-300" />
+                      <span className="text-[11px] truncate">%{removalProgress} Siliniyor</span>
+                    </>
+                  ) : (
+                    <>
+                      <Wand2 className="w-3.5 h-3.5 text-purple-300 shrink-0" />
+                      <span className="truncate">AI Dekupe (Sil)</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
               {isCompressing && (
                 <div className="flex items-center justify-center gap-1.5 text-xs text-amber-400">
                   <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Fotoğraf WebP olarak optimize ediliyor...
@@ -314,8 +361,51 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
             </div>
           </div>
 
-          {/* Right: Clean form controls (NO separate cropper panel) */}
+          {/* Right: Clean form controls */}
           <div className="md:col-span-7 space-y-3.5">
+            {/* Card Theme Picker (5+1 Tematik Seviye) */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-bold text-neutral-300">
+                  Kart Tipi & Teması (5+1 Seviye)
+                </label>
+                <span className="text-[10px] text-amber-400 font-mono font-bold">
+                  {editedPlayer.theme ? editedPlayer.theme.toUpperCase() : 'GOLD'}
+                </span>
+              </div>
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
+                {[
+                  { id: 'gold' as CardTheme, label: 'Altın', icon: '🟡', desc: 'Standart (OVR 75+)' },
+                  { id: 'totw' as CardTheme, label: 'TOTW', icon: '⚫', desc: 'Haftanın MVP’si' },
+                  { id: 'inform' as CardTheme, label: 'In-Form', icon: '🔥', desc: 'Formda / Alevli' },
+                  { id: 'revir' as CardTheme, label: 'Revir', icon: '🩹', desc: 'Bandajlı Sakat' },
+                  { id: 'legend' as CardTheme, label: 'Efsane', icon: '👑', desc: 'İsmail & Gölcür Abi', locked: editedPlayer.id !== 'p4' && editedPlayer.id !== 'p9' && !isAdmin },
+                  { id: 'bidon' as CardTheme, label: 'Bidon', icon: '🛢️', desc: 'Günün Ceza Kartı' },
+                ].map((item) => {
+                  const isSelected = (editedPlayer.theme || 'gold') === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      disabled={item.locked}
+                      onClick={() => setEditedPlayer({ ...editedPlayer, theme: item.id })}
+                      className={`p-1.5 rounded-lg border text-center transition-all cursor-pointer ${
+                        isSelected
+                          ? 'bg-amber-500 text-black font-black border-amber-400 shadow-md'
+                          : item.locked
+                          ? 'bg-neutral-900/40 text-neutral-600 border-neutral-850 cursor-not-allowed opacity-40'
+                          : 'bg-neutral-800/80 text-neutral-300 border-neutral-700 hover:border-neutral-500'
+                      }`}
+                      title={item.desc}
+                    >
+                      <span className="text-sm block">{item.icon}</span>
+                      <span className="text-[10px] font-bold block truncate">{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* Nickname & Position */}
             <div className="grid grid-cols-2 gap-3">
               <div>

@@ -12,7 +12,7 @@ export interface UserProfile {
   createdAt: string;
 }
 
-export type CardTheme = 'gold' | 'totw' | 'inform' | 'revir';
+export type CardTheme = 'gold' | 'totw' | 'inform' | 'revir' | 'legend' | 'bidon';
 
 export type PhysicalStatus = 'full' | 'light_injury' | 'tired' | 'extra_fit';
 

@@ -84,8 +84,7 @@ export const TacticalPitch: React.FC<Props> = ({
               }}
               className="w-full h-full object-cover"
               onError={(e) => {
-                (e.target as HTMLImageElement).src =
-                  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80';
+                (e.target as HTMLImageElement).src = '/players/alper.jpg';
               }}
             />
             {isInjured && (

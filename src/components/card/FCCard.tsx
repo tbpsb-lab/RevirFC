@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Player, CardTheme, PlayerStats } from '../../types';
-import { PlayStyleBadge } from './PlayStyleBadge';
-import { Bandage, TrendingUp, TrendingDown, Minus, Crown, Flame } from 'lucide-react';
+import { PLAYSTYLE_CONFIG } from './PlayStyleBadge';
+import { Download } from 'lucide-react';
+import { toPng } from 'html-to-image';
 
 interface Props {
   player: Player;
@@ -15,6 +16,7 @@ interface Props {
   onPhotoMouseDown?: (e: React.MouseEvent) => void;
   onPhotoTouchStart?: (e: React.TouchEvent) => void;
   onPhotoWheel?: (e: React.WheelEvent) => void;
+  showDownloadButton?: boolean;
 }
 
 export const FCCard: React.FC<Props> = ({
@@ -29,24 +31,27 @@ export const FCCard: React.FC<Props> = ({
   onPhotoMouseDown,
   onPhotoTouchStart,
   onPhotoWheel,
+  showDownloadButton = true,
 }) => {
   const [rotate, setRotate] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const cardElementRef = useRef<HTMLDivElement>(null);
 
   const stats = overrideStats || player.stats;
   const ovr = overrideOVR !== undefined ? overrideOVR : player.currentOVR;
-  const theme: CardTheme = player.theme;
+  const theme: CardTheme = player.theme || 'gold';
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!interactive) return;
+    if (!interactive || photoInteractive) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
 
-    const rotX = ((y - centerY) / centerY) * -12;
-    const rotY = ((x - centerX) / centerX) * 12;
+    const rotX = ((y - centerY) / centerY) * -10;
+    const rotY = ((x - centerX) / centerX) * 10;
 
     setRotate({ x: rotX, y: rotY });
   };
@@ -56,279 +61,350 @@ export const FCCard: React.FC<Props> = ({
     setIsHovered(false);
   };
 
-  // Card theme styling
-  const getThemeStyles = () => {
+  const handleDownloadCard = async () => {
+    if (!cardElementRef.current) return;
+    try {
+      setIsDownloading(true);
+      const dataUrl = await toPng(cardElementRef.current, {
+        quality: 1.0,
+        pixelRatio: 3,
+        cacheBust: true,
+      });
+      const link = document.createElement('a');
+      link.download = `RevirFC_${player.name}_${theme}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error('Card export failed:', err);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  // 5+1 Card Theme Configurations
+  const getThemeConfig = () => {
     switch (theme) {
       case 'totw':
         return {
-          wrapper: 'from-amber-400/80 via-black to-amber-600/60 shadow-amber-500/20 border-amber-400/50',
-          bg: 'bg-gradient-to-b from-neutral-900 via-neutral-950 to-black text-amber-100',
-          ovrText: 'text-amber-300 drop-shadow-[0_2px_4px_rgba(245,158,11,0.5)]',
-          badgeText: 'text-amber-400',
-          accent: 'border-amber-500/40 bg-amber-500/10',
-          shimmer: 'from-amber-200/20 to-transparent',
+          template: '/cards/card_totw.jpg',
+          ovrColor: 'text-[#FDE68A]',
+          nameColor: 'text-white',
+          nicknameColor: 'text-[#FBBF24]',
+          statValColor: 'text-[#FDE68A]',
+          nameTop: 'top-[56%]',
+          nicknameTop: 'top-[60.5%]',
+          statValTop: 'top-[78.8%]',
+          isGold: false,
           label: 'TOTW • MVP',
         };
       case 'inform':
         return {
-          wrapper: 'from-orange-500/90 via-red-950 to-amber-500/80 shadow-orange-500/30 border-orange-500/60',
-          bg: 'bg-gradient-to-b from-orange-950 via-neutral-950 to-neutral-900 text-orange-100',
-          ovrText: 'text-orange-400 drop-shadow-[0_2px_6px_rgba(249,115,22,0.6)]',
-          badgeText: 'text-orange-300',
-          accent: 'border-orange-500/40 bg-orange-500/15',
-          shimmer: 'from-orange-300/25 to-transparent',
+          template: '/cards/card_inform.jpg',
+          ovrColor: 'text-[#FED7AA]',
+          nameColor: 'text-white',
+          nicknameColor: 'text-[#F97316]',
+          statValColor: 'text-[#FED7AA]',
+          nameTop: 'top-[56%]',
+          nicknameTop: 'top-[60.5%]',
+          statValTop: 'top-[78.8%]',
+          isGold: false,
           label: 'IN-FORM 🔥',
         };
       case 'revir':
         return {
-          wrapper: 'from-rose-600/80 via-neutral-900 to-red-800/60 shadow-rose-600/30 border-rose-500/50',
-          bg: 'bg-gradient-to-b from-rose-950/90 via-neutral-900 to-neutral-950 text-rose-100',
-          ovrText: 'text-rose-400 drop-shadow-[0_2px_4px_rgba(244,63,94,0.5)]',
-          badgeText: 'text-rose-300',
-          accent: 'border-rose-500/40 bg-rose-500/10',
-          shimmer: 'from-rose-300/20 to-transparent',
+          template: '/cards/card_revir.jpg',
+          ovrColor: 'text-[#BAE6FD]',
+          nameColor: 'text-white',
+          nicknameColor: 'text-[#38BDF8]',
+          statValColor: 'text-[#BAE6FD]',
+          nameTop: 'top-[56%]',
+          nicknameTop: 'top-[60.5%]',
+          statValTop: 'top-[78.8%]',
+          isGold: false,
           label: 'REVİR RAPORLU 🩹',
+        };
+      case 'legend':
+        return {
+          template: '/cards/card_legend.jpg',
+          ovrColor: 'text-[#854D0E]',
+          nameColor: 'text-[#1E293B]',
+          nicknameColor: 'text-[#B45309]',
+          statValColor: 'text-[#854D0E]',
+          nameTop: 'top-[58%]',
+          nicknameTop: 'top-[62.5%]',
+          statValTop: 'top-[78.8%]',
+          isGold: false,
+          label: 'EFSANE • ICON 👑',
+        };
+      case 'bidon':
+        return {
+          template: '/cards/card_bidon.jpg',
+          ovrColor: 'text-[#EA580C]',
+          nameColor: 'text-[#292524]',
+          nicknameColor: 'text-[#78350F]',
+          statValColor: 'text-[#78350F]',
+          nameTop: 'top-[56%]',
+          nicknameTop: 'top-[60.5%]',
+          statValTop: 'top-[78.8%]',
+          isGold: false,
+          label: 'GÜNÜN BİDONU 🛢️',
         };
       case 'gold':
       default:
         return {
-          wrapper: 'from-yellow-400 via-amber-600 to-yellow-600 shadow-yellow-500/20 border-yellow-300/60',
-          bg: 'bg-gradient-to-b from-yellow-950/70 via-neutral-900 to-black text-amber-50',
-          ovrText: 'text-yellow-300 drop-shadow-[0_2px_4px_rgba(234,179,8,0.5)]',
-          badgeText: 'text-yellow-400',
-          accent: 'border-yellow-500/30 bg-yellow-500/10',
-          shimmer: 'from-yellow-200/20 to-transparent',
+          template: '/cards/card_gold.jpg',
+          ovrColor: 'text-[#E6C280]',
+          nameColor: 'text-white',
+          nicknameColor: 'text-[#E6C280]',
+          statValColor: 'text-[#E6C280]',
+          nameTop: 'top-[57.5%]',
+          nicknameTop: 'top-[62.8%]',
+          statValTop: 'top-[75.8%]',
+          isGold: true,
           label: 'GOLD RARE',
         };
     }
   };
 
-  const themeStyle = getThemeStyles();
+  const themeConfig = getThemeConfig();
 
-  // Size configurations
+  // Size configurations proportional to 764x1024
   const sizeConfig = {
     sm: {
-      width: 'w-40',
-      height: 'h-60',
+      width: 'w-44',
+      height: 'h-[235px]',
       ovrText: 'text-2xl',
-      posText: 'text-xs',
-      photoSize: 'w-20 h-24',
+      posText: 'text-[9px]',
+      numberText: 'text-[8px]',
       nameText: 'text-xs',
-      statLabel: 'text-[8px]',
-      statVal: 'text-[10px]',
-      padding: 'p-2',
+      nicknameText: 'text-[9px]',
+      statVal: 'text-[9px]',
+      flagSize: 'w-3.5 h-2.5',
+      logoSize: 'w-3.5 h-3.5',
     },
     md: {
-      width: 'w-64',
-      height: 'h-96',
+      width: 'w-68',
+      height: 'h-[362px]',
       ovrText: 'text-4xl',
-      posText: 'text-sm font-bold',
-      photoSize: 'w-32 h-36',
-      nameText: 'text-base font-extrabold',
-      statLabel: 'text-[10px]',
-      statVal: 'text-sm font-bold',
-      padding: 'p-3.5',
+      posText: 'text-xs font-black',
+      numberText: 'text-[10px]',
+      nameText: 'text-base font-black',
+      nicknameText: 'text-xs font-bold',
+      statVal: 'text-sm font-black',
+      flagSize: 'w-5 h-3.5',
+      logoSize: 'w-5 h-5',
     },
     lg: {
-      width: 'w-80',
-      height: 'h-[460px]',
+      width: 'w-84',
+      height: 'h-[448px]',
       ovrText: 'text-5xl',
-      posText: 'text-base font-black',
-      photoSize: 'w-44 h-48',
-      nameText: 'text-lg font-black',
-      statLabel: 'text-xs',
+      posText: 'text-sm font-black',
+      numberText: 'text-xs',
+      nameText: 'text-xl font-black',
+      nicknameText: 'text-sm font-bold',
       statVal: 'text-base font-black',
-      padding: 'p-4',
+      flagSize: 'w-6 h-4',
+      logoSize: 'w-6 h-6',
     },
   }[size];
 
   return (
     <div
-      style={{
-        perspective: '1000px',
-      }}
-      className={`relative inline-block transition-transform duration-150 ${sizeConfig.width} select-none`}
+      style={{ perspective: '1000px' }}
+      className={`relative inline-block ${sizeConfig.width} select-none group`}
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
       onClick={onClick}
     >
+      {/* 3D Tilting Card Container */}
       <div
+        ref={cardElementRef}
         style={{
-          transform: `rotateX(${rotate.x}deg) rotateY(${rotate.y}deg)`,
-          transition: isHovered ? 'none' : 'transform 0.4s ease-out',
+          transform: !photoInteractive ? `rotateX(${rotate.x}deg) rotateY(${rotate.y}deg)` : undefined,
+          transition: isHovered && !photoInteractive ? 'none' : 'transform 0.3s ease-out',
         }}
-        className={`relative ${sizeConfig.height} rounded-2xl p-[2px] bg-gradient-to-b ${themeStyle.wrapper} shadow-2xl transition-shadow ${
-          isHovered ? 'shadow-amber-500/30' : ''
-        } cursor-pointer group`}
+        className={`relative ${sizeConfig.height} w-full rounded-2xl overflow-hidden shadow-2xl ${
+          isHovered ? 'shadow-amber-500/25' : ''
+        } cursor-pointer`}
       >
-        {/* Inner Card Cardboard */}
-        <div className={`w-full h-full rounded-[14px] ${themeStyle.bg} ${sizeConfig.padding} flex flex-col justify-between relative overflow-hidden`}>
-          {/* Holographic light sheen reflection */}
+        {/* KATMAN 1: ARKA TABLA & ŞABLON (Template Graphics) */}
+        <img
+          src={themeConfig.template}
+          alt={themeConfig.label}
+          className="absolute inset-0 w-full h-full object-fill pointer-events-none select-none z-0"
+        />
+
+        {/* KATMAN 2: OYUNCU FOTOĞRAFI (Cutout / Photo with Transform) */}
+        <div
+          className="absolute top-[12%] left-[16%] right-[10%] h-[47%] flex items-center justify-center z-10 overflow-hidden"
+          style={{
+            maskImage: 'linear-gradient(to bottom, black 72%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, black 72%, transparent 100%)',
+          }}
+        >
           <div
-            className={`absolute inset-0 bg-gradient-to-tr ${themeStyle.shimmer} opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-300 mix-blend-overlay`}
-          />
+            onMouseDown={photoInteractive ? onPhotoMouseDown : undefined}
+            onTouchStart={photoInteractive ? onPhotoTouchStart : undefined}
+            onWheel={photoInteractive ? onPhotoWheel : undefined}
+            className={`w-full h-full flex items-center justify-center ${
+              photoInteractive ? 'cursor-grab active:cursor-grabbing touch-none ring-2 ring-amber-400 rounded-xl' : ''
+            }`}
+            title={photoInteractive ? 'Fotoğrafı sürükleyin veya fare tekerleğiyle yakınlaştırın' : undefined}
+          >
+            <img
+              src={player.photoUrl}
+              alt={player.name}
+              style={{
+                transform: player.photoAdjustments
+                  ? `translate(${player.photoAdjustments.x * 1.5}%, ${player.photoAdjustments.y * 1.5}%) scale(${player.photoAdjustments.scale})`
+                  : undefined,
+                transformOrigin: 'center center',
+              }}
+              className="max-h-full object-contain pointer-events-none select-none transition-transform duration-75"
+              draggable={false}
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '/players/alper.jpg';
+              }}
+            />
 
-          {/* Top Banner: Club & Card Theme */}
-          <div className="flex items-center justify-between z-10">
-            <span className="text-[10px] tracking-wider uppercase font-black px-2 py-0.5 rounded-full bg-black/40 border border-white/10 backdrop-blur-sm flex items-center gap-1.5">
-              <img
-                src="/logo.jpg"
-                alt="RFC"
-                className="w-3.5 h-3.5 rounded-full object-cover border border-amber-400/50"
-              />
-              REVIR FC • 27
-            </span>
-            <div className="flex items-center gap-1">
-              {theme === 'totw' && <Crown className="w-3.5 h-3.5 text-amber-400 animate-pulse" />}
-              {theme === 'inform' && <Flame className="w-3.5 h-3.5 text-orange-400 animate-bounce" />}
-              {theme === 'revir' && <Bandage className="w-3.5 h-3.5 text-rose-400" />}
-              <span className={`text-[9px] font-bold tracking-tight uppercase ${themeStyle.badgeText}`}>
-                {themeStyle.label}
+            {/* Interactive Mode Guide Indicator */}
+            {photoInteractive && (
+              <span className="absolute bottom-1 bg-black/85 text-[8px] text-amber-300 font-bold px-1.5 py-0.5 rounded border border-amber-400/40 pointer-events-none">
+                ✋ Sürükle / Zoom
               </span>
-            </div>
+            )}
           </div>
+        </div>
 
-          {/* Top Info + Photo Section */}
-          <div className="flex items-start justify-between mt-1 z-10">
-            {/* OVR + Position + Form indicator */}
-            <div className="flex flex-col items-center">
-              <span className={`font-black tracking-tighter ${sizeConfig.ovrText} ${themeStyle.ovrText} leading-none`}>
-                {ovr}
-              </span>
-              <span className={`tracking-widest uppercase ${sizeConfig.posText} text-white/90 font-bold mt-0.5`}>
-                {player.position}
-              </span>
-              <div className="w-5 h-0.5 bg-white/20 my-1 rounded" />
-              <span className="text-[11px] font-mono text-white/60">#{player.number}</span>
+        {/* KATMAN 3: HOLOGRAFİK IŞIK PARLAMASI (Shimmer on Hover) */}
+        <div
+          className="absolute inset-0 bg-gradient-to-tr from-amber-200/10 via-white/5 to-transparent opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-300 mix-blend-overlay z-15"
+        />
 
-              {/* Form Trend */}
-              <div className="mt-1" title={`Form Trendi: ${player.formTrend}`}>
-                {player.formTrend === 'up' && (
-                  <span className="inline-flex items-center text-emerald-400 bg-emerald-950/70 border border-emerald-500/30 rounded px-1 py-0.5 text-[9px]">
-                    <TrendingUp className="w-2.5 h-2.5 mr-0.5" /> +Form
-                  </span>
-                )}
-                {player.formTrend === 'down' && (
-                  <span className="inline-flex items-center text-rose-400 bg-rose-950/70 border border-rose-500/30 rounded px-1 py-0.5 text-[9px]">
-                    <TrendingDown className="w-2.5 h-2.5 mr-0.5" /> -Form
-                  </span>
-                )}
-                {player.formTrend === 'stable' && (
-                  <span className="inline-flex items-center text-zinc-400 bg-zinc-900/60 rounded px-1 py-0.5 text-[9px]">
-                    <Minus className="w-2.5 h-2.5" />
-                  </span>
-                )}
+        {/* KATMAN 4: ÜST METİN & CANLI VERİLER (HTML/CSS Absolute Layers) */}
+
+        {/* Sol Üst Bilgi Bloğu: OVR + Mevki + Numara + Bayrak + Revir Logosu */}
+        <div className="absolute top-[13%] left-[9.5%] flex flex-col items-center z-20 pointer-events-none select-none">
+          {/* OVR */}
+          <span className={`font-black tracking-tighter leading-none ${themeConfig.ovrColor} ${sizeConfig.ovrText} drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]`}>
+            {ovr}
+          </span>
+          {/* Mevki */}
+          <span className={`tracking-wider uppercase text-white/90 mt-0.5 ${sizeConfig.posText} drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]`}>
+            {player.position}
+          </span>
+          {/* Forma Numarası */}
+          <span className={`font-mono text-white/60 font-bold ${sizeConfig.numberText}`}>
+            #{player.number}
+          </span>
+          {/* Ayraç */}
+          <div className="w-4 h-[1.5px] bg-white/30 my-1 rounded-full" />
+          {/* Türk Bayrağı */}
+          <div className={`${sizeConfig.flagSize} rounded-[2px] overflow-hidden border border-white/30 shadow-xs flex items-center justify-center bg-red-600 my-0.5`}>
+            <span className="text-[10px] leading-none">🇹🇷</span>
+          </div>
+          {/* Kulüp Logosu */}
+          <img
+            src="/logo.jpg"
+            alt="Revir FC"
+            className={`${sizeConfig.logoSize} rounded-full object-cover border border-amber-400/50 shadow-md shadow-amber-500/20 mt-0.5`}
+          />
+        </div>
+
+        {/* Altın Kart İçin Sağ Üst Arması (Eğer template üzerinde yoksa) */}
+        {themeConfig.isGold && (
+          <div className="absolute top-[13%] right-[10%] z-20 pointer-events-none select-none opacity-90">
+            <div className="w-6 h-7 rounded-t-sm rounded-b-md bg-gradient-to-b from-amber-300 via-amber-500 to-amber-700 p-[1.5px] shadow-md shadow-amber-500/30">
+              <div className="w-full h-full bg-black/60 rounded-b-sm flex items-center justify-center text-[10px]">
+                ⚽
               </div>
             </div>
+          </div>
+        )}
 
-            {/* Player Photo with authentic FC cutout styling */}
-            <div className="relative flex-1 flex justify-center items-end">
-              <div
-                onMouseDown={photoInteractive ? onPhotoMouseDown : undefined}
-                onTouchStart={photoInteractive ? onPhotoTouchStart : undefined}
-                onWheel={photoInteractive ? onPhotoWheel : undefined}
-                className={`relative ${sizeConfig.photoSize} overflow-hidden rounded-xl border border-white/10 shadow-lg ${
-                  photoInteractive
-                    ? 'cursor-grab active:cursor-grabbing ring-2 ring-amber-400 shadow-amber-500/40 touch-none group/photo'
-                    : ''
-                }`}
-                title={photoInteractive ? 'Fotoğrafı farenizle veya parmağınızla sürükleyin, tekerlekle büyütün' : undefined}
-              >
-                <img
-                  src={player.photoUrl}
-                  alt={player.name}
-                  style={{
-                    transform: player.photoAdjustments
-                      ? `scale(${player.photoAdjustments.scale}) translate(${player.photoAdjustments.x}%, ${player.photoAdjustments.y}%)`
-                      : undefined,
-                    transformOrigin: 'center center',
-                  }}
-                  className="w-full h-full object-cover object-top transition-transform duration-75 pointer-events-none select-none"
-                  draggable={false}
-                  onError={(e) => {
-                    // Fallback avatar
-                    (e.target as HTMLImageElement).src =
-                      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80';
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+        {/* Oyuncu Adı ve Halı Saha Lakabı */}
+        <div
+          className={`absolute left-[10%] right-[10%] ${themeConfig.nameTop} flex flex-col items-center justify-center text-center z-20 pointer-events-none`}
+        >
+          <h3 className={`font-black uppercase tracking-wide ${themeConfig.nameColor} ${sizeConfig.nameText} drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] truncate w-full`}>
+            {player.name}
+          </h3>
+          <span className={`italic font-bold ${themeConfig.nicknameColor} ${sizeConfig.nicknameText} drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] -mt-0.5 truncate`}>
+            "{player.nickname}"
+          </span>
+        </div>
 
-                {photoInteractive && (
-                  <div className="absolute inset-0 pointer-events-none border border-amber-400/40 rounded-xl flex items-center justify-center">
-                    <div className="w-full h-full grid grid-cols-2 grid-rows-2">
-                      <div className="border-r border-b border-amber-400/20" />
-                      <div className="border-b border-amber-400/20" />
-                      <div className="border-r border-amber-400/20" />
-                      <div />
-                    </div>
-                    <span className="absolute bottom-1 bg-black/85 text-[8px] text-amber-300 font-bold px-1.5 py-0.5 rounded border border-amber-400/30 font-mono tracking-tight shadow">
-                      ✋ Sürükle / Zoom
+        {/* PlayStyles Rozetleri */}
+        {showBadges && (
+          <>
+            {themeConfig.isGold ? (
+              /* Altın Kart: Alt Orta Hap (Pill) Rozeti */
+              <div className="absolute bottom-[3.5%] left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+                {player.playstyles.length > 0 && (
+                  <div className="bg-[#0b2927]/95 border border-[#2dd4bf]/70 rounded-full px-2.5 py-0.5 flex items-center gap-1.5 shadow-lg shadow-[#042f2e]/60">
+                    <span className="text-[11px]">❄️</span>
+                    <span className="text-[9px] font-bold text-[#5eead4] whitespace-nowrap tracking-tight">
+                      {PLAYSTYLE_CONFIG[player.playstyles[0]]?.label || 'Soğukkanlı Bitirici'}
                     </span>
                   </div>
                 )}
               </div>
-            </div>
-          </div>
+            ) : (
+              /* Diğer Kartlar: 2 Oval Rozet Yuvası */
+              <div className="absolute top-[65.2%] left-[30%] right-[30%] flex justify-between items-center z-20 pointer-events-none">
+                {player.playstyles.slice(0, 2).map((ps, idx) => (
+                  <div
+                    key={idx}
+                    className="w-10 h-6 rounded-full flex items-center justify-center bg-black/50 backdrop-blur-xs border border-amber-400/40 text-[10px] font-bold shadow-sm"
+                    title={PLAYSTYLE_CONFIG[ps]?.label}
+                  >
+                    <span className="text-[11px] leading-none">
+                      {idx === 0 ? '⚡' : '🔥'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
 
-          {/* Player Name and Nickname */}
-          <div className="text-center z-10 my-1">
-            <h3 className={`uppercase tracking-tight text-white ${sizeConfig.nameText} truncate drop-shadow-md`}>
-              {player.name}
-            </h3>
-            <p className="text-[10px] text-amber-300/80 italic font-medium truncate">
-              "{player.nickname}"
-            </p>
-          </div>
-
-          {/* 6 Core FC 27 Halı Saha Stats Grid */}
-          <div className="grid grid-cols-6 gap-0.5 bg-black/40 backdrop-blur-md rounded-xl p-1.5 border border-white/10 z-10 text-center">
-            <div className="flex flex-col">
-              <span className={`font-mono ${sizeConfig.statVal} text-white`}>{stats.pac}</span>
-              <span className={`text-white/50 font-bold ${sizeConfig.statLabel}`}>PAC</span>
-            </div>
-            <div className="flex flex-col">
-              <span className={`font-mono ${sizeConfig.statVal} text-white`}>{stats.sho}</span>
-              <span className={`text-white/50 font-bold ${sizeConfig.statLabel}`}>SHO</span>
-            </div>
-            <div className="flex flex-col">
-              <span className={`font-mono ${sizeConfig.statVal} text-white`}>{stats.pas}</span>
-              <span className={`text-white/50 font-bold ${sizeConfig.statLabel}`}>PAS</span>
-            </div>
-            <div className="flex flex-col">
-              <span className={`font-mono ${sizeConfig.statVal} text-white`}>{stats.dri}</span>
-              <span className={`text-white/50 font-bold ${sizeConfig.statLabel}`}>DRI</span>
-            </div>
-            <div className="flex flex-col">
-              <span className={`font-mono ${sizeConfig.statVal} text-white`}>{stats.def}</span>
-              <span className={`text-white/50 font-bold ${sizeConfig.statLabel}`}>DEF</span>
-            </div>
-            <div className="flex flex-col">
-              <span className={`font-mono ${sizeConfig.statVal} text-white`}>{stats.phy}</span>
-              <span className={`text-white/50 font-bold ${sizeConfig.statLabel}`}>PHY</span>
-            </div>
-          </div>
-
-          {/* PlayStyles Badges (if enabled and space permits) */}
-          {showBadges && size !== 'sm' && player.playstyles.length > 0 && (
-            <div className="flex items-center justify-center gap-1 mt-1 z-10 flex-wrap">
-              {player.playstyles.slice(0, 2).map((ps) => (
-                <PlayStyleBadge key={ps} styleName={ps} size="sm" />
-              ))}
-            </div>
-          )}
-
-          {/* Ego / Modesty Indicator (if notable) */}
-          {size === 'lg' && (
-            <div className="mt-2 text-center text-[10px] bg-black/60 rounded p-1 border border-white/5">
-              <span className="text-white/60">Öz Algı Farkı: </span>
-              <span className={player.egoIndex > 1.0 ? 'text-rose-400 font-bold' : player.egoIndex < -0.8 ? 'text-emerald-400 font-bold' : 'text-zinc-300'}>
-                {player.egoIndex > 0 ? `+${player.egoIndex}` : player.egoIndex} ({player.egoIndex > 1.0 ? 'Özgüven Patlaması 🚀' : player.egoIndex < -0.8 ? 'Gizli Kahraman 🛡️' : 'Dengeli ⚖️'})
+        {/* 6 Temel Saha İstatistiği (HIZ ŞUT PAS DRİ SAV FİZ) */}
+        <div
+          className={`absolute left-[7.5%] right-[7.5%] ${themeConfig.statValTop} flex items-center justify-between text-center pointer-events-none z-20`}
+        >
+          {[
+            { val: stats.pac },
+            { val: stats.sho },
+            { val: stats.pas },
+            { val: stats.dri },
+            { val: stats.def },
+            { val: stats.phy },
+          ].map((item, idx) => (
+            <div key={idx} className="w-[16.66%] flex justify-center">
+              <span className={`font-black font-mono tracking-tight ${themeConfig.statValColor} ${sizeConfig.statVal} drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]`}>
+                {item.val}
               </span>
             </div>
-          )}
+          ))}
         </div>
       </div>
+
+      {/* WhatsApp / Instagram İndirme Butonu (Hover'da Çıkar) */}
+      {showDownloadButton && !photoInteractive && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleDownloadCard();
+          }}
+          disabled={isDownloading}
+          className="absolute -bottom-7 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-neutral-900/90 hover:bg-neutral-800 text-amber-400 border border-amber-400/40 text-[10px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-lg cursor-pointer whitespace-nowrap z-30"
+          title="WhatsApp ve Instagram için HD PNG İndir"
+        >
+          <Download className="w-3 h-3" />
+          {isDownloading ? 'İndiriliyor...' : 'Kartı İndir (PNG)'}
+        </button>
+      )}
     </div>
   );
 };

@@ -44,20 +44,49 @@ import { ReminderHubModal } from './components/reminder/ReminderHubModal';
 function MainApp() {
   const { currentUser, allUsers, approveUser, rejectUser } = useAuth();
 
-  // Local state persisted in localStorage (version 2 for real 22 players)
+  // Local state persisted in localStorage (version 3 with 5+1 themes, İsmail Abi & Gölcür Abi Legend)
   const [players, setPlayers] = useState<Player[]>(() => {
     try {
       localStorage.removeItem('revirfc_players_v1');
     } catch {}
 
-    const saved = localStorage.getItem('revirfc_players_v2');
+    const saved = localStorage.getItem('revirfc_players_v3') || localStorage.getItem('revirfc_players_v2');
     if (!saved) return INITIAL_PLAYERS;
     try {
-      const parsed: Player[] = JSON.parse(saved);
+      let parsed: Player[] = JSON.parse(saved);
       // If old dummy players exist in storage, purge and reload real 22 players
       if (parsed.some((p) => p.name === 'Mert Kayra' || p.name === 'Burak Demir')) {
         return INITIAL_PLAYERS;
       }
+      // Guarantee İsmail Abi & Gölcür Abi are updated to Legend
+      parsed = parsed.map((p) => {
+        if (p.id === 'p4') {
+          return {
+            ...p,
+            name: 'İsmail Abi',
+            theme: 'legend',
+            baseOVR: 88,
+            currentOVR: Math.max(p.currentOVR, 88),
+          };
+        }
+        if (p.id === 'p9') {
+          return {
+            ...p,
+            name: 'Gölcür Abi',
+            theme: 'legend',
+            baseOVR: 88,
+            currentOVR: Math.max(p.currentOVR, 88),
+          };
+        }
+        if (p.id === 'p1') {
+          return {
+            ...p,
+            nickname: p.nickname === 'Büyük Kaptan' ? 'White' : p.nickname,
+            photoUrl: p.photoUrl.includes('unsplash') ? '/players/alper.jpg' : p.photoUrl,
+          };
+        }
+        return p;
+      });
       const existingIds = new Set(parsed.map((p) => p.id));
       const missing = INITIAL_PLAYERS.filter((p) => !existingIds.has(p.id));
       return [...parsed, ...missing];
@@ -161,7 +190,7 @@ function MainApp() {
 
   // Sync state to LocalStorage
   useEffect(() => {
-    localStorage.setItem('revirfc_players_v2', JSON.stringify(players));
+    localStorage.setItem('revirfc_players_v3', JSON.stringify(players));
   }, [players]);
 
   useEffect(() => {
@@ -295,12 +324,18 @@ function MainApp() {
         opponentIds,
       });
 
-      // Update theme: MVP gets TOTW Siyah Kart, Bidon gets normal, injured gets revir
+      // Update theme: İsmail Abi & Gölcür Abi always remain Legend
       let newTheme = p.theme;
-      if (awards.mvpId === p.id) {
+      if (p.id === 'p4' || p.id === 'p9') {
+        newTheme = 'legend';
+      } else if (awards.mvpId === p.id) {
         newTheme = 'totw';
-      } else if (p.theme === 'totw') {
-        newTheme = 'gold'; // previous MVP back to gold
+      } else if (awards.bidonId === p.id) {
+        newTheme = 'bidon';
+      } else if (calc.deltaOVR >= 2) {
+        newTheme = 'inform';
+      } else if (p.theme === 'totw' || p.theme === 'bidon') {
+        newTheme = 'gold'; // previous MVP / Bidon resets to gold
       }
 
       return {

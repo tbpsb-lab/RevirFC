@@ -122,6 +122,26 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
           >
             <Bandage className="w-3 h-3" /> Revir 🩹
           </button>
+          <button
+            onClick={() => setThemeFilter('legend')}
+            className={`px-2.5 py-1.5 rounded-xl border font-bold flex items-center gap-1 transition-all ${
+              themeFilter === 'legend'
+                ? 'bg-amber-100 text-amber-950 border-amber-300 shadow-md'
+                : 'bg-neutral-950 text-amber-200 border-amber-300/30'
+            }`}
+          >
+            👑 Efsane (İsmail & Gölcür)
+          </button>
+          <button
+            onClick={() => setThemeFilter('bidon')}
+            className={`px-2.5 py-1.5 rounded-xl border font-bold flex items-center gap-1 transition-all ${
+              themeFilter === 'bidon'
+                ? 'bg-amber-800 text-white border-amber-700 shadow-md'
+                : 'bg-neutral-950 text-amber-600 border-amber-700/30'
+            }`}
+          >
+            🛢️ Günün Bidonu
+          </button>
         </div>
       </div>
 
