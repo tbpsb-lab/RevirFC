@@ -176,12 +176,12 @@ export const FCCard: React.FC<Props> = ({
           template: '/cards/card_bidon.png',
           ovrColor: 'text-[#EA580C]',
           nameColor: 'text-[#1C1917]',
-          nicknameColor: 'text-[#78350F]',
-          statValColor: 'text-[#78350F]',
+          nicknameColor: 'text-[#FBBF24]',
+          statValColor: 'text-[#1C1917]',
           ovalTextColor: 'text-amber-200',
           ovalIconColor: 'text-amber-400',
-          nameTop: 'top-[53.2%]',
-          statTop: 'top-[81.2%]',
+          nameTop: 'top-[50.8%]',
+          statTop: 'top-[79.6%]',
           statBounds: 'left-[11.3%] right-[11.3%]',
           ovalsTop: 'top-[65.6%]',
           ovalsBounds: 'left-[10.5%] right-[10.5%]',
@@ -417,7 +417,7 @@ export const FCCard: React.FC<Props> = ({
           {/* Lakap: İsmin üstünde, resmin alt kısmına doğru */}
           <p
             className={`font-bold italic ${themeConfig.nicknameColor} text-[11px] sm:text-xs tracking-wide ${
-              theme === 'legend' || theme === 'bidon'
+              theme === 'legend'
                 ? 'drop-shadow-none'
                 : 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)]'
             } mb-0.5 truncate w-full px-4`}
@@ -567,7 +567,7 @@ export const FCCard: React.FC<Props> = ({
                   theme === 'legend'
                     ? 'text-[#0F172A] drop-shadow-[0_1px_0_rgba(255,255,255,0.85)]'
                     : theme === 'bidon'
-                    ? 'text-[#1C1917] drop-shadow-none'
+                    ? 'text-[#1C1917] drop-shadow-[0_1px_0_rgba(255,255,255,0.75)]'
                     : `${themeConfig.statValColor} drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]`
                 }`}
               >
