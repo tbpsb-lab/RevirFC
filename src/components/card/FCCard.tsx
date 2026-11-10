@@ -93,12 +93,12 @@ export const FCCard: React.FC<Props> = ({
           nicknameColor: 'text-[#FBBF24]',
           statValColor: 'text-[#FDE68A]',
           ovalTextColor: 'text-amber-200',
-          ovalIconColor: 'text-amber-300',
-          nameTop: 'top-[54.6%]',
+          ovalIconColor: 'text-amber-400',
+          nameTop: 'top-[52.2%]',
           statTop: 'top-[82.2%]',
           statBounds: 'left-[11.3%] right-[11.3%]',
           ovalsTop: 'top-[65.2%]',
-          ovalsBounds: 'left-[29.5%] right-[29.5%]',
+          ovalsBounds: 'left-[10.5%] right-[10.5%]',
           ovalsHeight: 'h-[7.2%]',
           photoFrame: 'top-[11%] left-[12%] right-[8%] h-[44%]',
           isGold: false,
@@ -368,25 +368,65 @@ export const FCCard: React.FC<Props> = ({
         )}
 
         {/* Oyuncu Adı ve Halı Saha Lakabı */}
-        <div
-          className={`absolute left-0 right-0 ${themeConfig.nameTop} flex flex-col items-center justify-center text-center z-20 pointer-events-none`}
-        >
-          <h3 className={`font-black uppercase tracking-wide ${themeConfig.nameColor} ${
-            theme === 'legend' || theme === 'bidon' ? 'text-lg sm:text-xl' : sizeConfig.nameText
-          } ${theme === 'legend' || theme === 'bidon' ? 'drop-shadow-none' : 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]'} truncate w-full px-4`}>
-            {player.name}
-          </h3>
-          <p className={`font-bold italic ${themeConfig.nicknameColor} ${
-            theme === 'legend' || theme === 'bidon' ? 'text-[11px]' : sizeConfig.nicknameText
-          } ${theme === 'legend' || theme === 'bidon' ? 'drop-shadow-none' : 'drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]'} mt-0.5 truncate w-full px-4`}>
-            "{player.nickname}"
-          </p>
-        </div>
+        {theme === 'totw' ? (
+          <div className="absolute left-0 right-0 top-[52.0%] flex flex-col items-center justify-center text-center z-20 pointer-events-none">
+            {/* Lakap: İsmin üstünde, resmin üzerine doğru */}
+            <p className="font-bold italic text-[#FBBF24] text-[11px] sm:text-xs tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] mb-1 truncate w-full px-4">
+              "{player.nickname}"
+            </p>
+            {/* İsim: Tam isimlik kısmının ortasında */}
+            <h3 className={`font-black uppercase tracking-wide text-white ${sizeConfig.nameText} drop-shadow-[0_2px_5px_rgba(0,0,0,0.95)] truncate w-full px-4`}>
+              {player.name}
+            </h3>
+          </div>
+        ) : (
+          <div
+            className={`absolute left-0 right-0 ${themeConfig.nameTop} flex flex-col items-center justify-center text-center z-20 pointer-events-none`}
+          >
+            <h3 className={`font-black uppercase tracking-wide ${themeConfig.nameColor} ${
+              theme === 'legend' || theme === 'bidon' ? 'text-lg sm:text-xl' : sizeConfig.nameText
+            } ${theme === 'legend' || theme === 'bidon' ? 'drop-shadow-none' : 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]'} truncate w-full px-4`}>
+              {player.name}
+            </h3>
+            <p className={`font-bold italic ${themeConfig.nicknameColor} ${
+              theme === 'legend' || theme === 'bidon' ? 'text-[11px]' : sizeConfig.nicknameText
+            } ${theme === 'legend' || theme === 'bidon' ? 'drop-shadow-none' : 'drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]'} mt-0.5 truncate w-full px-4`}>
+              "{player.nickname}"
+            </p>
+          </div>
+        )}
 
         {/* PlayStyles Rozetleri */}
         {showBadges && (
           <>
-            {themeConfig.isGold ? (
+            {theme === 'totw' ? (
+              /* TOTW Kartı: Köşeleri Yuvarlatılmış Geniş Yatay Dikdörtgen Rozetler */
+              <div
+                className={`absolute ${themeConfig.ovalsTop} ${themeConfig.ovalsBounds} ${themeConfig.ovalsHeight} flex justify-center items-center gap-2 z-20 pointer-events-none select-none`}
+              >
+                {player.playstyles.slice(0, 2).map((ps, idx) => {
+                  const cfg = PLAYSTYLE_CONFIG[ps];
+                  if (!cfg) return null;
+                  const Icon = cfg.icon;
+                  const isSingle = player.playstyles.slice(0, 2).length === 1;
+                  return (
+                    <div
+                      key={idx}
+                      className={`${
+                        isSingle ? 'w-[65%]' : 'flex-1 min-w-0'
+                      } h-full rounded-xl bg-gradient-to-r from-neutral-950/95 via-[#1a1610]/95 to-neutral-950/95 border border-amber-400/60 shadow-lg shadow-black/80 flex items-center justify-center gap-1.5 px-2.5`}
+                      title={`${cfg.label}: ${cfg.description}`}
+                    >
+                      <span className="text-[11px] leading-none select-none">{cfg.emoji}</span>
+                      <Icon className="w-3.5 h-3.5 shrink-0 text-amber-400" />
+                      <span className="text-[9px] sm:text-[10px] md:text-[11px] font-bold text-amber-200 tracking-tight truncate">
+                        {cfg.label}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : themeConfig.isGold ? (
               /* Altın Kart: Sağ/Orta Alt Hap Rozetleri (1 veya 2 adet yan yana) */
               <div className="absolute bottom-[4.8%] right-[8%] left-[8%] flex justify-end items-center gap-1.5 z-20 pointer-events-none select-none">
                 {player.playstyles.slice(0, 2).map((ps, idx) => {
