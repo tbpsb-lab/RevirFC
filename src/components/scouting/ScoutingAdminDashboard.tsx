@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Player, PlayerScoutingEntry, CommitteeConsensus, PlayStyle } from '../../types';
+import { COMMITTEE_MEMBERS } from '../../services/mockData';
 import { PLAYSTYLE_CONFIG } from '../card/PlayStyleBadge';
 import {
   FileSpreadsheet,
@@ -30,8 +31,10 @@ export const ScoutingAdminDashboard: React.FC<Props> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Collect all unique committee evaluators
-  const allEvaluators = Array.from(new Set(savedEntries.map((e) => e.evaluatorName))).filter(Boolean);
+  // Designated 4 Committee Members + any other voters
+  const allEvaluators = Array.from(
+    new Set([...COMMITTEE_MEMBERS, ...savedEntries.map((e) => e.evaluatorName)])
+  ).filter(Boolean);
 
   // Compute consensus for each player
   const consensusList: CommitteeConsensus[] = players.map((player) => {

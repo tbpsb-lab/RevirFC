@@ -44,9 +44,8 @@ export const Navbar: React.FC<Props> = ({
   const { currentUser, switchMockRole, isFirebaseMode, logout } = useAuth();
 
   const navItems: { id: NavTab; label: string; icon: React.FC<{ className?: string }>; adminOnly?: boolean }[] = [
-    { id: 'squad', label: '20 Kişilik Kadro', icon: Users },
+    { id: 'squad', label: '21 Kişilik Kadro', icon: Users },
     { id: 'scouting', label: '⭐ Kurul Puanlama', icon: Sliders },
-    { id: 'match', label: 'Maç & Check-In', icon: Trophy },
     { id: 'match', label: 'Maç & Check-In', icon: Trophy },
     { id: 'tactics', label: 'Taktik Tahtası', icon: Flame },
     { id: 'locker', label: 'Soyunma Odası', icon: MessageSquare },
@@ -63,7 +62,7 @@ export const Navbar: React.FC<Props> = ({
       <div className="bg-neutral-900 border-b border-neutral-850 px-4 py-1.5 flex flex-wrap items-center justify-between text-xs gap-2">
         <div className="flex items-center gap-2">
           <span className="text-[11px] font-bold text-neutral-400 flex items-center gap-1">
-            <KeyRound className="w-3.5 h-3.5 text-amber-400" /> Hızlı Rol / Test Kullanıcısı:
+            <KeyRound className="w-3.5 h-3.5 text-amber-400" /> Aktif Hesap:
           </span>
           <div className="flex items-center gap-1">
             <button
@@ -74,7 +73,7 @@ export const Navbar: React.FC<Props> = ({
                   : 'bg-neutral-800 text-neutral-300 hover:text-white'
               }`}
             >
-              👑 Yönetici (Admin)
+              👑 Yönetici (Alper)
             </button>
             <button
               onClick={() => switchMockRole('captain')}
@@ -84,7 +83,7 @@ export const Navbar: React.FC<Props> = ({
                   : 'bg-neutral-800 text-neutral-300 hover:text-white'
               }`}
             >
-              ⚽ Kaptan (Burak)
+              ⭐ Kurul (Akif / Yüksel)
             </button>
             <button
               onClick={() => switchMockRole('player')}
@@ -94,7 +93,7 @@ export const Navbar: React.FC<Props> = ({
                   : 'bg-neutral-800 text-neutral-300 hover:text-white'
               }`}
             >
-              🩹 Revir Üyesi (Tolga)
+              🏃 Oyuncu (Baran)
             </button>
             <button
               onClick={() => switchMockRole('pending')}

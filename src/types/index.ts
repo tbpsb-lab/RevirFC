@@ -26,13 +26,24 @@ export interface PlayerStats {
 }
 
 export type PlayStyle = 
-  | 'relentless' // Ciğersiz (Bitmeyen Kondisyon)
-  | 'power_shot' // Balyoz (Uzaktan Şut)
-  | 'octopus'    // Ahtapot (Kaleci Refleksi)
-  | 'wall'       // Duvar (Geçilmez Stoper)
-  | 'poacher'    // İleride Bekleyen (Geriye Koşmayan Forvet)
-  | 'maestro'    // Orkestra Şefi (Akıl Almaz Paslar)
-  | 'trickster'; // Ayak Tenisçisi (Dar Alanda Çalım)
+  | 'relentless'    // Ciğersiz (Bitmeyen Kondisyon)
+  | 'power_shot'    // Balyoz (Uzaktan Şut)
+  | 'octopus'       // Ahtapot (Kaleci Refleksi)
+  | 'wall'          // Beton Duvar (Geçilmez Stoper)
+  | 'poacher'       // Kampçı / İleride Bekleyen (Geriye Koşmayan Forvet)
+  | 'maestro'       // Orkestra Şefi (Akıl Almaz Paslar)
+  | 'trickster'     // Ayak Tenisçisi (Dar Alanda Çalım)
+  | 'speedster'     // Roket / Sprinter (Hızlı Deparcı)
+  | 'first_touch'   // Mıknatıs (Yumuşak İlk Dokunuş)
+  | 'tiki_taka'     // Karekod Pasör (Tek Pas Ustası)
+  | 'trivela'       // Dış Füze (Ayak Dışı Vuruş)
+  | 'interceptor'   // Kademe Tilkisi (Pas Arası Canavarı)
+  | 'finesse_shot'  // Falso Ustası (Plase Vuruş)
+  | 'slide_tackler' // Kasap Süpürücü (Sert Müdahale)
+  | 'commander'     // Saha İçi Komutan (Bağıran Kaptan)
+  | 'ice_cold'      // Soğukkanlı Bitirici (Karşı Karşıya Affetmeyen)
+  | 'late_bloomer'  // Son 15 Dakika Adamı (İkinci Yarı Açılan)
+  | 'fragile';      // Müzmin Revirlik (Her Maç Bandajlı);
 
 export type PreferredPosition = 'GK' | 'DEF' | 'MID' | 'FWD';
 

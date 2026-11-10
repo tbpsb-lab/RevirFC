@@ -32,6 +32,22 @@ export function calculatePlayerMatchRating(params: {
   // Filter votes for this player
   const playerVotes = votes.filter((v) => v.targetPlayerId === playerId);
 
+  // Fault tolerance: If no one scored this player, preserve current OVR without crash
+  if (playerVotes.length === 0) {
+    return {
+      playerId,
+      matchScore10: Math.round((oldOVR / 10) * 10) / 10,
+      matchScore100: oldOVR,
+      oldOVR,
+      newOVR: oldOVR,
+      deltaOVR: 0,
+      selfScore: Math.round((oldOVR / 10) * 10) / 10,
+      peerAverageScore: Math.round((oldOVR / 10) * 10) / 10,
+      egoDelta: 0,
+      egoLabel: 'Gerçekçi Usta',
+    };
+  }
+
   // Separate self vote, teammate votes, and opponent votes
   let selfScore = 7.0; // default if not provided
   const teammateScores: number[] = [];

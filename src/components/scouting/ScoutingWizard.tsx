@@ -169,15 +169,23 @@ export const ScoutingWizard: React.FC<Props> = ({
 
         {/* Evaluator Selector & Link Share */}
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-2 bg-neutral-950 px-3 py-1.5 rounded-2xl border border-neutral-800">
-            <span className="text-[11px] text-neutral-400 font-bold">Kurul Üyesi:</span>
-            <input
-              type="text"
-              value={evaluatorName}
-              onChange={(e) => onEvaluatorChange(e.target.value)}
-              placeholder="Adınız"
-              className="bg-transparent text-xs font-bold text-amber-300 focus:outline-none w-28"
-            />
+          {/* 4 Committee Members Fast Switcher */}
+          <div className="flex items-center gap-1 bg-neutral-950 p-1 rounded-2xl border border-neutral-800">
+            <span className="text-[10px] text-neutral-400 font-bold px-2">Kurul:</span>
+            {['Alper', 'Yüksel', 'Akif', 'İsmail'].map((name) => (
+              <button
+                key={name}
+                type="button"
+                onClick={() => onEvaluatorChange(name)}
+                className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all ${
+                  evaluatorName === name
+                    ? 'bg-amber-500 text-black shadow-md'
+                    : 'text-neutral-400 hover:text-white hover:bg-neutral-850'
+                }`}
+              >
+                {name}
+              </button>
+            ))}
           </div>
 
           <button

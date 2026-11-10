@@ -14,6 +14,7 @@ import {
   ShieldAlert,
   Sparkles,
   Trophy,
+  Bell,
 } from 'lucide-react';
 
 interface Props {
@@ -24,6 +25,7 @@ interface Props {
   onRunBalancing: () => void;
   onOpenRating: () => void;
   onToggleParticipation: (playerId: string) => void;
+  onOpenReminderHub?: () => void;
 }
 
 export const SquadList: React.FC<Props> = ({
@@ -34,6 +36,7 @@ export const SquadList: React.FC<Props> = ({
   onRunBalancing,
   onOpenRating,
   onToggleParticipation,
+  onOpenReminderHub,
 }) => {
   const starters = players.filter((p) => match.starters.includes(p.id));
   const waitlist = players.filter((p) => match.waitlist.includes(p.id));
@@ -131,6 +134,16 @@ export const SquadList: React.FC<Props> = ({
             >
               <Trophy className="w-4 h-4" /> 360° Puanlama
             </button>
+
+            {onOpenReminderHub && (
+              <button
+                onClick={onOpenReminderHub}
+                className="bg-neutral-800 hover:bg-neutral-700 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl border border-neutral-700 flex items-center gap-1.5 cursor-pointer"
+                title="Girmeyi unutanlara WhatsApp veya E-Posta hatırlatması gönder"
+              >
+                <Bell className="w-4 h-4 text-amber-400" /> Hatırlatıcı Gönder
+              </button>
+            )}
           </div>
         </div>
       </div>

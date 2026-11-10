@@ -39,6 +39,7 @@ import { DessertLedger } from './components/stats/DessertLedger';
 import { AdminApprovalPanel } from './components/admin/AdminApprovalPanel';
 import { ScoutingWizard } from './components/scouting/ScoutingWizard';
 import { ScoutingAdminDashboard } from './components/scouting/ScoutingAdminDashboard';
+import { ReminderHubModal } from './components/reminder/ReminderHubModal';
 
 function MainApp() {
   const { currentUser, allUsers, approveUser, rejectUser } = useAuth();
@@ -112,6 +113,16 @@ function MainApp() {
   const [checkInPlayer, setCheckInPlayer] = useState<Player | null>(null);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [showFirebaseModal, setShowFirebaseModal] = useState(false);
+  const [showReminderModal, setShowReminderModal] = useState(false);
+
+  const handleQuickCheckInForPlayer = (playerId: string) => {
+    handleSaveCheckIn({
+      playerId,
+      timestamp: Date.now(),
+      status: 'full',
+      note: 'Kaptan tarafından hızlı onaylandı',
+    });
+  };
 
   // Sync state to LocalStorage
   useEffect(() => {
@@ -442,6 +453,7 @@ function MainApp() {
             onRunBalancing={handleRunBalancing}
             onOpenRating={() => setShowRatingModal(true)}
             onToggleParticipation={handleToggleParticipation}
+            onOpenReminderHub={() => setShowReminderModal(true)}
           />
         )}
 
@@ -533,6 +545,16 @@ function MainApp() {
 
       {showFirebaseModal && (
         <FirebaseSetupModal onClose={() => setShowFirebaseModal(false)} />
+      )}
+
+      {showReminderModal && (
+        <ReminderHubModal
+          match={match}
+          players={players}
+          savedScoutingEntries={savedScoutingEntries}
+          onQuickCheckInForPlayer={handleQuickCheckInForPlayer}
+          onClose={() => setShowReminderModal(false)}
+        />
       )}
     </div>
   );
