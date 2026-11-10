@@ -34,7 +34,7 @@ const THEME_COLORS: Record<CardTheme, { ovr: string; role: string; name: string 
   totw: { ovr: 'text-[#FDE68A]', role: 'text-[#FBBF24]', name: 'text-white' },
   inform: { ovr: 'text-[#FED7AA]', role: 'text-[#FB923C]', name: 'text-orange-100' },
   revir: { ovr: 'text-[#7DD3FC]', role: 'text-[#38BDF8]', name: 'text-sky-100' },
-  legend: { ovr: 'text-[#78350F]', role: 'text-[#92400E]', name: 'text-neutral-900 font-extrabold' },
+  legend: { ovr: 'text-[#FEF08A]', role: 'text-[#FDE68A]', name: 'text-neutral-900 font-extrabold' },
   bidon: { ovr: 'text-[#EA580C]', role: 'text-[#C2410C]', name: 'text-amber-950 font-extrabold' },
 };
 
