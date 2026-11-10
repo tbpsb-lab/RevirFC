@@ -367,26 +367,12 @@ export const FCCard: React.FC<Props> = ({
           />
         </div>
 
-        {/* Sağ Üst Tema Kalkanı (Altın, Alev, Revir) */}
+        {/* Sağ Üst Tema Kalkanı (Altın temasında overlay, diğer temalarda şablona gömülü) */}
         {theme === 'gold' && (
           <img
             src="/cards/gold_shield.png"
             alt="Golden Crest"
             className={`absolute top-[13.5%] right-[14%] ${sizeConfig.shieldSize} object-contain pointer-events-none z-20 opacity-95 drop-shadow-md select-none`}
-          />
-        )}
-        {theme === 'inform' && (
-          <img
-            src="/cards/inform_shield.png"
-            alt="Alev Crest"
-            className={`absolute top-[13.0%] right-[13.5%] ${sizeConfig.shieldSize} object-contain pointer-events-none z-20 opacity-95 drop-shadow-[0_2px_8px_rgba(234,88,12,0.7)] select-none`}
-          />
-        )}
-        {theme === 'revir' && (
-          <img
-            src="/cards/revir_shield.png"
-            alt="Revir Crest"
-            className={`absolute top-[13.0%] right-[13.5%] ${sizeConfig.shieldSize} object-contain pointer-events-none z-20 opacity-95 drop-shadow-[0_2px_8px_rgba(56,189,248,0.7)] select-none`}
           />
         )}
 
