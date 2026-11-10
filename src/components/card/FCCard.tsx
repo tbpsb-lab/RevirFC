@@ -165,17 +165,17 @@ export const FCCard: React.FC<Props> = ({
         return {
           template: '/cards/card_bidon.png',
           ovrColor: 'text-[#EA580C]',
-          nameColor: 'text-[#292524]',
+          nameColor: 'text-[#1C1917]',
           nicknameColor: 'text-[#78350F]',
           statValColor: 'text-[#78350F]',
           ovalTextColor: 'text-amber-200',
           ovalIconColor: 'text-amber-400',
-          nameTop: 'top-[56.0%]',
+          nameTop: 'top-[57.0%]',
           statTop: 'top-[81.2%]',
           statBounds: 'left-[11.3%] right-[11.3%]',
           ovalsTop: 'top-[66.0%]',
-          ovalsBounds: 'left-[29.5%] right-[29.5%]',
-          ovalsHeight: 'h-[7.5%]',
+          ovalsBounds: 'left-[21.0%] right-[21.0%]',
+          ovalsHeight: 'h-[7.8%]',
           photoFrame: 'top-[11%] left-[12%] right-[8%] h-[44%]',
           isGold: false,
           label: 'GÜNÜN BİDONU 🛢️',
@@ -371,10 +371,14 @@ export const FCCard: React.FC<Props> = ({
         <div
           className={`absolute left-0 right-0 ${themeConfig.nameTop} flex flex-col items-center justify-center text-center z-20 pointer-events-none`}
         >
-          <h3 className={`font-black uppercase tracking-wide ${themeConfig.nameColor} ${theme === 'legend' ? 'text-lg sm:text-xl' : sizeConfig.nameText} ${theme === 'legend' ? 'drop-shadow-none' : 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]'} truncate w-full px-4`}>
+          <h3 className={`font-black uppercase tracking-wide ${themeConfig.nameColor} ${
+            theme === 'legend' || theme === 'bidon' ? 'text-lg sm:text-xl' : sizeConfig.nameText
+          } ${theme === 'legend' || theme === 'bidon' ? 'drop-shadow-none' : 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]'} truncate w-full px-4`}>
             {player.name}
           </h3>
-          <p className={`font-bold italic ${themeConfig.nicknameColor} ${theme === 'legend' ? 'text-xs' : sizeConfig.nicknameText} ${theme === 'legend' ? 'drop-shadow-none' : 'drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]'} mt-0.5 truncate w-full px-4`}>
+          <p className={`font-bold italic ${themeConfig.nicknameColor} ${
+            theme === 'legend' || theme === 'bidon' ? 'text-[11px]' : sizeConfig.nicknameText
+          } ${theme === 'legend' || theme === 'bidon' ? 'drop-shadow-none' : 'drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]'} mt-0.5 truncate w-full px-4`}>
             "{player.nickname}"
           </p>
         </div>
@@ -419,7 +423,7 @@ export const FCCard: React.FC<Props> = ({
                         title={`${cfg.label}: ${cfg.description}`}
                       >
                         <Icon className={`w-3.5 h-3.5 shrink-0 ${themeConfig.ovalIconColor}`} />
-                        <span className={`text-[10px] font-bold ${themeConfig.ovalTextColor} tracking-tight truncate max-w-[65%]`}>
+                        <span className={`text-[9px] sm:text-[10px] font-bold ${themeConfig.ovalTextColor} tracking-tight truncate`}>
                           {cfg.label}
                         </span>
                       </div>
@@ -438,7 +442,7 @@ export const FCCard: React.FC<Props> = ({
                         title={`${cfg.label}: ${cfg.description}`}
                       >
                         <Icon className={`w-3.5 h-3.5 shrink-0 ${themeConfig.ovalIconColor}`} />
-                        <span className={`text-[10px] font-bold ${themeConfig.ovalTextColor} tracking-tight truncate max-w-[65%]`}>
+                        <span className={`text-[9px] sm:text-[10px] font-bold ${themeConfig.ovalTextColor} tracking-tight truncate`}>
                           {cfg.label}
                         </span>
                       </div>
