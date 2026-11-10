@@ -1,9 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Player, PlayStyle, PreferredPosition } from '../../types';
 import { FCCard } from './FCCard';
 import { PLAYSTYLE_CONFIG } from './PlayStyleBadge';
 import imageCompression from 'browser-image-compression';
-import { Upload, Sparkles, Check, RefreshCw, ZoomIn, Move, RotateCcw } from 'lucide-react';
+import {
+  Upload,
+  Sparkles,
+  Check,
+  RefreshCw,
+  ZoomIn,
+  ZoomOut,
+  Move,
+  RotateCcw,
+  Hand,
+  Crosshair,
+} from 'lucide-react';
 
 interface Props {
   player: Player;
@@ -23,6 +34,11 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
     scale: player.photoAdjustments?.scale ?? 1.0,
   });
 
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef<{ startX: number; startY: number; initX: number; initY: number } | null>(null);
+  const touchDistRef = useRef<number | null>(null);
+  const touchStartScaleRef = useRef<number>(1.0);
+
   const updateAdjustment = (key: 'x' | 'y' | 'scale', value: number) => {
     const next = { ...adjustments, [key]: value };
     setAdjustments(next);
@@ -39,6 +55,92 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
       ...prev,
       photoAdjustments: initial,
     }));
+  };
+
+  // Direct mouse drag on photo
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+    dragStartRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      initX: adjustments.x,
+      initY: adjustments.y,
+    };
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !dragStartRef.current) return;
+    const deltaX = (e.clientX - dragStartRef.current.startX) / (2.2 * adjustments.scale);
+    const deltaY = (e.clientY - dragStartRef.current.startY) / (2.2 * adjustments.scale);
+
+    const newX = Math.max(-50, Math.min(50, Math.round(dragStartRef.current.initX + deltaX)));
+    const newY = Math.max(-50, Math.min(50, Math.round(dragStartRef.current.initY + deltaY)));
+
+    updateAdjustment('x', newX);
+    updateAdjustment('y', newY);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    dragStartRef.current = null;
+  };
+
+  // Wheel zoom directly on photo
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    const zoomDelta = e.deltaY < 0 ? 0.08 : -0.08;
+    const nextScale = Math.max(0.7, Math.min(3.0, Math.round((adjustments.scale + zoomDelta) * 100) / 100));
+    updateAdjustment('scale', nextScale);
+  };
+
+  // Touch handlers for mobile & tablet (1 finger drag pan, 2 fingers pinch zoom)
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      setIsDragging(true);
+      dragStartRef.current = {
+        startX: e.touches[0].clientX,
+        startY: e.touches[0].clientY,
+        initX: adjustments.x,
+        initY: adjustments.y,
+      };
+    } else if (e.touches.length === 2) {
+      setIsDragging(false);
+      dragStartRef.current = null;
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      touchDistRef.current = dist;
+      touchStartScaleRef.current = adjustments.scale;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 1 && isDragging && dragStartRef.current) {
+      const deltaX = (e.touches[0].clientX - dragStartRef.current.startX) / (2.0 * adjustments.scale);
+      const deltaY = (e.touches[0].clientY - dragStartRef.current.startY) / (2.0 * adjustments.scale);
+
+      const newX = Math.max(-50, Math.min(50, Math.round(dragStartRef.current.initX + deltaX)));
+      const newY = Math.max(-50, Math.min(50, Math.round(dragStartRef.current.initY + deltaY)));
+
+      updateAdjustment('x', newX);
+      updateAdjustment('y', newY);
+    } else if (e.touches.length === 2 && touchDistRef.current) {
+      const currentDist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      const ratio = currentDist / touchDistRef.current;
+      const nextScale = Math.max(0.7, Math.min(3.0, Math.round(touchStartScaleRef.current * ratio * 100) / 100));
+      updateAdjustment('scale', nextScale);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+    dragStartRef.current = null;
+    touchDistRef.current = null;
   };
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -154,76 +256,131 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
             {/* Interactive Photo Cropper & Adjustment Panel */}
             <div className="bg-neutral-800/60 p-4 rounded-xl border border-neutral-700/60 space-y-3">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-neutral-300 uppercase tracking-wider flex items-center gap-1.5">
-                  <Move className="w-3.5 h-3.5 text-amber-400" /> Fotoğrafı Konumlandır & Kırp (Kadraj)
+                <label className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <Move className="w-3.5 h-3.5" /> Canlı Kadraj & Fotoğraf Konumlandırma
                 </label>
                 <button
                   type="button"
                   onClick={resetAdjustments}
-                  className="text-[10px] text-neutral-400 hover:text-white flex items-center gap-1 bg-neutral-900 px-2 py-0.5 rounded border border-neutral-700 cursor-pointer"
+                  className="text-[10px] text-neutral-300 hover:text-white flex items-center gap-1 bg-neutral-900 px-2.5 py-1 rounded border border-neutral-700 cursor-pointer transition-colors"
                 >
-                  <RotateCcw className="w-3 h-3" /> Sıfırla & Ortala
+                  <RotateCcw className="w-3 h-3 text-amber-400" /> Sıfırla & Ortala
                 </button>
               </div>
 
-              {/* Sliders Grid */}
-              <div className="space-y-2.5 bg-neutral-950 p-3 rounded-xl border border-neutral-850">
-                {/* Zoom */}
-                <div>
-                  <div className="flex justify-between items-center text-[11px] mb-1">
-                    <span className="text-neutral-300 font-semibold flex items-center gap-1">
-                      <ZoomIn className="w-3 h-3 text-amber-400" /> Büyüt / Küçült (Ölçek):
-                    </span>
-                    <span className="font-mono text-amber-400 font-bold">{adjustments.scale.toFixed(2)}x</span>
+              {/* Direct Gesture Canvas Box */}
+              <div
+                className="relative w-full h-52 rounded-xl overflow-hidden bg-neutral-950 border-2 border-dashed border-amber-500/40 select-none cursor-grab active:cursor-grabbing flex items-center justify-center touch-none group shadow-inner"
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                onWheel={handleWheel}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                title="Fotoğrafı farenizle veya parmağınızla sürükleyerek taşıyın, tekerlekle büyütün/küçültün"
+              >
+                {/* Photo Element */}
+                <img
+                  src={editedPlayer.photoUrl}
+                  alt={editedPlayer.name}
+                  className="max-w-none pointer-events-none select-none transition-transform duration-75 object-contain"
+                  style={{
+                    width: '200px',
+                    height: '200px',
+                    transform: `translate(${adjustments.x * 2.2}px, ${adjustments.y * 2.2}px) scale(${adjustments.scale})`,
+                    transformOrigin: 'center center',
+                  }}
+                  draggable={false}
+                />
+
+                {/* Rule of thirds grid & Crosshair Overlay */}
+                <div className="absolute inset-0 pointer-events-none grid grid-cols-3 grid-rows-3 border border-amber-400/20">
+                  <div className="border-r border-b border-amber-400/15" />
+                  <div className="border-r border-b border-amber-400/15" />
+                  <div className="border-b border-amber-400/15" />
+                  <div className="border-r border-b border-amber-400/15" />
+                  <div className="border-r border-b border-amber-400/15 flex items-center justify-center">
+                    <Crosshair className="w-6 h-6 text-amber-400/30" />
                   </div>
-                  <input
-                    type="range"
-                    min="0.8"
-                    max="2.5"
-                    step="0.05"
-                    value={adjustments.scale}
-                    onChange={(e) => updateAdjustment('scale', parseFloat(e.target.value))}
-                    className="w-full accent-amber-500 h-1.5 bg-neutral-800 rounded cursor-pointer"
-                  />
+                  <div className="border-b border-amber-400/15" />
+                  <div className="border-r border-amber-400/15" />
+                  <div className="border-r border-amber-400/15" />
+                  <div />
                 </div>
 
-                {/* Horizontal (X) */}
-                <div>
-                  <div className="flex justify-between items-center text-[11px] mb-1">
-                    <span className="text-neutral-300 font-semibold">↔️ Sağa / Sola Kaydır (X Ekseni):</span>
-                    <span className="font-mono text-amber-400 font-bold">{adjustments.x > 0 ? `+${adjustments.x}%` : `${adjustments.x}%`}</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="-50"
-                    max="50"
-                    step="1"
-                    value={adjustments.x}
-                    onChange={(e) => updateAdjustment('x', parseInt(e.target.value))}
-                    className="w-full accent-amber-500 h-1.5 bg-neutral-800 rounded cursor-pointer"
-                  />
-                </div>
-
-                {/* Vertical (Y) */}
-                <div>
-                  <div className="flex justify-between items-center text-[11px] mb-1">
-                    <span className="text-neutral-300 font-semibold">↕️ Yukarı / Aşağı Kaydır (Y Ekseni):</span>
-                    <span className="font-mono text-amber-400 font-bold">{adjustments.y > 0 ? `+${adjustments.y}%` : `${adjustments.y}%`}</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="-50"
-                    max="50"
-                    step="1"
-                    value={adjustments.y}
-                    onChange={(e) => updateAdjustment('y', parseInt(e.target.value))}
-                    className="w-full accent-amber-500 h-1.5 bg-neutral-800 rounded cursor-pointer"
-                  />
+                {/* Gesture Help Overlay pill */}
+                <div className="absolute bottom-2 left-2 right-2 pointer-events-none flex items-center justify-between">
+                  <span className="bg-black/75 backdrop-blur px-2 py-0.5 rounded text-[10px] text-neutral-300 font-mono border border-white/10 flex items-center gap-1">
+                    <Hand className="w-3 h-3 text-amber-400" /> Sürükle • Tekerlek / 2 Parmak Zoom
+                  </span>
+                  <span className="bg-amber-500/20 backdrop-blur px-2 py-0.5 rounded text-[10px] text-amber-400 font-mono border border-amber-500/30">
+                    {adjustments.scale.toFixed(2)}x
+                  </span>
                 </div>
               </div>
-              <p className="text-[10px] text-neutral-400 italic">
-                * WhatsApp fotoğraflarında yüzü kartın ortasına tam oturtmak için kaydırıcıları kullanın. Soldaki kartta canlı olarak önizlenir.
-              </p>
+
+              {/* Quick Zoom Buttons & Sliders */}
+              <div className="space-y-2 bg-neutral-950 p-2.5 rounded-xl border border-neutral-800">
+                <div className="flex items-center justify-between text-[11px] pb-1 border-b border-neutral-800/80">
+                  <span className="text-neutral-400 font-medium">Hızlı Yakınlaştırma:</span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => updateAdjustment('scale', Math.max(0.7, Math.round((adjustments.scale - 0.1) * 10) / 10))}
+                      className="px-2 py-0.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-bold rounded border border-neutral-700 cursor-pointer flex items-center gap-1"
+                    >
+                      <ZoomOut className="w-3 h-3" /> -
+                    </button>
+                    <span className="font-mono text-amber-400 font-bold min-w-12 text-center">
+                      {adjustments.scale.toFixed(2)}x
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => updateAdjustment('scale', Math.min(3.0, Math.round((adjustments.scale + 0.1) * 10) / 10))}
+                      className="px-2 py-0.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-bold rounded border border-neutral-700 cursor-pointer flex items-center gap-1"
+                    >
+                      <ZoomIn className="w-3 h-3" /> +
+                    </button>
+                  </div>
+                </div>
+
+                {/* Precision Sliders */}
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <div>
+                    <div className="flex justify-between items-center text-[10px] mb-0.5">
+                      <span className="text-neutral-400">↔️ Yatay (X):</span>
+                      <span className="font-mono text-amber-400">{adjustments.x > 0 ? `+${adjustments.x}%` : `${adjustments.x}%`}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="-50"
+                      max="50"
+                      step="1"
+                      value={adjustments.x}
+                      onChange={(e) => updateAdjustment('x', parseInt(e.target.value))}
+                      className="w-full accent-amber-500 h-1 bg-neutral-800 rounded cursor-pointer"
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between items-center text-[10px] mb-0.5">
+                      <span className="text-neutral-400">↕️ Dikey (Y):</span>
+                      <span className="font-mono text-amber-400">{adjustments.y > 0 ? `+${adjustments.y}%` : `${adjustments.y}%`}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="-50"
+                      max="50"
+                      step="1"
+                      value={adjustments.y}
+                      onChange={(e) => updateAdjustment('y', parseInt(e.target.value))}
+                      className="w-full accent-amber-500 h-1 bg-neutral-800 rounded cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Nickname & Position */}
