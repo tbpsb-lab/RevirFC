@@ -1,0 +1,72 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    function isApproved() {
+      return isAuthenticated() && getUserData().status == 'approved';
+    }
+    
+    function isAdmin() {
+      return isApproved() && getUserData().role == 'admin';
+    }
+    
+    function isCaptain() {
+      return isApproved() && (getUserData().role == 'captain' || getUserData().role == 'admin');
+    }
+
+    // User collection: user can create their own pending profile; only admins can approve or change roles
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow update: if isAdmin() || (isAuthenticated() && request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'status', 'claimedPlayerId']));
+      allow delete: if isAdmin();
+    }
+
+    // All club content requires APPROVED membership! (Soyunma Odası Güvenliği)
+    match /players/{playerId} {
+      allow read: if isApproved();
+      allow update: if isApproved() && (isAdmin() || (getUserData().claimedPlayerId == playerId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['baseOVR', 'currentOVR'])));
+      allow create, delete: if isAdmin();
+    }
+
+    match /matches/{matchId} {
+      allow read: if isApproved();
+      allow create, update: if isCaptain();
+      allow delete: if isAdmin();
+    }
+
+    match /ratings/{ratingId} {
+      allow read: if isApproved();
+      allow create: if isApproved();
+      allow update, delete: if isAdmin();
+    }
+
+    match /locker_posts/{postId} {
+      allow read: if isApproved();
+      allow create: if isApproved();
+      allow update: if isApproved(); // for reactions
+      allow delete: if isAdmin() || (isApproved() && resource.data.authorPlayerId == getUserData().claimedPlayerId);
+    }
+
+    match /photos/{photoId} {
+      allow read: if isApproved();
+      allow create: if isApproved();
+      allow update: if isApproved(); // for likes
+      allow delete: if isAdmin();
+    }
+
+    match /debts/{debtId} {
+      allow read: if isApproved();
+      allow create, update, delete: if isCaptain();
+    }
+  }
+}

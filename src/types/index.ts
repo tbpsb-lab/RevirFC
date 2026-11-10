@@ -1,0 +1,161 @@
+export type UserRole = 'admin' | 'captain' | 'player';
+export type UserStatus = 'pending' | 'approved' | 'rejected';
+
+export interface UserProfile {
+  uid: string;
+  email: string;
+  displayName: string;
+  photoURL?: string;
+  role: UserRole;
+  status: UserStatus;
+  claimedPlayerId?: string;
+  createdAt: string;
+}
+
+export type CardTheme = 'gold' | 'totw' | 'inform' | 'revir';
+
+export type PhysicalStatus = 'full' | 'light_injury' | 'tired' | 'extra_fit';
+
+export interface PlayerStats {
+  pac: number; // Tempo / Kondisyon
+  sho: number; // Şut / Bitiricilik
+  pas: number; // Pas / Oyun Kurma
+  dri: number; // Dribbling / Dar Alan
+  def: number; // Defans / Kademe
+  phy: number; // Fizik / Mücadele & Direnç
+}
+
+export type PlayStyle = 
+  | 'relentless' // Ciğersiz (Bitmeyen Kondisyon)
+  | 'power_shot' // Balyoz (Uzaktan Şut)
+  | 'octopus'    // Ahtapot (Kaleci Refleksi)
+  | 'wall'       // Duvar (Geçilmez Stoper)
+  | 'poacher'    // İleride Bekleyen (Geriye Koşmayan Forvet)
+  | 'maestro'    // Orkestra Şefi (Akıl Almaz Paslar)
+  | 'trickster'; // Ayak Tenisçisi (Dar Alanda Çalım)
+
+export type PreferredPosition = 'GK' | 'DEF' | 'MID' | 'FWD';
+
+export interface Player {
+  id: string;
+  name: string;
+  nickname: string;
+  position: PreferredPosition;
+  number: number;
+  photoUrl: string;
+  baseOVR: number;
+  currentOVR: number;
+  stats: PlayerStats;
+  theme: CardTheme;
+  playstyles: PlayStyle[];
+  matchesPlayed: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  goals: number;
+  assists: number;
+  egoIndex: number; // Self rating minus field average rating
+  formTrend: 'up' | 'down' | 'stable';
+  bestPartnerId?: string;
+  worstPartnerId?: string;
+  currentStatus?: PhysicalStatus;
+}
+
+export interface CheckInEntry {
+  playerId: string;
+  timestamp: number;
+  status: PhysicalStatus;
+  note?: string;
+}
+
+export interface MatchSquad {
+  name: string;
+  color: 'green' | 'white' | 'red' | 'blue';
+  players: {
+    player: Player;
+    effectiveStats: PlayerStats;
+    effectiveOVR: number;
+    assignedRole: PreferredPosition;
+  }[];
+  totalOVR: number;
+  avgPAC: number;
+  avgDEF: number;
+}
+
+export interface MatchScore {
+  teamA: number;
+  teamB: number;
+}
+
+export interface MatchRatingVote {
+  raterPlayerId: string;
+  targetPlayerId: string;
+  score: number; // 1-10
+  mücadeleScore?: number;
+  teknikScore?: number;
+  comment?: string;
+  isAnonymous?: boolean;
+}
+
+export interface MatchAwards {
+  mvpId?: string;       // Haftanın TOTW Kartı
+  wallId?: string;      // Etten Duvar
+  bidonId?: string;     // Günün Bidonu
+}
+
+export interface Match {
+  id: string;
+  title: string;
+  date: string;
+  pitchName: string;
+  stage: 'check_in' | 'balancing' | 'rating' | 'archived';
+  starters: string[]; // Player IDs (max 12)
+  waitlist: string[]; // Player IDs (13+)
+  checkIns: Record<string, CheckInEntry>;
+  teamA?: MatchSquad;
+  teamB?: MatchSquad;
+  score?: MatchScore;
+  awards?: MatchAwards;
+  ratings?: MatchRatingVote[];
+  tacticalNotes?: string;
+}
+
+export interface LockerPost {
+  id: string;
+  matchId?: string;
+  authorPlayerId: string;
+  authorName: string;
+  authorPhoto?: string;
+  text: string;
+  isAnonymous: boolean;
+  isHeadline?: boolean;
+  reactions: {
+    fire: string[];     // 🔥
+    laugh: string[];    // 😂
+    violin: string[];   // 🎻
+    revir: string[];    // 🚑
+    goat: string[];     // 🐐
+  };
+  createdAt: string;
+}
+
+export interface PhotoArchiveItem {
+  id: string;
+  matchId: string;
+  matchTitle: string;
+  imageUrl: string;
+  caption: string;
+  taggedPlayerIds: string[];
+  likes: string[];
+  uploadedBy: string;
+  createdAt: string;
+}
+
+export interface DessertDebt {
+  id: string;
+  debtorPlayerId: string;
+  description: string;
+  treatType: 'baklava' | 'çay' | 'kebap' | 'soğuk_içecek';
+  status: 'pending' | 'paid';
+  createdAt: string;
+}

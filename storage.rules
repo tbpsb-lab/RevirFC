@@ -1,0 +1,22 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    function isApproved() {
+      return request.auth != null;
+    }
+    
+    // Player avatars and match archives (limit size to 5MB, ideally WebP < 300KB)
+    match /avatars/{fileName} {
+      allow read: if isApproved();
+      allow write: if isApproved() && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+    
+    match /matches/{matchId}/{fileName} {
+      allow read: if isApproved();
+      allow write: if isApproved() && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+  }
+}
