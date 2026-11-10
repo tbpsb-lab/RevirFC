@@ -270,7 +270,7 @@ export const FCCard: React.FC<Props> = ({
 
   return (
     <div
-      style={{ perspective: '750px' }}
+      style={{ perspective: '850px' }}
       className={`relative inline-block ${sizeConfig.width} select-none group`}
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
@@ -293,7 +293,7 @@ export const FCCard: React.FC<Props> = ({
           alt={themeConfig.label}
           style={{ transform: 'translateZ(0px)' }}
           className={`absolute inset-0 w-full h-full object-contain pointer-events-none select-none z-0 transition-[filter] duration-200 ${
-            isHovered ? 'drop-shadow-[0_22px_35px_rgba(0,0,0,0.6)]' : 'drop-shadow-xl'
+            isHovered ? 'drop-shadow-[0_20px_30px_rgba(0,0,0,0.55)]' : 'drop-shadow-xl'
           }`}
         />
 
@@ -303,7 +303,7 @@ export const FCCard: React.FC<Props> = ({
           style={{
             maskImage: 'linear-gradient(to bottom, black 72%, transparent 100%)',
             WebkitMaskImage: 'linear-gradient(to bottom, black 72%, transparent 100%)',
-            transform: `translateZ(10px) translate3d(${pX * 0.15}px, ${pY * 0.15}px, 0)`,
+            transform: `translateZ(3px) translate3d(${pX * 0.04}px, ${pY * 0.04}px, 0)`,
             transition: isHovered ? 'none' : 'transform 0.35s ease-out',
           }}
         >
@@ -343,28 +343,28 @@ export const FCCard: React.FC<Props> = ({
 
         {/* KATMAN 3: ÜST METİN & CANLI VERİLER (3D Parallax Önde Yüzen Katmanlar) */}
 
-        {/* Sol Üst Bilgi Kolonu (OVR, Mevki, Forma No, Bayrak, Kulüp Arması - 3D Parallax: translateZ(70px)) */}
+        {/* Sol Üst Bilgi Kolonu (OVR, Mevki, Forma No, Bayrak, Kulüp Arması - 3D Parallax: translateZ(18px)) */}
         <div
           className="absolute top-[13.5%] left-[17%] w-[17%] flex flex-col items-center text-center z-20 pointer-events-none select-none"
           style={{
-            transform: `translateZ(70px) translate3d(${pX * 0.7}px, ${pY * 0.7}px, 0)`,
+            transform: `translateZ(18px) translate3d(${pX * 0.18}px, ${pY * 0.18}px, 0)`,
             transition: isHovered ? 'none' : 'transform 0.35s ease-out',
           }}
         >
           {/* OVR (86) */}
-          <span className={`font-black tracking-tighter leading-none ${themeConfig.ovrColor} ${sizeConfig.ovrText} drop-shadow-[0_3px_6px_rgba(0,0,0,0.95)]`}>
+          <span className={`font-black tracking-tighter leading-none ${themeConfig.ovrColor} ${sizeConfig.ovrText} drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)]`}>
             {ovr}
           </span>
           {/* Mevki (MID) */}
-          <span className={`tracking-wider uppercase text-white font-black mt-1 ${sizeConfig.posText} drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)]`}>
+          <span className={`tracking-wider uppercase text-white font-black mt-1 ${sizeConfig.posText} drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)]`}>
             {player.position}
           </span>
           {/* Forma Numarası (#10) */}
-          <span className={`font-mono font-bold text-[#A09886] ${sizeConfig.numberText} mt-0.5 drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]`}>
+          <span className={`font-mono font-bold text-[#A09886] ${sizeConfig.numberText} mt-0.5 drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]`}>
             #{player.number}
           </span>
           {/* Ülke Bayrağı (Hover'da şık ipeksi kumaş dalgalanması) */}
-          <div className={`relative ${sizeConfig.flagWidth} mt-2 overflow-hidden rounded-[2px] shadow-md border border-white/20 select-none group/flag`}>
+          <div className={`relative ${sizeConfig.flagWidth} mt-2 overflow-hidden rounded-[2px] shadow-sm border border-white/20 select-none group/flag`}>
             <img
               src={player.flagUrl || getNationFlagUrl(player.nationality)}
               alt={player.nationName || player.nationality || 'TR'}
@@ -378,7 +378,7 @@ export const FCCard: React.FC<Props> = ({
             <div className="absolute inset-0 pointer-events-none flag-sheen-on-hover opacity-0" />
           </div>
           {/* Kulüp / Takım Arması */}
-          <div className={`relative ${sizeConfig.logoWidth} mt-1.5 rounded-full overflow-hidden shadow-lg border border-amber-400/40 bg-black/30 p-0.5 drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)]`}>
+          <div className={`relative ${sizeConfig.logoWidth} mt-1.5 rounded-full overflow-hidden shadow-md border border-amber-400/40 bg-black/30 p-0.5 drop-shadow-[0_3px_6px_rgba(0,0,0,0.5)]`}>
             <img
               src={player.clubLogoUrl || getClubLogoUrl(player.clubId)}
               alt={player.clubName || 'Revir FC'}
@@ -391,26 +391,26 @@ export const FCCard: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* Sağ Üst Tema Kalkanı (3D Parallax: translateZ(85px) - Karttan en önde bağımsız asılı duran 3D kalkan) */}
+        {/* Sağ Üst Tema Kalkanı (3D Parallax: translateZ(21px) - Zarif ve doğal derinlikli 3D kalkan) */}
         <div
           className={`absolute top-[13.0%] right-[13.5%] ${sizeConfig.shieldSize} pointer-events-none z-30 select-none`}
           style={{
-            transform: `translateZ(85px) translate3d(${pX * 1.0}px, ${pY * 1.0}px, 0)`,
+            transform: `translateZ(21px) translate3d(${pX * 0.25}px, ${pY * 0.25}px, 0)`,
             transition: isHovered ? 'none' : 'transform 0.35s ease-out',
           }}
         >
           <img
             src={THEME_SHIELDS[theme]}
             alt={`${theme} Crest`}
-            className="w-full h-full object-contain opacity-95 drop-shadow-[0_10px_20px_rgba(0,0,0,0.75)]"
+            className="w-full h-full object-contain opacity-95 drop-shadow-[0_4px_10px_rgba(0,0,0,0.6)]"
           />
         </div>
 
-        {/* Oyuncu Adı ve Halı Saha Lakabı (3D Parallax: translateZ(60px)) */}
+        {/* Oyuncu Adı ve Halı Saha Lakabı (3D Parallax: translateZ(15px)) */}
         <div
           className={`absolute left-0 right-0 ${themeConfig.nameTop} flex flex-col items-center justify-center text-center z-20 pointer-events-none`}
           style={{
-            transform: `translateZ(60px) translate3d(${pX * 0.55}px, ${pY * 0.55}px, 0)`,
+            transform: `translateZ(15px) translate3d(${pX * 0.14}px, ${pY * 0.14}px, 0)`,
             transition: isHovered ? 'none' : 'transform 0.35s ease-out',
           }}
         >
@@ -438,7 +438,7 @@ export const FCCard: React.FC<Props> = ({
           </h3>
         </div>
 
-        {/* PlayStyles Rozetleri (3D Parallax: translateZ(75px)) */}
+        {/* PlayStyles Rozetleri (3D Parallax: translateZ(19px)) */}
         {showBadges && (
           <>
             {themeConfig.isGold ? (
@@ -446,7 +446,7 @@ export const FCCard: React.FC<Props> = ({
               <div
                 className="absolute bottom-[4.8%] right-[8%] left-[8%] flex justify-end items-center gap-1.5 z-20 pointer-events-none select-none"
                 style={{
-                  transform: `translateZ(75px) translate3d(${pX * 0.8}px, ${pY * 0.8}px, 0)`,
+                  transform: `translateZ(19px) translate3d(${pX * 0.20}px, ${pY * 0.20}px, 0)`,
                   transition: isHovered ? 'none' : 'transform 0.35s ease-out',
                 }}
               >
@@ -473,7 +473,7 @@ export const FCCard: React.FC<Props> = ({
               <div
                 className={`absolute ${themeConfig.ovalsTop} ${themeConfig.ovalsBounds} ${themeConfig.ovalsHeight} flex justify-center items-center gap-2 z-20 pointer-events-none select-none`}
                 style={{
-                  transform: `translateZ(75px) translate3d(${pX * 0.8}px, ${pY * 0.8}px, 0)`,
+                  transform: `translateZ(19px) translate3d(${pX * 0.20}px, ${pY * 0.20}px, 0)`,
                   transition: isHovered ? 'none' : 'transform 0.35s ease-out',
                 }}
               >
@@ -545,11 +545,11 @@ export const FCCard: React.FC<Props> = ({
           </>
         )}
 
-        {/* 6 Temel Saha İstatistiği (3D Parallax: translateZ(50px)) */}
+        {/* 6 Temel Saha İstatistiği (3D Parallax: translateZ(12px)) */}
         <div
           className={`absolute ${themeConfig.statBounds} ${themeConfig.statTop} grid grid-cols-6 text-center pointer-events-none select-none z-20`}
           style={{
-            transform: `translateZ(50px) translate3d(${pX * 0.45}px, ${pY * 0.45}px, 0)`,
+            transform: `translateZ(12px) translate3d(${pX * 0.11}px, ${pY * 0.11}px, 0)`,
             transition: isHovered ? 'none' : 'transform 0.35s ease-out',
           }}
         >
