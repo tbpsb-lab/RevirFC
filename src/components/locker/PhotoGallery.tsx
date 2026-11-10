@@ -39,8 +39,12 @@ export const PhotoGallery: React.FC<Props> = ({
         fileType: 'image/webp',
       };
       const compressedFile = await imageCompression(file, options);
-      const url = URL.createObjectURL(compressedFile);
-      setSelectedImage(url);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64Url = reader.result as string;
+        setSelectedImage(base64Url);
+      };
+      reader.readAsDataURL(compressedFile);
     } catch (err) {
       console.error('Image compression failed:', err);
     } finally {

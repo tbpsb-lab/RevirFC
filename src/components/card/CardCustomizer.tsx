@@ -31,9 +31,13 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
       };
 
       const compressedFile = await imageCompression(file, options);
-      const url = URL.createObjectURL(compressedFile);
-      setPreviewUrl(url);
-      setEditedPlayer((prev) => ({ ...prev, photoUrl: url }));
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64Url = reader.result as string;
+        setPreviewUrl(base64Url);
+        setEditedPlayer((prev) => ({ ...prev, photoUrl: base64Url }));
+      };
+      reader.readAsDataURL(compressedFile);
     } catch (err) {
       console.error('Image compression error:', err);
     } finally {
