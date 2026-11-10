@@ -9,7 +9,7 @@ export const INITIAL_PLAYERS: Player[] = [
     nickname: 'White',
     position: 'MID',
     number: 10,
-    photoUrl: '/players/alper.jpg',
+    photoUrl: '/players/alper.png',
     baseOVR: 86,
     currentOVR: 86,
     stats: { pac: 84, sho: 81, pas: 88, dri: 85, def: 72, phy: 80 },
