@@ -78,13 +78,13 @@ export const TacticalPitch: React.FC<Props> = ({
               alt={item.player.name}
               style={{
                 transform: item.player.photoAdjustments
-                  ? `scale(${item.player.photoAdjustments.scale}) translate(${item.player.photoAdjustments.x}%, ${item.player.photoAdjustments.y}%)`
+                  ? `translate(${item.player.photoAdjustments.x}%, ${item.player.photoAdjustments.y}%) scale(${item.player.photoAdjustments.scale})`
                   : undefined,
                 transformOrigin: 'center center',
               }}
               className="w-full h-full object-cover"
               onError={(e) => {
-                (e.target as HTMLImageElement).src = '/players/alper.jpg';
+                (e.target as HTMLImageElement).src = '/players/alper.png';
               }}
             />
             {isInjured && (

@@ -241,10 +241,10 @@ export const FCCard: React.FC<Props> = ({
 
         {/* KATMAN 2: OYUNCU FOTOĞRAFI (Cutout / Photo with Transform) */}
         <div
-          className="absolute top-[14%] left-[28%] right-[10%] h-[44%] flex items-center justify-center z-10 overflow-hidden"
+          className="absolute top-[12%] left-[12%] right-[8%] h-[47%] flex items-center justify-center z-10 overflow-hidden"
           style={{
-            maskImage: 'linear-gradient(to bottom, black 72%, transparent 100%)',
-            WebkitMaskImage: 'linear-gradient(to bottom, black 72%, transparent 100%)',
+            maskImage: 'linear-gradient(to bottom, black 75%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, black 75%, transparent 100%)',
           }}
         >
           <div
@@ -261,7 +261,7 @@ export const FCCard: React.FC<Props> = ({
               alt={player.name}
               style={{
                 transform: player.photoAdjustments
-                  ? `translate(${player.photoAdjustments.x * 1.5}%, ${player.photoAdjustments.y * 1.5}%) scale(${player.photoAdjustments.scale})`
+                  ? `translate(${player.photoAdjustments.x}%, ${player.photoAdjustments.y}%) scale(${player.photoAdjustments.scale})`
                   : undefined,
                 transformOrigin: 'center center',
               }}
@@ -341,31 +341,46 @@ export const FCCard: React.FC<Props> = ({
         {showBadges && (
           <>
             {themeConfig.isGold ? (
-              /* Altın Kart: Örnekteki gibi Sağ Alt Hap Rozeti */
-              <div className="absolute bottom-[5.5%] right-[14%] z-20 pointer-events-none select-none">
-                <div className={`bg-[#0c312d]/95 border border-[#14b8a6]/70 rounded-full ${sizeConfig.pillPad} flex items-center gap-1.5 shadow-md shadow-[#042f2e]/60`}>
-                  <span className="text-xs">❄️</span>
-                  <span className={`font-bold text-[#5eead4] whitespace-nowrap tracking-tight ${sizeConfig.pillText}`}>
-                    {player.playstyles.length > 0 && PLAYSTYLE_CONFIG[player.playstyles[0]]
-                      ? PLAYSTYLE_CONFIG[player.playstyles[0]].label
-                      : 'Soğukkanlı Bitirici'}
-                  </span>
-                </div>
+              /* Altın Kart: Sağ/Orta Alt Hap Rozetleri (1 veya 2 adet yan yana) */
+              <div className="absolute bottom-[4.8%] right-[8%] left-[8%] flex justify-end items-center gap-1.5 z-20 pointer-events-none select-none">
+                {player.playstyles.slice(0, 2).map((ps, idx) => {
+                  const cfg = PLAYSTYLE_CONFIG[ps];
+                  if (!cfg) return null;
+                  const Icon = cfg.icon;
+                  return (
+                    <div
+                      key={idx}
+                      className="bg-[#0c312d]/95 border border-[#14b8a6]/70 rounded-full px-2.5 py-0.5 flex items-center gap-1 shadow-md shadow-[#042f2e]/60 max-w-[48%]"
+                      title={`${cfg.label}: ${cfg.description}`}
+                    >
+                      <Icon className="w-3 h-3 text-[#5eead4] shrink-0" />
+                      <span className="font-bold text-[#5eead4] truncate tracking-tight text-[11px]">
+                        {cfg.label}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               /* Diğer Kartlar: 2 Oval Rozet Yuvası (y=66.4%) */
               <div className="absolute top-[66.4%] left-[28%] right-[28%] flex justify-between items-center z-20 pointer-events-none select-none">
-                {player.playstyles.slice(0, 2).map((ps, idx) => (
-                  <div
-                    key={idx}
-                    className="w-10 h-6 rounded-full flex items-center justify-center bg-black/40 border border-amber-400/40 text-[10px] font-bold shadow-sm"
-                    title={PLAYSTYLE_CONFIG[ps]?.label}
-                  >
-                    <span className="text-xs">
-                      {idx === 0 ? '⚡' : '🔥'}
-                    </span>
-                  </div>
-                ))}
+                {player.playstyles.slice(0, 2).map((ps, idx) => {
+                  const cfg = PLAYSTYLE_CONFIG[ps];
+                  const Icon = cfg?.icon;
+                  return (
+                    <div
+                      key={idx}
+                      className="w-10 h-6 rounded-full flex items-center justify-center bg-black/50 border border-amber-400/50 text-[10px] font-bold shadow-sm"
+                      title={cfg ? `${cfg.label}: ${cfg.description}` : ps}
+                    >
+                      {Icon ? (
+                        <Icon className="w-3.5 h-3.5 text-amber-300" />
+                      ) : (
+                        <span className="text-xs">{idx === 0 ? '⚡' : '🔥'}</span>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </>

@@ -82,7 +82,7 @@ function MainApp() {
           return {
             ...p,
             nickname: p.nickname === 'Büyük Kaptan' ? 'White' : p.nickname,
-            photoUrl: '/players/alper.png',
+            photoUrl: p.photoUrl && !p.photoUrl.includes('unsplash') ? p.photoUrl : '/players/alper.png',
           };
         }
         return p;

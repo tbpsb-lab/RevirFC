@@ -13,6 +13,10 @@ import {
   ZoomOut,
   RotateCcw,
   Wand2,
+  ArrowUp,
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
 } from 'lucide-react';
 
 interface Props {
@@ -39,13 +43,19 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
   const touchDistRef = useRef<number | null>(null);
   const touchStartScaleRef = useRef<number>(1.0);
 
+  const updateAdjustments = (partial: Partial<{ x: number; y: number; scale: number }>) => {
+    setAdjustments((prev) => {
+      const next = { ...prev, ...partial };
+      setEditedPlayer((p) => ({
+        ...p,
+        photoAdjustments: next,
+      }));
+      return next;
+    });
+  };
+
   const updateAdjustment = (key: 'x' | 'y' | 'scale', value: number) => {
-    const next = { ...adjustments, [key]: value };
-    setAdjustments(next);
-    setEditedPlayer((prev) => ({
-      ...prev,
-      photoAdjustments: next,
-    }));
+    updateAdjustments({ [key]: value });
   };
 
   const resetAdjustments = () => {
@@ -74,7 +84,7 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
     e.preventDefault();
     e.stopPropagation();
     const zoomDelta = e.deltaY < 0 ? 0.08 : -0.08;
-    const nextScale = Math.max(0.7, Math.min(3.0, Math.round((adjustments.scale + zoomDelta) * 100) / 100));
+    const nextScale = Math.max(0.6, Math.min(3.5, Math.round((adjustments.scale + zoomDelta) * 100) / 100));
     updateAdjustment('scale', nextScale);
   };
 
@@ -106,14 +116,13 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
 
     const onMouseMove = (e: MouseEvent) => {
       if (!dragStartRef.current) return;
-      const deltaX = (e.clientX - dragStartRef.current.startX) / (1.8 * adjustments.scale);
-      const deltaY = (e.clientY - dragStartRef.current.startY) / (1.8 * adjustments.scale);
+      const deltaX = (e.clientX - dragStartRef.current.startX) / (1.5 * adjustments.scale);
+      const deltaY = (e.clientY - dragStartRef.current.startY) / (1.5 * adjustments.scale);
 
-      const newX = Math.max(-50, Math.min(50, Math.round(dragStartRef.current.initX + deltaX)));
-      const newY = Math.max(-50, Math.min(50, Math.round(dragStartRef.current.initY + deltaY)));
+      const newX = Math.max(-100, Math.min(100, Math.round(dragStartRef.current.initX + deltaX)));
+      const newY = Math.max(-100, Math.min(100, Math.round(dragStartRef.current.initY + deltaY)));
 
-      updateAdjustment('x', newX);
-      updateAdjustment('y', newY);
+      updateAdjustments({ x: newX, y: newY });
     };
 
     const onMouseUp = () => {
@@ -134,21 +143,20 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
 
     const onTouchMove = (e: TouchEvent) => {
       if (e.touches.length === 1 && isDragging && dragStartRef.current) {
-        const deltaX = (e.touches[0].clientX - dragStartRef.current.startX) / (1.8 * adjustments.scale);
-        const deltaY = (e.touches[0].clientY - dragStartRef.current.startY) / (1.8 * adjustments.scale);
+        const deltaX = (e.touches[0].clientX - dragStartRef.current.startX) / (1.5 * adjustments.scale);
+        const deltaY = (e.touches[0].clientY - dragStartRef.current.startY) / (1.5 * adjustments.scale);
 
-        const newX = Math.max(-50, Math.min(50, Math.round(dragStartRef.current.initX + deltaX)));
-        const newY = Math.max(-50, Math.min(50, Math.round(dragStartRef.current.initY + deltaY)));
+        const newX = Math.max(-100, Math.min(100, Math.round(dragStartRef.current.initX + deltaX)));
+        const newY = Math.max(-100, Math.min(100, Math.round(dragStartRef.current.initY + deltaY)));
 
-        updateAdjustment('x', newX);
-        updateAdjustment('y', newY);
+        updateAdjustments({ x: newX, y: newY });
       } else if (e.touches.length === 2 && touchDistRef.current) {
         const currentDist = Math.hypot(
           e.touches[0].clientX - e.touches[1].clientX,
           e.touches[0].clientY - e.touches[1].clientY
         );
         const ratio = currentDist / touchDistRef.current;
-        const nextScale = Math.max(0.7, Math.min(3.0, Math.round(touchStartScaleRef.current * ratio * 100) / 100));
+        const nextScale = Math.max(0.6, Math.min(3.5, Math.round(touchStartScaleRef.current * ratio * 100) / 100));
         updateAdjustment('scale', nextScale);
       }
     };
@@ -186,7 +194,13 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64Url = reader.result as string;
-        setEditedPlayer((prev) => ({ ...prev, photoUrl: base64Url }));
+        const initial = { x: 0, y: 0, scale: 1.0 };
+        setAdjustments(initial);
+        setEditedPlayer((prev) => ({
+          ...prev,
+          photoUrl: base64Url,
+          photoAdjustments: initial,
+        }));
       };
       reader.readAsDataURL(compressedFile);
     } catch (err) {
@@ -279,14 +293,15 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
               onPhotoWheel={handleWheel}
             />
 
-            {/* Quick scale & reset bar right under the card */}
-            <div className="w-64 mt-3 space-y-2">
+            {/* Quick scale & directional nudge pad right under the card */}
+            <div className="w-72 mt-3 space-y-2">
+              {/* Zoom & Reset Row */}
               <div className="flex items-center justify-between bg-neutral-950 px-2.5 py-1.5 rounded-lg border border-neutral-800 text-xs">
                 <span className="text-[11px] text-neutral-400 font-semibold">Ölçek:</span>
                 <div className="flex items-center gap-1.5">
                   <button
                     type="button"
-                    onClick={() => updateAdjustment('scale', Math.max(0.7, Math.round((adjustments.scale - 0.1) * 10) / 10))}
+                    onClick={() => updateAdjustment('scale', Math.max(0.6, Math.round((adjustments.scale - 0.1) * 10) / 10))}
                     className="p-1 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded text-xs font-bold cursor-pointer"
                     title="Küçült"
                   >
@@ -297,7 +312,7 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
                   </span>
                   <button
                     type="button"
-                    onClick={() => updateAdjustment('scale', Math.min(3.0, Math.round((adjustments.scale + 0.1) * 10) / 10))}
+                    onClick={() => updateAdjustment('scale', Math.min(3.5, Math.round((adjustments.scale + 0.1) * 10) / 10))}
                     className="p-1 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded text-xs font-bold cursor-pointer"
                     title="Büyüt"
                   >
@@ -312,6 +327,50 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
                 >
                   <RotateCcw className="w-3 h-3 text-amber-400" /> Ortala
                 </button>
+              </div>
+
+              {/* Directional Nudge Pad (Sağa, Sola, Yukarı, Aşağı) */}
+              <div className="bg-neutral-950 px-2.5 py-2 rounded-lg border border-neutral-800 flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="text-[11px] text-neutral-300 font-semibold">Hassas Kaydır:</span>
+                  <span className="text-[9px] text-neutral-500 font-mono">X: {adjustments.x}% | Y: {adjustments.y}%</span>
+                </div>
+                <div className="grid grid-cols-3 gap-1 w-24">
+                  <div />
+                  <button
+                    type="button"
+                    onClick={() => updateAdjustment('y', Math.max(-100, adjustments.y - 4))}
+                    className="p-1 bg-neutral-800 hover:bg-neutral-700 text-amber-400 rounded flex items-center justify-center cursor-pointer transition-colors"
+                    title="Yukarı Kaydır"
+                  >
+                    <ArrowUp className="w-3.5 h-3.5" />
+                  </button>
+                  <div />
+                  <button
+                    type="button"
+                    onClick={() => updateAdjustment('x', Math.max(-100, adjustments.x - 4))}
+                    className="p-1 bg-neutral-800 hover:bg-neutral-700 text-amber-400 rounded flex items-center justify-center cursor-pointer transition-colors"
+                    title="Sola Kaydır"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateAdjustment('y', Math.min(100, adjustments.y + 4))}
+                    className="p-1 bg-neutral-800 hover:bg-neutral-700 text-amber-400 rounded flex items-center justify-center cursor-pointer transition-colors"
+                    title="Aşağı Kaydır"
+                  >
+                    <ArrowDown className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateAdjustment('x', Math.min(100, adjustments.x + 4))}
+                    className="p-1 bg-neutral-800 hover:bg-neutral-700 text-amber-400 rounded flex items-center justify-center cursor-pointer transition-colors"
+                    title="Sağa Kaydır"
+                  >
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
 
               {/* Photo Upload & AI Dekupe Buttons */}
