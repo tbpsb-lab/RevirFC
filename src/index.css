@@ -96,26 +96,52 @@
 }
 
 /* ==========================================================================
-   Flag Gentle Wave Animation on Card Hover
+   Flag Elegant Silk Wave Animation on Card Hover
    ========================================================================== */
 
-@keyframes flag-wave-gentle {
-  0%, 100% {
-    transform: perspective(300px) rotateY(0deg) skewY(0deg) scaleX(1);
+@keyframes flag-silk-wave {
+  0% {
+    transform: perspective(280px) rotateY(0deg) skewY(0deg) scaleX(1);
   }
   25% {
-    transform: perspective(300px) rotateY(-12deg) skewY(-3deg) scaleX(0.97);
+    transform: perspective(280px) rotateY(-13deg) skewY(-3deg) scaleX(0.96) scaleY(1.02);
   }
   50% {
-    transform: perspective(300px) rotateY(5deg) skewY(2deg) scaleX(1.01);
+    transform: perspective(280px) rotateY(8deg) skewY(2.2deg) scaleX(1.01) scaleY(0.98);
   }
   75% {
-    transform: perspective(300px) rotateY(-7deg) skewY(-2deg) scaleX(0.98);
+    transform: perspective(280px) rotateY(-9deg) skewY(-2deg) scaleX(0.97) scaleY(1.01);
+  }
+  100% {
+    transform: perspective(280px) rotateY(0deg) skewY(0deg) scaleX(1);
+  }
+}
+
+@keyframes flag-silk-sheen {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
   }
 }
 
 .group:hover .flag-wave-on-hover {
   transform-origin: left center;
-  animation: flag-wave-gentle 2.2s ease-in-out infinite;
+  animation: flag-silk-wave 2.4s ease-in-out infinite;
+}
+
+.group:hover .flag-sheen-on-hover {
+  opacity: 1;
+  background: linear-gradient(
+    110deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.32) 28%,
+    rgba(0, 0, 0, 0.22) 50%,
+    rgba(255, 255, 255, 0.28) 72%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: flag-silk-sheen 2.4s ease-in-out infinite;
 }
 
