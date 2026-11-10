@@ -95,3 +95,27 @@
   animation: card-ripple-wave 3.5s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 
+/* ==========================================================================
+   Flag Gentle Wave Animation on Card Hover
+   ========================================================================== */
+
+@keyframes flag-wave-gentle {
+  0%, 100% {
+    transform: perspective(300px) rotateY(0deg) skewY(0deg) scaleX(1);
+  }
+  25% {
+    transform: perspective(300px) rotateY(-12deg) skewY(-3deg) scaleX(0.97);
+  }
+  50% {
+    transform: perspective(300px) rotateY(5deg) skewY(2deg) scaleX(1.01);
+  }
+  75% {
+    transform: perspective(300px) rotateY(-7deg) skewY(-2deg) scaleX(0.98);
+  }
+}
+
+.group:hover .flag-wave-on-hover {
+  transform-origin: left center;
+  animation: flag-wave-gentle 2.2s ease-in-out infinite;
+}
+
