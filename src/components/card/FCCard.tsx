@@ -82,7 +82,7 @@ export const FCCard: React.FC<Props> = ({
     }
   };
 
-  // 5+1 Card Theme Configurations with transparent PNG templates
+  // 5+1 Card Theme Configurations with transparent PNG templates and pixel-perfect element alignments
   const getThemeConfig = () => {
     switch (theme) {
       case 'totw':
@@ -92,8 +92,13 @@ export const FCCard: React.FC<Props> = ({
           nameColor: 'text-white',
           nicknameColor: 'text-[#FBBF24]',
           statValColor: 'text-[#FDE68A]',
-          nameTop: 'top-[56%]',
-          statTop: 'top-[78.0%]',
+          nameTop: 'top-[54.6%]',
+          statTop: 'top-[81.8%]',
+          statBounds: 'left-[11.3%] right-[11.3%]',
+          ovalsTop: 'top-[65.2%]',
+          ovalsBounds: 'left-[29.5%] right-[29.5%]',
+          ovalsHeight: 'h-[7.2%]',
+          photoFrame: 'top-[11%] left-[12%] right-[8%] h-[44%]',
           isGold: false,
           label: 'TOTW • MVP',
         };
@@ -104,8 +109,13 @@ export const FCCard: React.FC<Props> = ({
           nameColor: 'text-white',
           nicknameColor: 'text-[#F97316]',
           statValColor: 'text-[#FED7AA]',
-          nameTop: 'top-[56%]',
-          statTop: 'top-[78.0%]',
+          nameTop: 'top-[54.6%]',
+          statTop: 'top-[81.8%]',
+          statBounds: 'left-[11.3%] right-[11.3%]',
+          ovalsTop: 'top-[65.2%]',
+          ovalsBounds: 'left-[29.5%] right-[29.5%]',
+          ovalsHeight: 'h-[7.2%]',
+          photoFrame: 'top-[11%] left-[12%] right-[8%] h-[44%]',
           isGold: false,
           label: 'IN-FORM 🔥',
         };
@@ -116,8 +126,13 @@ export const FCCard: React.FC<Props> = ({
           nameColor: 'text-white',
           nicknameColor: 'text-[#38BDF8]',
           statValColor: 'text-[#BAE6FD]',
-          nameTop: 'top-[56%]',
-          statTop: 'top-[78.0%]',
+          nameTop: 'top-[54.6%]',
+          statTop: 'top-[81.8%]',
+          statBounds: 'left-[11.3%] right-[11.3%]',
+          ovalsTop: 'top-[65.2%]',
+          ovalsBounds: 'left-[29.5%] right-[29.5%]',
+          ovalsHeight: 'h-[7.2%]',
+          photoFrame: 'top-[11%] left-[12%] right-[8%] h-[44%]',
           isGold: false,
           label: 'REVİR RAPORLU 🩹',
         };
@@ -128,8 +143,13 @@ export const FCCard: React.FC<Props> = ({
           nameColor: 'text-[#1E293B]',
           nicknameColor: 'text-[#B45309]',
           statValColor: 'text-[#854D0E]',
-          nameTop: 'top-[58%]',
-          statTop: 'top-[78.0%]',
+          nameTop: 'top-[55.2%]',
+          statTop: 'top-[81.8%]',
+          statBounds: 'left-[11.3%] right-[11.3%]',
+          ovalsTop: 'top-[65.2%]',
+          ovalsBounds: 'left-[29.5%] right-[29.5%]',
+          ovalsHeight: 'h-[7.2%]',
+          photoFrame: 'top-[11%] left-[12%] right-[8%] h-[44%]',
           isGold: false,
           label: 'EFSANE • ICON 👑',
         };
@@ -140,8 +160,13 @@ export const FCCard: React.FC<Props> = ({
           nameColor: 'text-[#292524]',
           nicknameColor: 'text-[#78350F]',
           statValColor: 'text-[#78350F]',
-          nameTop: 'top-[56%]',
-          statTop: 'top-[78.0%]',
+          nameTop: 'top-[54.6%]',
+          statTop: 'top-[81.8%]',
+          statBounds: 'left-[11.3%] right-[11.3%]',
+          ovalsTop: 'top-[65.2%]',
+          ovalsBounds: 'left-[29.5%] right-[29.5%]',
+          ovalsHeight: 'h-[7.2%]',
+          photoFrame: 'top-[11%] left-[12%] right-[8%] h-[44%]',
           isGold: false,
           label: 'GÜNÜN BİDONU 🛢️',
         };
@@ -155,6 +180,11 @@ export const FCCard: React.FC<Props> = ({
           statValColor: 'text-[#E5C07B]',
           nameTop: 'top-[57.8%]',
           statTop: 'top-[78.2%]',
+          statBounds: 'left-[17%] right-[17%]',
+          ovalsTop: '',
+          ovalsBounds: '',
+          ovalsHeight: '',
+          photoFrame: 'top-[12%] left-[12%] right-[8%] h-[47%]',
           isGold: true,
           label: 'GOLD RARE',
         };
@@ -241,10 +271,10 @@ export const FCCard: React.FC<Props> = ({
 
         {/* KATMAN 2: OYUNCU FOTOĞRAFI (Cutout / Photo with Transform) */}
         <div
-          className="absolute top-[12%] left-[12%] right-[8%] h-[47%] flex items-center justify-center z-10 overflow-hidden"
+          className={`absolute ${themeConfig.photoFrame} flex items-center justify-center z-10 overflow-hidden`}
           style={{
-            maskImage: 'linear-gradient(to bottom, black 75%, transparent 100%)',
-            WebkitMaskImage: 'linear-gradient(to bottom, black 75%, transparent 100%)',
+            maskImage: 'linear-gradient(to bottom, black 72%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, black 72%, transparent 100%)',
           }}
         >
           <div
@@ -362,33 +392,55 @@ export const FCCard: React.FC<Props> = ({
                 })}
               </div>
             ) : (
-              /* Diğer Kartlar: 2 Oval Rozet Yuvası (y=66.4%) */
-              <div className="absolute top-[66.4%] left-[28%] right-[28%] flex justify-between items-center z-20 pointer-events-none select-none">
-                {player.playstyles.slice(0, 2).map((ps, idx) => {
-                  const cfg = PLAYSTYLE_CONFIG[ps];
-                  const Icon = cfg?.icon;
-                  return (
-                    <div
-                      key={idx}
-                      className="w-10 h-6 rounded-full flex items-center justify-center bg-black/50 border border-amber-400/50 text-[10px] font-bold shadow-sm"
-                      title={cfg ? `${cfg.label}: ${cfg.description}` : ps}
-                    >
-                      {Icon ? (
-                        <Icon className="w-3.5 h-3.5 text-amber-300" />
-                      ) : (
-                        <span className="text-xs">{idx === 0 ? '⚡' : '🔥'}</span>
-                      )}
-                    </div>
-                  );
-                })}
+              /* Diğer Kartlar: Şablonda Önceden Çizilmiş 2 Oval Rozet Yuvasına Tam Oturan Tasarım */
+              <div
+                className={`absolute ${themeConfig.ovalsTop} ${themeConfig.ovalsBounds} ${themeConfig.ovalsHeight} flex justify-between items-center z-20 pointer-events-none select-none`}
+              >
+                {/* Sol Oval Rozet */}
+                <div className="w-[46%] h-full flex items-center justify-center">
+                  {player.playstyles[0] && PLAYSTYLE_CONFIG[player.playstyles[0]] && (() => {
+                    const cfg = PLAYSTYLE_CONFIG[player.playstyles[0]];
+                    const Icon = cfg.icon;
+                    return (
+                      <div
+                        className="w-full h-full flex items-center justify-center gap-1 text-amber-300 drop-shadow-sm px-1"
+                        title={`${cfg.label}: ${cfg.description}`}
+                      >
+                        <Icon className="w-3.5 h-3.5 shrink-0 text-amber-300" />
+                        <span className="text-[10px] font-bold text-amber-200 tracking-tight truncate max-w-[65%]">
+                          {cfg.label}
+                        </span>
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                {/* Sağ Oval Rozet */}
+                <div className="w-[46%] h-full flex items-center justify-center">
+                  {player.playstyles[1] && PLAYSTYLE_CONFIG[player.playstyles[1]] && (() => {
+                    const cfg = PLAYSTYLE_CONFIG[player.playstyles[1]];
+                    const Icon = cfg.icon;
+                    return (
+                      <div
+                        className="w-full h-full flex items-center justify-center gap-1 text-amber-300 drop-shadow-sm px-1"
+                        title={`${cfg.label}: ${cfg.description}`}
+                      >
+                        <Icon className="w-3.5 h-3.5 shrink-0 text-amber-300" />
+                        <span className="text-[10px] font-bold text-amber-200 tracking-tight truncate max-w-[65%]">
+                          {cfg.label}
+                        </span>
+                      </div>
+                    );
+                  })()}
+                </div>
               </div>
             )}
           </>
         )}
 
-        {/* 6 Temel Saha İstatistiği (Tam Olarak HIZ ŞUT PAS DRİ SAV FİZ Kolonlarının Altında: left 17%..83%) */}
+        {/* 6 Temel Saha İstatistiği (Tam Olarak HIZ ŞUT PAS DRİ SAV FİZ Kolonlarının Altında) */}
         <div
-          className={`absolute left-[17%] right-[17%] ${themeConfig.statTop} grid grid-cols-6 text-center pointer-events-none select-none z-20`}
+          className={`absolute ${themeConfig.statBounds} ${themeConfig.statTop} grid grid-cols-6 text-center pointer-events-none select-none z-20`}
         >
           {[
             { val: stats.pac },
