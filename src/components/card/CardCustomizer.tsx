@@ -4,8 +4,8 @@ import { FCCard } from './FCCard';
 import { PLAYSTYLE_CONFIG, PLAYSTYLE_CATEGORIES } from './PlayStyleBadge';
 import {
   NATIONS,
-  SUPER_LIG_CLUBS,
-  LIG_1_CLUBS,
+  BIG_FOUR_TR_CLUBS,
+  OTHER_TR_CLUBS,
   WORLD_TOP_CLUBS,
   getClubById,
   getClubLogoUrl,
@@ -580,21 +580,21 @@ export const CardCustomizer: React.FC<Props> = ({ player, onSave, onClose, isAdm
                     <optgroup label="⭐ Özel Halı Saha Kulübü">
                       <option value="revir_fc">Revir FC (Varsayılan)</option>
                     </optgroup>
-                    <optgroup label="🇹🇷 Trendyol Süper Lig">
-                      {SUPER_LIG_CLUBS.map((c) => (
+                    <optgroup label="🇹🇷 Türk Takımları (4 Büyükler • Alfabetik)">
+                      {BIG_FOUR_TR_CLUBS.map((c) => (
                         <option key={c.id} value={c.id}>
                           {c.name}
                         </option>
                       ))}
                     </optgroup>
-                    <optgroup label="🇹🇷 Trendyol 1. Lig">
-                      {LIG_1_CLUBS.map((c) => (
+                    <optgroup label="🇹🇷 Diğer Türk Takımları (Transfermarkt Değeri Sırasıyla)">
+                      {OTHER_TR_CLUBS.map((c) => (
                         <option key={c.id} value={c.id}>
                           {c.name}
                         </option>
                       ))}
                     </optgroup>
-                    <optgroup label="🌍 Dünyanın En Önemli 100 Takımı">
+                    <optgroup label="🌍 Transfermarkt En Değerli Kulüpler Listesi">
                       {WORLD_TOP_CLUBS.map((c) => (
                         <option key={c.id} value={c.id}>
                           {c.name} ({c.country})
