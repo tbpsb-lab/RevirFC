@@ -30,7 +30,7 @@ const THEME_SHIELDS: Record<CardTheme, string> = {
 };
 
 const THEME_COLORS: Record<CardTheme, { ovr: string; role: string; name: string }> = {
-  gold: { ovr: 'text-[#F5D77F]', role: 'text-[#E5C07B]', name: 'text-amber-100' },
+  gold: { ovr: 'text-[#FDE047]', role: 'text-[#FBBF24]', name: 'text-neutral-900 font-extrabold' },
   totw: { ovr: 'text-[#FDE68A]', role: 'text-[#FBBF24]', name: 'text-white' },
   inform: { ovr: 'text-[#FED7AA]', role: 'text-[#FB923C]', name: 'text-orange-100' },
   revir: { ovr: 'text-[#7DD3FC]', role: 'text-[#38BDF8]', name: 'text-sky-100' },

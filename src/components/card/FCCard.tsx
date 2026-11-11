@@ -199,22 +199,22 @@ export const FCCard: React.FC<Props> = ({
       default:
         return {
           template: '/cards/card_gold.png',
-          ovrColor: 'text-[#E5C07B]',
-          nameColor: 'text-white',
-          nicknameColor: 'text-[#E5C07B]',
-          statValColor: 'text-[#E5C07B]',
-          ovalTextColor: 'text-[#5eead4]',
-          ovalIconColor: 'text-[#5eead4]',
-          ovalDropShadow: 'drop-shadow-[0_1px_2px_rgba(0,0,0,0.95)]',
-          nameTop: 'top-[53.5%]',
-          statTop: 'top-[78.2%]',
-          statBounds: 'left-[17%] right-[17%]',
-          ovalsTop: '',
-          ovalsBounds: '',
-          ovalsHeight: '',
-          photoFrame: 'top-[12%] left-[12%] right-[8%] h-[47%]',
-          isGold: true,
-          label: 'GOLD RARE',
+          ovrColor: 'text-[#FDE047]',
+          nameColor: 'text-[#1C1917]',
+          nicknameColor: 'text-[#FBBF24]',
+          statValColor: 'text-[#FDE68A]',
+          ovalTextColor: 'text-[#FEF08A]',
+          ovalIconColor: 'text-[#FACC15]',
+          ovalDropShadow: 'drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)]',
+          nameTop: 'top-[51.8%]',
+          statTop: 'top-[80.4%]',
+          statBounds: 'left-[11.3%] right-[11.3%]',
+          ovalsTop: 'top-[66.6%]',
+          ovalsBounds: 'left-[9.5%] right-[9.5%]',
+          ovalsHeight: 'h-[5.8%]',
+          photoFrame: 'top-[11%] left-[12%] right-[8%] h-[44%]',
+          isGold: false,
+          label: 'STANDART • GOLD',
         };
     }
   };
@@ -312,7 +312,7 @@ export const FCCard: React.FC<Props> = ({
           style={{
             maskImage: 'linear-gradient(to bottom, black 72%, transparent 100%)',
             WebkitMaskImage: 'linear-gradient(to bottom, black 72%, transparent 100%)',
-            transform: `translateZ(1.5px) translate3d(${pX * 0.015}px, ${pY * 0.015}px, 0)`,
+            transform: `translateZ(2px) translate3d(${pX * 0.02}px, ${pY * 0.02}px, 0)`,
             transition: isHovered ? 'none' : 'transform 0.35s ease-out',
           }}
         >
@@ -440,9 +440,9 @@ export const FCCard: React.FC<Props> = ({
           {/* İsim: Tam isimlik kısmının ortasında */}
           <h3
             className={`font-black uppercase tracking-wide ${themeConfig.nameColor} ${
-              theme === 'legend' || theme === 'bidon' ? 'text-lg sm:text-xl' : sizeConfig.nameText
+              theme === 'legend' || theme === 'bidon' || theme === 'gold' ? 'text-lg sm:text-xl' : sizeConfig.nameText
             } ${
-              theme === 'legend' || theme === 'bidon'
+              theme === 'legend' || theme === 'bidon' || theme === 'gold'
                 ? 'drop-shadow-none'
                 : 'drop-shadow-[0_2px_5px_rgba(0,0,0,0.95)]'
             } truncate w-full px-4`}
@@ -451,73 +451,41 @@ export const FCCard: React.FC<Props> = ({
           </h3>
         </div>
 
-        {/* PlayStyles Rozetleri (3D Parallax: translateZ(4px)) - Sadece Simge ve Yazı, Kutusuz ve Çerçevesiz */}
+        {/* PlayStyles Rozetleri (3D Parallax: translateZ(3.5px)) - Sadece Simge ve Yazı, Kutusuz ve Çerçevesiz */}
         {showBadges && (
-          <>
-            {themeConfig.isGold ? (
-              /* Altın Kart: Sağ/Orta Alt Rozetleri */
-              <div
-                className="absolute bottom-[4.8%] right-[8%] left-[8%] flex justify-end items-center gap-2 z-20 pointer-events-none select-none"
-                style={{
-                  transform: `translateZ(4px) translate3d(${pX * 0.04}px, ${pY * 0.04}px, 0)`,
-                  transition: isHovered ? 'none' : 'transform 0.35s ease-out',
-                }}
-              >
-                {player.playstyles.slice(0, 2).map((ps, idx) => {
-                  const cfg = PLAYSTYLE_CONFIG[ps];
-                  if (!cfg) return null;
-                  const Icon = cfg.icon;
-                  return (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-end gap-1.5 flex-1 min-w-0 max-w-[49%]"
-                      title={`${cfg.label}: ${cfg.description}`}
-                    >
-                      <Icon className={`w-3.5 h-3.5 ${themeConfig.ovalIconColor} shrink-0 ${themeConfig.ovalDropShadow}`} />
-                      <span className={`font-bold ${themeConfig.ovalTextColor} ${themeConfig.ovalDropShadow} truncate tracking-tight text-[10px] sm:text-[11px]`}>
-                        {cfg.label}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              /* Diğer Tüm Tematik Kartlar: Şablon Yuvaları Üzerinde Saf Simge ve Yazı */
-              <div
-                className={`absolute ${themeConfig.ovalsTop} ${themeConfig.ovalsBounds} ${themeConfig.ovalsHeight} grid grid-cols-2 gap-2 z-20 pointer-events-none select-none`}
-                style={{
-                  transform: `translateZ(4px) translate3d(${pX * 0.04}px, ${pY * 0.04}px, 0)`,
-                  transition: isHovered ? 'none' : 'transform 0.35s ease-out',
-                }}
-              >
-                {player.playstyles.slice(0, 2).map((ps, idx) => {
-                  const cfg = PLAYSTYLE_CONFIG[ps];
-                  if (!cfg) return null;
-                  const Icon = cfg.icon;
+          <div
+            className={`absolute ${themeConfig.ovalsTop} ${themeConfig.ovalsBounds} ${themeConfig.ovalsHeight} grid grid-cols-2 gap-2 z-20 pointer-events-none select-none`}
+            style={{
+              transform: `translateZ(3.5px) translate3d(${pX * 0.035}px, ${pY * 0.035}px, 0)`,
+              transition: isHovered ? 'none' : 'transform 0.35s ease-out',
+            }}
+          >
+            {player.playstyles.slice(0, 2).map((ps, idx) => {
+              const cfg = PLAYSTYLE_CONFIG[ps];
+              if (!cfg) return null;
+              const Icon = cfg.icon;
 
-                  return (
-                    <div
-                      key={idx}
-                      className="h-full w-full flex items-center justify-center gap-1.5 px-1"
-                      title={`${cfg.label}: ${cfg.description}`}
-                    >
-                      <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${themeConfig.ovalIconColor} shrink-0 ${themeConfig.ovalDropShadow}`} />
-                      <span className={`text-[10px] sm:text-[11px] md:text-xs font-bold tracking-tight truncate ${themeConfig.ovalTextColor} ${themeConfig.ovalDropShadow}`}>
-                        {cfg.label}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </>
+              return (
+                <div
+                  key={idx}
+                  className="h-full w-full flex items-center justify-center gap-1.5 px-1"
+                  title={`${cfg.label}: ${cfg.description}`}
+                >
+                  <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${themeConfig.ovalIconColor} shrink-0 ${themeConfig.ovalDropShadow}`} />
+                  <span className={`text-[10px] sm:text-[11px] md:text-xs font-bold tracking-tight truncate ${themeConfig.ovalTextColor} ${themeConfig.ovalDropShadow}`}>
+                    {cfg.label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
         )}
 
-        {/* 6 Temel Saha İstatistiği (3D Parallax: translateZ(3px)) */}
+        {/* 6 Temel Saha İstatistiği (3D Parallax: translateZ(2.5px)) */}
         <div
           className={`absolute ${themeConfig.statBounds} ${themeConfig.statTop} grid grid-cols-6 text-center pointer-events-none select-none z-20`}
           style={{
-            transform: `translateZ(3px) translate3d(${pX * 0.03}px, ${pY * 0.03}px, 0)`,
+            transform: `translateZ(2.5px) translate3d(${pX * 0.025}px, ${pY * 0.025}px, 0)`,
             transition: isHovered ? 'none' : 'transform 0.35s ease-out',
           }}
         >
