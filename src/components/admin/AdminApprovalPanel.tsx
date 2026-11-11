@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { UserProfile, Player, UserRole } from '../../types';
-import { ShieldCheck, UserPlus, Check, X, UserCheck, AlertTriangle } from 'lucide-react';
+import { ShieldCheck, UserPlus, Check, X, UserCheck, AlertTriangle, Sparkles } from 'lucide-react';
 
 interface Props {
   allUsers: UserProfile[];
   players: Player[];
   onApprove: (uid: string, claimedPlayerId: string, role: UserRole) => void;
   onReject: (uid: string) => void;
+  onApproveNickname?: (playerId: string) => void;
+  onRejectNickname?: (playerId: string) => void;
 }
 
 export const AdminApprovalPanel: React.FC<Props> = ({
@@ -14,9 +16,12 @@ export const AdminApprovalPanel: React.FC<Props> = ({
   players,
   onApprove,
   onReject,
+  onApproveNickname,
+  onRejectNickname,
 }) => {
   const pendingUsers = allUsers.filter((u) => u.status === 'pending');
   const approvedUsers = allUsers.filter((u) => u.status === 'approved');
+  const pendingNicknamePlayers = players.filter((p) => Boolean(p.pendingNickname));
 
   const [selectedPlayerForUser, setSelectedPlayerForUser] = useState<Record<string, string>>({});
   const [selectedRoleForUser, setSelectedRoleForUser] = useState<Record<string, UserRole>>({});
@@ -40,9 +45,16 @@ export const AdminApprovalPanel: React.FC<Props> = ({
             Dışarıdan gelen kayıtlar doğrudan Onay Bekliyor ekranına düşer. Onaylanmadan hiçbir maç veya fotoğraf görünmez.
           </p>
         </div>
-        <span className="text-xs bg-amber-500/20 text-amber-300 font-bold px-3 py-1 rounded-full border border-amber-500/30">
-          {pendingUsers.length} Onay Bekleyen
-        </span>
+        <div className="flex items-center gap-2">
+          {pendingNicknamePlayers.length > 0 && (
+            <span className="text-xs bg-orange-500/20 text-orange-300 font-bold px-3 py-1 rounded-full border border-orange-500/30">
+              {pendingNicknamePlayers.length} Lakap Onayı
+            </span>
+          )}
+          <span className="text-xs bg-amber-500/20 text-amber-300 font-bold px-3 py-1 rounded-full border border-amber-500/30">
+            {pendingUsers.length} Üye Onayı
+          </span>
+        </div>
       </div>
 
       {/* Pending users list */}
@@ -128,6 +140,77 @@ export const AdminApprovalPanel: React.FC<Props> = ({
                 </div>
               );
             })}
+          </div>
+        )}
+      </div>
+
+      {/* Pending Nickname Requests (Oyuncu Lakap Değişikliği Talepleri) */}
+      <div className="pt-4 border-t border-neutral-800">
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-amber-400" />
+            Lakap Değişikliği Talepleri ({pendingNicknamePlayers.length})
+          </h4>
+          <span className="text-[11px] text-neutral-400">
+            Kullanıcıların kendi kartları için talep ettiği lakaplar yönetici onayı bekliyor
+          </span>
+        </div>
+
+        {pendingNicknamePlayers.length === 0 ? (
+          <div className="p-4 bg-neutral-950/50 rounded-2xl border border-neutral-800/80 text-center text-xs text-neutral-500">
+            Bekleyen oyuncu lakap değişikliği talebi bulunmuyor.
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {pendingNicknamePlayers.map((player) => (
+              <div
+                key={player.id}
+                className="p-4 bg-neutral-950 border border-neutral-800 rounded-2xl flex flex-wrap items-center justify-between gap-4"
+              >
+                <div className="flex items-center gap-3.5">
+                  <img
+                    src={player.photoUrl}
+                    alt={player.name}
+                    className="w-12 h-12 rounded-2xl object-cover border-2 border-amber-500/40"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/players/alper.png';
+                    }}
+                  />
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h5 className="text-sm font-black text-white">{player.name}</h5>
+                      <span className="text-[10px] font-mono text-amber-300 font-bold bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">
+                        #{player.number} • {player.position}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs mt-1">
+                      <span className="text-neutral-500 line-through">
+                        Mevcut: &quot;{player.nickname}&quot;
+                      </span>
+                      <span className="text-neutral-400">→</span>
+                      <span className="text-amber-400 font-extrabold italic bg-amber-500/20 px-2 py-0.5 rounded border border-amber-400/40">
+                        Talep Edilen: &quot;{player.pendingNickname}&quot;
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => onApproveNickname?.(player.id)}
+                    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-emerald-600/30 transition-transform active:scale-95 cursor-pointer"
+                  >
+                    <Check className="w-3.5 h-3.5" /> Lakabı Onayla
+                  </button>
+                  <button
+                    onClick={() => onRejectNickname?.(player.id)}
+                    className="px-3.5 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-rose-300 font-bold text-xs flex items-center gap-1.5 border border-rose-500/30 transition-colors cursor-pointer"
+                  >
+                    <X className="w-3.5 h-3.5" /> Reddet
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>

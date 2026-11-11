@@ -228,7 +228,7 @@ export const FCCard: React.FC<Props> = ({
       height: 'h-[241px]',
       ovrText: 'text-2xl',
       posText: 'text-[9px]',
-      numberText: 'text-[8px]',
+      numberText: 'text-[10px]',
       nameText: 'text-xs',
       nicknameText: 'text-[9px]',
       statVal: 'text-[10px]',
@@ -244,7 +244,7 @@ export const FCCard: React.FC<Props> = ({
       height: 'h-[375px]',
       ovrText: 'text-4xl',
       posText: 'text-xs font-black',
-      numberText: 'text-[10px]',
+      numberText: 'text-[13px]',
       nameText: 'text-lg font-black',
       nicknameText: 'text-xs font-bold',
       statVal: 'text-sm font-black',
@@ -260,7 +260,7 @@ export const FCCard: React.FC<Props> = ({
       height: 'h-[482px]',
       ovrText: 'text-5xl',
       posText: 'text-sm font-black',
-      numberText: 'text-xs',
+      numberText: 'text-[16px]',
       nameText: 'text-2xl font-black',
       nicknameText: 'text-sm font-bold',
       statVal: 'text-base font-black',
@@ -374,8 +374,8 @@ export const FCCard: React.FC<Props> = ({
           <span className={`tracking-wider uppercase text-white font-black mt-1 ${sizeConfig.posText} drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)]`}>
             {player.position}
           </span>
-          {/* Forma Numarası (#10) */}
-          <span className={`font-mono font-bold text-[#A09886] ${sizeConfig.numberText} mt-0.5 drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]`}>
+          {/* Forma Numarası (#10) - Net, yüksek kontrastlı altın/kehribar rengi ve büyütülmüş font */}
+          <span className={`font-mono font-black tracking-tight text-amber-200 ${sizeConfig.numberText} mt-0.5 drop-shadow-[0_2px_4px_rgba(0,0,0,1)] filter`}>
             #{player.number}
           </span>
           {/* Ülke Bayrağı (Hover'da şık ipeksi kumaş dalgalanması) */}

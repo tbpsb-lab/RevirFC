@@ -82,6 +82,7 @@ export interface Player {
   id: string;
   name: string;
   nickname: string;
+  pendingNickname?: string; // Kullanıcı tarafından değiştirilmiş, yönetici onayı bekleyen lakap
   position: PreferredPosition;
   number: number;
   photoUrl: string;

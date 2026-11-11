@@ -1,6 +1,6 @@
 import { Player, Match, LockerPost, PhotoArchiveItem, DessertDebt, UserProfile } from '../types';
 
-export const COMMITTEE_MEMBERS = ['Alper', 'Yüksel', 'Akif', 'İsmail Abi'] as const;
+export const COMMITTEE_MEMBERS = ['Alper', 'Yüksel', 'Akif', 'İsmail'] as const;
 
 export const INITIAL_PLAYERS: Player[] = [
   {
@@ -68,7 +68,7 @@ export const INITIAL_PLAYERS: Player[] = [
   },
   {
     id: 'p4',
-    name: 'İsmail Abi',
+    name: 'İsmail',
     nickname: 'Ahtapot Efsane',
     position: 'GK',
     number: 1,
@@ -76,7 +76,7 @@ export const INITIAL_PLAYERS: Player[] = [
     baseOVR: 88,
     currentOVR: 88,
     stats: { pac: 72, sho: 45, pas: 78, dri: 70, def: 92, phy: 89 },
-    theme: 'legend', // Sadece İsmail Abi ve Gölcür Abi Efsane
+    theme: 'legend', // İsmail, Gölcür, Cevdet Efsane
     playstyles: ['octopus', 'first_touch'],
     matchesPlayed: 52,
     wins: 38,
@@ -136,19 +136,19 @@ export const INITIAL_PLAYERS: Player[] = [
     position: 'DEF',
     number: 3,
     photoUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&auto=format&fit=crop&q=80',
-    baseOVR: 81,
-    currentOVR: 80,
-    stats: { pac: 68, sho: 50, pas: 71, dri: 65, def: 85, phy: 86 },
-    theme: 'revir', // Bandajlı
-    playstyles: ['slide_tackler', 'fragile'],
-    matchesPlayed: 20,
-    wins: 11,
-    draws: 2,
-    losses: 7,
-    goals: 3,
-    assists: 4,
-    egoIndex: -0.7,
-    formTrend: 'down',
+    baseOVR: 86,
+    currentOVR: 86,
+    stats: { pac: 74, sho: 58, pas: 76, dri: 72, def: 88, phy: 90 },
+    theme: 'legend', // Kulüp Efsanesi
+    playstyles: ['slide_tackler', 'first_touch'],
+    matchesPlayed: 45,
+    wins: 32,
+    draws: 4,
+    losses: 9,
+    goals: 8,
+    assists: 12,
+    egoIndex: 0.1,
+    formTrend: 'stable',
   },
   {
     id: 'p8',
@@ -173,7 +173,7 @@ export const INITIAL_PLAYERS: Player[] = [
   },
   {
     id: 'p9',
-    name: 'Gölcür Abi',
+    name: 'Gölcür',
     nickname: 'Kule Efsane',
     position: 'FWD',
     number: 19,
@@ -181,7 +181,7 @@ export const INITIAL_PLAYERS: Player[] = [
     baseOVR: 88,
     currentOVR: 88,
     stats: { pac: 78, sho: 90, pas: 75, dri: 78, def: 52, phy: 91 },
-    theme: 'legend', // Sadece İsmail Abi ve Gölcür Abi Efsane
+    theme: 'legend', // İsmail, Gölcür, Cevdet Efsane
     playstyles: ['power_shot', 'ice_cold'],
     matchesPlayed: 55,
     wins: 40,
@@ -607,7 +607,7 @@ export const MOCK_USERS: UserProfile[] = [
   {
     uid: 'user-ismail',
     email: 'ismail@revirfc.com',
-    displayName: 'İsmail Abi (Kurul & Legend)',
+    displayName: 'İsmail (Kurul & Legend)',
     role: 'captain',
     status: 'approved',
     claimedPlayerId: 'p4',

@@ -53,7 +53,7 @@ const THEME_INFO: Record<CardTheme, { label: string; icon: string; title: string
   totw: { label: 'MVP', icon: '⭐', title: 'Haftanın En Değerli Oyuncusu (MVP)', desc: 'Haftanın en iyi oyuncusuna Kurul ve maç sonu oylaması tarafından hediye edilir.' },
   inform: { label: 'In-Form', icon: '🔥', title: 'Alevli / Formda', desc: 'Sadece Kurul tarafından verilir (Maksimum 3 kişi). Yüksek form grafiği ve parlayan performanslar içindir.' },
   revir: { label: 'Revir', icon: '🩹', title: 'Bandajlı Sakat Raporu', desc: 'Maç öncesi sakatlık check-in durumu bildiren oyunculara otomatik atanır.' },
-  legend: { label: 'Efsane', icon: '👑', title: 'Kulüp Efsanesi', desc: 'İsmail Abi ve Gölcür Abi gibi kulüp efsanelerine özel unvandır.' },
+  legend: { label: 'Efsane', icon: '👑', title: 'Kulüp Efsanesi', desc: 'İsmail, Gölcür ve Cevdet gibi kulüp efsanelerine özel unvandır.' },
   bidon: { label: 'Bidon', icon: '🛢️', title: 'Günün Bidonu', desc: 'Maç sonu oylamasında günün bidonu seçilen oyuncuya takılır. Haftaya koca bir termos çay borçlanır ☕' },
 };
 
@@ -720,7 +720,7 @@ export const CardCustomizer: React.FC<Props> = ({
                         { id: 'totw' as CardTheme, label: 'MVP', icon: '⭐', desc: 'Haftanın En Değerli Oyuncusu' },
                         { id: 'inform' as CardTheme, label: 'In-Form', icon: '🔥', desc: 'Formda / Alevli' },
                         { id: 'revir' as CardTheme, label: 'Revir', icon: '🩹', desc: 'Bandajlı Sakat' },
-                        { id: 'legend' as CardTheme, label: 'Efsane', icon: '👑', desc: 'İsmail & Gölcür Abi' },
+                        { id: 'legend' as CardTheme, label: 'Efsane', icon: '👑', desc: 'İsmail, Gölcür & Cevdet' },
                         { id: 'bidon' as CardTheme, label: 'Bidon', icon: '🛢️', desc: 'Günün Ceza Kartı' },
                       ].map((item) => {
                         const isSelected = currentTheme === item.id;
@@ -780,7 +780,14 @@ export const CardCustomizer: React.FC<Props> = ({
                 {/* Nickname, Position & Jersey Number */}
                 <div className="grid grid-cols-12 gap-2.5">
                   <div className="col-span-5">
-                    <label className="block text-xs font-bold text-neutral-300 mb-1">Halı Saha Lakabı</label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-xs font-bold text-neutral-300">Halı Saha Lakabı</label>
+                      {!isAdmin && (
+                        <span className="text-[9px] text-amber-300 bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 rounded font-bold">
+                          Yönetici Onaylı
+                        </span>
+                      )}
+                    </div>
                     <input
                       type="text"
                       value={editedPlayer.nickname}
@@ -788,6 +795,17 @@ export const CardCustomizer: React.FC<Props> = ({
                       placeholder="Örn: Balyoz, Doktor..."
                       className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-400"
                     />
+                    {!isAdmin && (
+                      <p className="text-[10px] text-neutral-400 mt-1">
+                        {player.pendingNickname ? (
+                          <span className="text-amber-300 font-bold block truncate">
+                            ⏳ Onay bekleyen talep: &quot;{player.pendingNickname}&quot;
+                          </span>
+                        ) : (
+                          '💡 Değişiklik yönetici onayından sonra yayınlanır.'
+                        )}
+                      </p>
+                    )}
                   </div>
                   <div className="col-span-4">
                     <label className="block text-xs font-bold text-neutral-300 mb-1">Mevki</label>
@@ -815,6 +833,9 @@ export const CardCustomizer: React.FC<Props> = ({
                       placeholder="10"
                       className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-2.5 py-2 text-xs sm:text-sm text-white font-mono font-bold text-center focus:outline-none focus:border-amber-400"
                     />
+                    <p className="text-[9px] text-neutral-400 mt-1 leading-tight">
+                      ✓ Aynı numara serbesttir
+                    </p>
                   </div>
                 </div>
 
@@ -1186,7 +1207,20 @@ export const CardCustomizer: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={() => {
-                  onSave(editedPlayer);
+                  let playerToSave = { ...editedPlayer };
+                  if (!isAdmin) {
+                    const trimmedInput = (editedPlayer.nickname || '').trim();
+                    if (trimmedInput !== player.nickname) {
+                      // Normal player requested a new nickname: queue for admin approval
+                      playerToSave.pendingNickname = trimmedInput;
+                      playerToSave.nickname = player.nickname;
+                      alert(`"${trimmedInput}" lakap değişikliği talebiniz alındı! Yönetici onayından sonra kartınızda güncellenecektir.`);
+                    }
+                  } else {
+                    // Admin directly saves, clears any pending request
+                    playerToSave.pendingNickname = undefined;
+                  }
+                  onSave(playerToSave);
                   onClose();
                 }}
                 className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-black flex items-center gap-2 shadow-lg shadow-amber-500/25 cursor-pointer transition-transform active:scale-95"

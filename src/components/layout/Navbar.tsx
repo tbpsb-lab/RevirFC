@@ -34,6 +34,7 @@ interface Props {
   claimedPlayer?: Player;
   onOpenCardEdit?: () => void;
   onOpenFirebaseModal?: () => void;
+  pendingApprovalCount?: number;
 }
 
 export const Navbar: React.FC<Props> = ({
@@ -42,6 +43,7 @@ export const Navbar: React.FC<Props> = ({
   claimedPlayer,
   onOpenCardEdit,
   onOpenFirebaseModal,
+  pendingApprovalCount = 0,
 }) => {
   const { currentUser, switchMockRole, isFirebaseMode, logout } = useAuth();
 
@@ -188,7 +190,12 @@ export const Navbar: React.FC<Props> = ({
                 }`}
               >
                 <Icon className="w-4 h-4" />
-                {item.label}
+                <span>{item.label}</span>
+                {item.id === 'admin' && pendingApprovalCount > 0 && (
+                  <span className="ml-1 px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[10px] font-black">
+                    {pendingApprovalCount}
+                  </span>
+                )}
               </button>
             );
           })}
@@ -224,7 +231,12 @@ export const Navbar: React.FC<Props> = ({
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
-              {item.label}
+              <span>{item.label}</span>
+              {item.id === 'admin' && pendingApprovalCount > 0 && (
+                <span className="ml-1 px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[9px] font-black">
+                  {pendingApprovalCount}
+                </span>
+              )}
             </button>
           );
         })}

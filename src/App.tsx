@@ -61,12 +61,12 @@ function MainApp() {
       if (parsed.some((p) => p.name === 'Mert Kayra' || p.name === 'Burak Demir')) {
         return INITIAL_PLAYERS;
       }
-      // Guarantee İsmail Abi & Gölcür Abi are updated to Legend
+      // Guarantee İsmail, Gölcür & Cevdet are updated to Legend
       parsed = parsed.map((p) => {
         if (p.id === 'p4') {
           return {
             ...p,
-            name: 'İsmail Abi',
+            name: 'İsmail',
             theme: 'legend',
             baseOVR: 88,
             currentOVR: Math.max(p.currentOVR, 88),
@@ -75,10 +75,19 @@ function MainApp() {
         if (p.id === 'p9') {
           return {
             ...p,
-            name: 'Gölcür Abi',
+            name: 'Gölcür',
             theme: 'legend',
             baseOVR: 88,
             currentOVR: Math.max(p.currentOVR, 88),
+          };
+        }
+        if (p.id === 'p7') {
+          return {
+            ...p,
+            name: 'Cevdet',
+            theme: 'legend',
+            baseOVR: Math.max(p.baseOVR, 86),
+            currentOVR: Math.max(p.currentOVR, 86),
           };
         }
         if (p.id === 'p1') {
@@ -322,9 +331,9 @@ function MainApp() {
       });
 
       // Update theme:
-      // İsmail Abi & Gölcür Abi always remain Legend
+      // İsmail, Gölcür & Cevdet always remain Legend
       let newTheme = p.theme;
-      if (p.id === 'p4' || p.id === 'p9') {
+      if (p.id === 'p4' || p.id === 'p9' || p.id === 'p7') {
         newTheme = 'legend';
       } else if (activeAwards.mvpId === p.id) {
         newTheme = 'totw';
@@ -363,8 +372,8 @@ function MainApp() {
   // Handle Kurul Veto, Son Mühür & Resmi Kart Dağıtımı
   const handleCommitteeConfirmAwards = (finalAwards: MatchAwards) => {
     const updatedPlayers = players.map((p) => {
-      // Efsaneler her zaman Efsane kalır
-      if (p.id === 'p4' || p.id === 'p9') {
+      // Efsaneler her zaman Efsane kalır (İsmail, Gölcür, Cevdet)
+      if (p.id === 'p4' || p.id === 'p9' || p.id === 'p7') {
         return { ...p, theme: 'legend' as const };
       }
       // 1. Haftanın MVP'si
@@ -577,6 +586,43 @@ function MainApp() {
     setPlayers(updatedPlayers);
   };
 
+  // Handle Admin approving a player's nickname change request
+  const handleApproveNickname = (playerId: string) => {
+    const targetPlayer = players.find((p) => p.id === playerId);
+    if (!targetPlayer || !targetPlayer.pendingNickname) return;
+
+    const approvedNick = targetPlayer.pendingNickname;
+    setPlayers((prev) =>
+      prev.map((p) =>
+        p.id === playerId ? { ...p, nickname: approvedNick, pendingNickname: undefined } : p
+      )
+    );
+
+    // Announce in Soyunma Odası (Locker Room)
+    const newAnnouncement: LockerPost = {
+      id: `post-${Date.now()}-nick`,
+      matchId: match.id,
+      authorPlayerId: 'system',
+      authorName: 'Revir FC Yönetim Kurulu 📢',
+      text: `✨ ${targetPlayer.name} için talep edilen yeni saha lakabı "${approvedNick}" yönetim tarafından onaylandı! Yeni kartı kutlu olsun! ⚽`,
+      isAnonymous: false,
+      reactions: { fire: [playerId], laugh: [], violin: [], revir: [], goat: [] },
+      createdAt: new Date().toISOString(),
+    };
+    setPosts((prev) => [newAnnouncement, ...prev]);
+  };
+
+  // Handle Admin rejecting a player's nickname change request
+  const handleRejectNickname = (playerId: string) => {
+    setPlayers((prev) =>
+      prev.map((p) => (p.id === playerId ? { ...p, pendingNickname: undefined } : p))
+    );
+  };
+
+  const pendingUsersCount = allUsers.filter((u) => u.status === 'pending').length;
+  const pendingNicknamesCount = players.filter((p) => Boolean(p.pendingNickname)).length;
+  const totalAdminPendingCount = pendingUsersCount + pendingNicknamesCount;
+
   return (
     <div className="min-h-screen bg-black text-white flex flex-col font-sans selection:bg-amber-500 selection:text-black">
       {/* Navbar */}
@@ -586,6 +632,7 @@ function MainApp() {
         claimedPlayer={claimedPlayer}
         onOpenCardEdit={() => claimedPlayer && setEditingPlayer(claimedPlayer)}
         onOpenFirebaseModal={() => setShowFirebaseModal(true)}
+        pendingApprovalCount={totalAdminPendingCount}
       />
 
       {/* Pending User Showcase Notification Banner */}
@@ -737,6 +784,8 @@ function MainApp() {
             players={players}
             onApprove={approveUser}
             onReject={rejectUser}
+            onApproveNickname={handleApproveNickname}
+            onRejectNickname={handleRejectNickname}
           />
         )}
       </main>

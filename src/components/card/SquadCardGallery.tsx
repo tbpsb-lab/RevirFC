@@ -210,7 +210,7 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
                 : 'bg-neutral-950 text-amber-200 border-amber-300/30'
             }`}
           >
-            👑 Efsane (İsmail & Gölcür)
+            👑 Efsane (İsmail, Gölcür, Cevdet)
           </button>
           <button
             onClick={() => setThemeFilter('bidon')}
