@@ -105,10 +105,10 @@ export const FCCard: React.FC<Props> = ({
           ovalTextColor: 'text-[#FEF08A]',
           ovalIconColor: 'text-[#FACC15]',
           ovalDropShadow: 'drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)]',
-          nameTop: 'top-[51.0%]',
-          statTop: 'top-[77.8%]',
+          nameTop: 'top-[52.4%]', // Siyah metalik isimliğin tam ortasına hizalandı
+          statTop: 'top-[77.6%]',
           statBounds: 'left-[11.3%] right-[11.3%]',
-          ovalsTop: 'top-[65.2%]',
+          ovalsTop: 'top-[65.8%]', // Altın parıltılı kapsüllerin tam içine oturtuldu
           ovalsBounds: 'left-[9.5%] right-[9.5%]',
           ovalsHeight: 'h-[5.8%]',
           photoFrame: 'top-[11%] left-[12%] right-[8%] h-[44%]',
@@ -125,12 +125,12 @@ export const FCCard: React.FC<Props> = ({
           ovalTextColor: 'text-[#FFEDD5]',
           ovalIconColor: 'text-[#FB923C]',
           ovalDropShadow: 'drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)]',
-          nameTop: 'top-[49.8%]', // İsim ve lakap alev kartında yukarı taşındı
-          statTop: 'top-[77.4%]', // Özellik değer sayıları kömür tabanından yukarı taşındı
+          nameTop: 'top-[50.0%]', // Ateşli cam hattın üstü ve altı dengeli
+          statTop: 'top-[76.6%]', // Sayılar akkor kömür tabanının hemen üstünde net okunur
           statBounds: 'left-[11.3%] right-[11.3%]',
-          ovalsTop: 'top-[63.8%]',
+          ovalsTop: 'top-[65.4%]', // İki dumanlı ateş halkasının tam göbeğine yerleştirildi
           ovalsBounds: 'left-[10.5%] right-[10.5%]',
-          ovalsHeight: 'h-[7.2%]',
+          ovalsHeight: 'h-[6.5%]',
           photoFrame: 'top-[11%] left-[12%] right-[8%] h-[44%]',
           isGold: false,
           label: 'ATEŞ EDİYO! 🔥',
@@ -145,12 +145,12 @@ export const FCCard: React.FC<Props> = ({
           ovalTextColor: 'text-[#E0F2FE]',
           ovalIconColor: 'text-[#38BDF8]',
           ovalDropShadow: 'drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)]',
-          nameTop: 'top-[53.8%]',
-          statTop: 'top-[82.4%]',
+          nameTop: 'top-[53.5%]',
+          statTop: 'top-[81.0%]', // Sayılar alt kavis yerine dikey bölmelerin ortasına taşındı
           statBounds: 'left-[11.3%] right-[11.3%]',
-          ovalsTop: 'top-[65.2%]',
+          ovalsTop: 'top-[65.6%]',
           ovalsBounds: 'left-[10.5%] right-[10.5%]',
-          ovalsHeight: 'h-[7.2%]',
+          ovalsHeight: 'h-[6.5%]',
           photoFrame: 'top-[11%] left-[12%] right-[8%] h-[44%]',
           isGold: false,
           label: 'REVİR RAPORLU 🩹',
@@ -165,10 +165,10 @@ export const FCCard: React.FC<Props> = ({
           ovalTextColor: 'text-[#78350F]',
           ovalIconColor: 'text-[#B45309]',
           ovalDropShadow: 'drop-shadow-[0_1px_0_rgba(255,255,255,0.8)]',
-          nameTop: 'top-[54.5%]',
-          statTop: 'top-[82.0%]',
+          nameTop: 'top-[54.0%]', // Mermer şerit isimliğin tam ortası
+          statTop: 'top-[81.0%]', // Sayılar alt mermer kavisten yukarı alınıp ortalandı
           statBounds: 'left-[11.3%] right-[11.3%]',
-          ovalsTop: 'top-[71.2%]', // Playstyles yuvaların tam ortasına aşağı kaydırıldı
+          ovalsTop: 'top-[70.8%]', // Beyaz mermer kapsüllerin tam merkezine oturtuldu
           ovalsBounds: 'left-[11.5%] right-[11.5%]',
           ovalsHeight: 'h-[5.8%]',
           photoFrame: 'top-[12%] left-[16%] right-[16%] h-[46%]',
@@ -185,12 +185,12 @@ export const FCCard: React.FC<Props> = ({
           ovalTextColor: 'text-[#FBBF24]',
           ovalIconColor: 'text-[#F59E0B]',
           ovalDropShadow: 'drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)]',
-          nameTop: 'top-[50.8%]',
-          statTop: 'top-[79.6%]',
+          nameTop: 'top-[54.0%]', // Lakap koli kapağı üstünde, isim koli bandının tam merkezinde
+          statTop: 'top-[77.8%]', // Sayılar dip metal sınırdan yukarı taşınıp paslı tablonun ortasına alındı
           statBounds: 'left-[11.3%] right-[11.3%]',
-          ovalsTop: 'top-[65.6%]',
+          ovalsTop: 'top-[67.8%]', // Paslı oval yuvaların tam ortasına hizalandı
           ovalsBounds: 'left-[10.5%] right-[10.5%]',
-          ovalsHeight: 'h-[7.2%]',
+          ovalsHeight: 'h-[6.2%]',
           photoFrame: 'top-[11%] left-[12%] right-[8%] h-[44%]',
           isGold: false,
           label: 'HAFTANIN BİDONU 🛢️',
@@ -206,10 +206,10 @@ export const FCCard: React.FC<Props> = ({
           ovalTextColor: 'text-[#FEF08A]',
           ovalIconColor: 'text-[#FACC15]',
           ovalDropShadow: 'drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)]',
-          nameTop: 'top-[51.0%]',
-          statTop: 'top-[77.2%]', // Özellik değer sayıları yukarı taşındı
+          nameTop: 'top-[51.8%]', // Altın kurdele isimliğin tam ortası
+          statTop: 'top-[78.4%]', // Sayılar HIZ-ŞUT etiketlerinden aşağı indirilip altın tabanda ortalandı
           statBounds: 'left-[11.3%] right-[11.3%]',
-          ovalsTop: 'top-[65.2%]', // Playstyles yuvaların tam ortasına yukarı taşındı
+          ovalsTop: 'top-[66.2%]', // Altın oval halkaların tam ortasına oturtuldu
           ovalsBounds: 'left-[9.5%] right-[9.5%]',
           ovalsHeight: 'h-[5.8%]',
           photoFrame: 'top-[11%] left-[12%] right-[8%] h-[44%]',
