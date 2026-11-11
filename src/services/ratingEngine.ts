@@ -18,7 +18,7 @@ export interface PlayerRatingCalculation {
 /**
  * Trimmed Weighted Mean Filter:
  * Discards 1 lowest and 1 highest peer vote to eliminate friendly 10s and troll 1s.
- * Weighted: 50% Opponent, 40% Teammates, 10% Self Rating.
+ * Altın Oran Ağırlıkları: %50 Takım Arkadaşı, %35 Rakip Takım, %15 Öz Puan.
  */
 export function calculatePlayerMatchRating(params: {
   playerId: string;
@@ -94,8 +94,8 @@ export function calculatePlayerMatchRating(params: {
     ? teammateScores.reduce((a, b) => a + b, 0) / teammateScores.length
     : peerAverageScore;
 
-  // Match rating (1 - 10)
-  const matchScore10 = Math.round((0.50 * oppAvg + 0.40 * teamAvg + 0.10 * selfScore) * 10) / 10;
+  // Match rating (1 - 10) - Altın Oran Formülü
+  const matchScore10 = Math.round((0.50 * teamAvg + 0.35 * oppAvg + 0.15 * selfScore) * 10) / 10;
   // Normalized to 10 - 100 for EA Sports FC OVR scale
   const matchScore100 = matchScore10 * 10;
 

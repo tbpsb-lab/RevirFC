@@ -26,6 +26,15 @@ export const MatchRatingModal: React.FC<Props> = ({
   const teamAPlayerIds = new Set(match.teamA?.players.map((x) => x.player.id) || []);
   const isRaterInTeamA = teamAPlayerIds.has(currentRaterPlayer.id);
 
+  // Candidate players for awards (cannot vote for yourself)
+  const candidatePlayers = matchPlayers.filter((p) => p.id !== currentRaterPlayer.id);
+
+  // Put other players first, current rater at the very end as the final self-rating step
+  const orderedPlayers = [
+    ...matchPlayers.filter((p) => p.id !== currentRaterPlayer.id),
+    ...matchPlayers.filter((p) => p.id === currentRaterPlayer.id),
+  ];
+
   // Ratings state map: { [targetPlayerId]: { score: number, comment: string, isAnonymous: boolean } }
   const [ratings, setRatings] = useState<
     Record<string, { score: number; comment: string; isAnonymous: boolean }>
@@ -37,11 +46,11 @@ export const MatchRatingModal: React.FC<Props> = ({
     return init;
   });
 
-  const [awards, setAwards] = useState<MatchAwards>({
-    mvpId: matchPlayers[0]?.id,
-    wallId: matchPlayers.find((p) => p.position === 'DEF' || p.position === 'GK')?.id || matchPlayers[1]?.id,
-    bidonId: matchPlayers[matchPlayers.length - 1]?.id,
-  });
+  const [awards, setAwards] = useState<MatchAwards>(() => ({
+    mvpId: candidatePlayers[0]?.id || matchPlayers[0]?.id,
+    wallId: candidatePlayers.find((p) => p.position === 'DEF' || p.position === 'GK')?.id || candidatePlayers[1]?.id || matchPlayers[0]?.id,
+    bidonId: candidatePlayers[candidatePlayers.length - 1]?.id || matchPlayers[matchPlayers.length - 1]?.id,
+  }));
 
   const handleScoreChange = (targetId: string, score: number) => {
     setRatings((prev) => ({
@@ -106,16 +115,16 @@ export const MatchRatingModal: React.FC<Props> = ({
         <div className="my-4 p-3.5 bg-neutral-800/80 rounded-2xl border border-neutral-700/80 flex items-start gap-3">
           <ShieldAlert className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
           <div className="text-xs space-y-1">
-            <p className="font-bold text-neutral-200">Anti-Trol ve Trimmed Mean Algoritması Devrede:</p>
+            <p className="font-bold text-neutral-200">Altın Oran ve Anti-Trol Puanlama Algoritması Devrede:</p>
             <p className="text-neutral-400 leading-relaxed">
-              Her oyuncuya verilen en yüksek ve en düşük 1 oy hesaplama dışı bırakılır. Ağırlık:%50 Rakip Takım, %40 Takım Arkadaşı, %10 Öz Puan. Puanlar EMA formülüyle genel kart reytingine (OVR) yansır.
+              Her oyuncuya verilen en yüksek ve en düşük 1 oy hesaplama dışı bırakılır. Ağırlık: %50 Takım Arkadaşı, %35 Rakip Takım, %15 Öz Puan. Puanlar EMA formülüyle genel kart reytingine (OVR) yansır.
             </p>
           </div>
         </div>
 
         {/* Player Rating Cards List */}
         <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2">
-          {matchPlayers.map((player) => {
+          {orderedPlayers.map((player) => {
             const isSelf = player.id === currentRaterPlayer.id;
             const isTeammate = teamAPlayerIds.has(player.id) === isRaterInTeamA;
             const voteData = ratings[player.id];
@@ -144,7 +153,7 @@ export const MatchRatingModal: React.FC<Props> = ({
                         <span className="text-[11px] font-mono text-amber-300">OVR {player.currentOVR}</span>
                       </div>
                       <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-black/40 text-neutral-400">
-                        {isSelf ? '⭐ Kendin (Öz Değerlendirme)' : isTeammate ? '🟢 Takım Arkadaşın' : '🔴 Rakip Oyuncu'}
+                        {isSelf ? '⭐ Kendin (Son Adım: Öz Değerlendirme)' : isTeammate ? '🟢 Takım Arkadaşın' : '🔴 Rakip Oyuncu'}
                       </span>
                     </div>
                   </div>
@@ -215,10 +224,17 @@ export const MatchRatingModal: React.FC<Props> = ({
               </label>
               <select
                 value={awards.mvpId}
-                onChange={(e) => setAwards({ ...awards, mvpId: e.target.value })}
-                className="w-full bg-neutral-900 border border-neutral-700 rounded-lg p-2 text-xs text-white"
+                onChange={(e) => {
+                  const newMvpId = e.target.value;
+                  setAwards((prev) => ({
+                    ...prev,
+                    mvpId: newMvpId,
+                    bidonId: prev.bidonId === newMvpId ? candidatePlayers.find((p) => p.id !== newMvpId)?.id : prev.bidonId,
+                  }));
+                }}
+                className="w-full bg-neutral-900 border border-neutral-700 rounded-lg p-2 text-xs text-white cursor-pointer"
               >
-                {matchPlayers.map((p) => (
+                {candidatePlayers.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name} (#{p.number})
                   </option>
@@ -234,9 +250,9 @@ export const MatchRatingModal: React.FC<Props> = ({
               <select
                 value={awards.wallId}
                 onChange={(e) => setAwards({ ...awards, wallId: e.target.value })}
-                className="w-full bg-neutral-900 border border-neutral-700 rounded-lg p-2 text-xs text-white"
+                className="w-full bg-neutral-900 border border-neutral-700 rounded-lg p-2 text-xs text-white cursor-pointer"
               >
-                {matchPlayers.map((p) => (
+                {candidatePlayers.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name} (#{p.number})
                   </option>
@@ -252,13 +268,15 @@ export const MatchRatingModal: React.FC<Props> = ({
               <select
                 value={awards.bidonId}
                 onChange={(e) => setAwards({ ...awards, bidonId: e.target.value })}
-                className="w-full bg-neutral-900 border border-neutral-700 rounded-lg p-2 text-xs text-white"
+                className="w-full bg-neutral-900 border border-neutral-700 rounded-lg p-2 text-xs text-white cursor-pointer"
               >
-                {matchPlayers.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} (#{p.number})
-                  </option>
-                ))}
+                {candidatePlayers
+                  .filter((p) => p.id !== awards.mvpId)
+                  .map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} (#{p.number})
+                    </option>
+                  ))}
               </select>
             </div>
           </div>
