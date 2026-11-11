@@ -236,7 +236,7 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
             <div
               key={player.id}
               className={`relative flex flex-col items-center transition-transform duration-300 ${
-                isMyCard || isMvp ? 'z-20 scale-[1.02]' : 'z-10'
+                isMvp ? 'z-20 scale-[1.03]' : isMyCard ? 'z-10' : 'z-10'
               }`}
             >
               {/* Top Badge: "Senin Kartın", "MVP", "Bidon", "In-Form", or Score Rank */}
@@ -278,30 +278,9 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
               )}
 
               {/* Card Wrapper with Looping Background Animation for User's Own Card or MVP Card */}
-              <div className={`relative ${isMyCard || isMvp ? 'animate-card-float' : ''}`}>
-                {/* 1. If it's user's own card */}
-                {isMyCard && (
-                  <div className="absolute -inset-4 sm:-inset-6 pointer-events-none -z-10 flex items-center justify-center">
-                    {/* Layer 1: Continuous Smooth Rotating Conic Aurora */}
-                    <div
-                      className="absolute inset-0 rounded-[2.8rem] opacity-55 blur-2xl animate-card-spin-slow"
-                      style={{
-                        background: isMvp
-                          ? 'conic-gradient(from 0deg at 50% 50%, rgba(245, 158, 11, 0.85) 0deg, rgba(251, 191, 36, 0.7) 60deg, rgba(79, 70, 229, 0.45) 140deg, rgba(245, 158, 11, 0.85) 210deg, rgba(217, 119, 6, 0.65) 290deg, rgba(245, 158, 11, 0.85) 360deg)'
-                          : 'conic-gradient(from 0deg at 50% 50%, rgba(245, 158, 11, 0.65) 0deg, rgba(234, 88, 12, 0.4) 60deg, rgba(16, 185, 129, 0.5) 140deg, rgba(6, 182, 212, 0.45) 210deg, rgba(217, 119, 6, 0.55) 290deg, rgba(245, 158, 11, 0.65) 360deg)',
-                      }}
-                    />
-
-                    {/* Layer 2: Gentle Breathing Glow Pulse (Luminous Ambient Aura) */}
-                    <div className="absolute -inset-2 rounded-[2.4rem] bg-gradient-to-tr from-amber-500/30 via-yellow-400/25 to-amber-600/30 blur-xl animate-card-aura" />
-
-                    {/* Layer 3: Expanding Hologram Beam Wave Ripple */}
-                    <div className="absolute inset-0 rounded-[2rem] border-2 border-amber-400/50 animate-card-ripple" />
-                  </div>
-                )}
-
-                {/* 2. If it's MVP and not user's own card (Çarpıcı Kozmik Altın Aura) */}
-                {!isMyCard && isMvp && (
+              <div className={`relative ${isMvp ? 'animate-card-float' : ''}`}>
+                {/* 1. MVP Kartı (Kullanıcının kendisi veya bir başkası) - Çarpıcı Kozmik Altın & Yıldız Tozu Aurası */}
+                {isMvp ? (
                   <div className="absolute -inset-4 sm:-inset-6 pointer-events-none -z-10 flex items-center justify-center">
                     {/* Layer 1: Cosmic Starlight & Gold Conic Beam (Obsidian Black, Deep Cosmic Violet, Radiant Gold, Starburst Amber) */}
                     <div
@@ -318,7 +297,15 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
                     {/* Layer 3: Expanding Starburst Ripple Wave */}
                     <div className="absolute inset-0 rounded-[2rem] border-2 border-amber-400/60 animate-mvp-ripple" />
                   </div>
-                )}
+                ) : isMyCard ? (
+                  /* 2. Kullanıcının Kendi Kartı (MVP değilken) - MVP parlamasını bastırmayan minimalist ve zarif aura */
+                  <div className="absolute -inset-3 pointer-events-none -z-10 flex items-center justify-center">
+                    {/* Yumuşak nefes alan sıcak kehribar parıltısı */}
+                    <div className="absolute inset-0 rounded-[2.2rem] bg-amber-500/10 blur-xl opacity-60 animate-pulse" />
+                    {/* Sade ve şık kart çerçevesi aydınlatması */}
+                    <div className="absolute inset-0 rounded-[1.8rem] border border-amber-400/25 shadow-sm shadow-amber-500/10" />
+                  </div>
+                ) : null}
 
                 <FCCard
                   player={player}
