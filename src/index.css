@@ -96,6 +96,74 @@
 }
 
 /* ==========================================================================
+   MVP Cosmic Aurora & Crest Glow Animations
+   ========================================================================== */
+
+@keyframes mvp-crest-breathe {
+  0%, 100% {
+    opacity: 0.50;
+    transform: scale(0.93);
+    filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.6));
+  }
+  50% {
+    opacity: 0.90;
+    transform: scale(1.10);
+    filter: drop-shadow(0 0 16px rgba(251, 191, 36, 0.95)) drop-shadow(0 0 24px rgba(245, 158, 11, 0.5));
+  }
+}
+
+.animate-mvp-crest-glow {
+  animation: mvp-crest-breathe 3s ease-in-out infinite;
+}
+
+@keyframes mvp-cosmic-breathe {
+  0%, 100% {
+    opacity: 0.50;
+    transform: scale(0.97);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.04);
+  }
+}
+
+.animate-mvp-cosmic-aura {
+  animation: mvp-cosmic-breathe 4.5s ease-in-out infinite;
+}
+
+@keyframes mvp-spin-aurora {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-mvp-spin-aurora {
+  animation: mvp-spin-aurora 16s linear infinite;
+}
+
+@keyframes mvp-ripple-gold {
+  0% {
+    transform: scale(0.96);
+    opacity: 0.70;
+  }
+  60% {
+    transform: scale(1.07);
+    opacity: 0.22;
+  }
+  100% {
+    transform: scale(1.14);
+    opacity: 0;
+  }
+}
+
+.animate-mvp-ripple {
+  animation: mvp-ripple-gold 3.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+/* ==========================================================================
    Flag Elegant Silk Wave Animation on Card Hover
    ========================================================================== */
 

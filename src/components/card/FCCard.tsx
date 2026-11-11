@@ -302,7 +302,13 @@ export const FCCard: React.FC<Props> = ({
           alt={themeConfig.label}
           style={{ transform: 'translateZ(0px)' }}
           className={`absolute inset-0 w-full h-full object-contain pointer-events-none select-none z-0 transition-[filter] duration-200 ${
-            isHovered ? 'drop-shadow-[0_20px_30px_rgba(0,0,0,0.55)]' : 'drop-shadow-xl'
+            theme === 'totw'
+              ? isHovered
+                ? 'drop-shadow-[0_20px_35px_rgba(245,158,11,0.45)]'
+                : 'drop-shadow-[0_10px_25px_rgba(245,158,11,0.22)]'
+              : isHovered
+              ? 'drop-shadow-[0_20px_30px_rgba(0,0,0,0.55)]'
+              : 'drop-shadow-xl'
           }`}
         />
 
@@ -406,16 +412,31 @@ export const FCCard: React.FC<Props> = ({
             theme === 'totw'
               ? `top-[9.8%] right-[9.5%] ${sizeConfig.mvpShieldSize}`
               : `top-[13.0%] right-[13.5%] ${sizeConfig.shieldSize}`
-          } pointer-events-none z-30 select-none`}
+          } pointer-events-none z-30 select-none flex items-center justify-center`}
           style={{
             transform: `translateZ(6px) translate3d(${pX * 0.06}px, ${pY * 0.06}px, 0)`,
             transition: isHovered ? 'none' : 'transform 0.35s ease-out',
           }}
         >
+          {/* MVP Sağ Üst Simgesi: Arka Plandan Hafif Animasyonlu Glowing Efekti */}
+          {theme === 'totw' && (
+            <div className="absolute inset-0 -m-1.5 rounded-full pointer-events-none -z-10 flex items-center justify-center">
+              {/* Birinci Katman: Yumuşak altın sarısı nefes alan halo */}
+              <div
+                className="w-full h-full rounded-full opacity-75 blur-md animate-mvp-crest-glow"
+                style={{
+                  background:
+                    'radial-gradient(circle, rgba(251, 191, 36, 0.8) 0%, rgba(245, 158, 11, 0.45) 45%, rgba(217, 119, 6, 0) 72%)',
+                }}
+              />
+              {/* İkinci Katman: Arka plandan hafif sıcak ışık aurası */}
+              <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-amber-500/20 via-yellow-300/35 to-amber-600/15 blur-lg animate-pulse" />
+            </div>
+          )}
           <img
             src={THEME_SHIELDS[theme]}
             alt={`${theme} Crest`}
-            className="w-full h-full object-contain opacity-95 drop-shadow-[0_3px_8px_rgba(0,0,0,0.5)]"
+            className="w-full h-full object-contain opacity-95 drop-shadow-[0_3px_8px_rgba(0,0,0,0.5)] relative z-10"
           />
         </div>
 

@@ -229,13 +229,14 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 justify-items-center">
         {filtered.map((player) => {
           const isMyCard = player.id === myPlayerId;
+          const isMvp = player.theme === 'totw';
           const rank = rankMap.get(player.id) || 1;
 
           return (
             <div
               key={player.id}
               className={`relative flex flex-col items-center transition-transform duration-300 ${
-                isMyCard ? 'z-20 scale-[1.02]' : 'z-10'
+                isMyCard || isMvp ? 'z-20 scale-[1.02]' : 'z-10'
               }`}
             >
               {/* Top Badge: "Senin Kartın", "MVP", "Bidon", "In-Form", or Score Rank */}
@@ -276,24 +277,46 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
                 </div>
               )}
 
-              {/* Card Wrapper with Looping Background Animation for User's Own Card */}
-              <div className={`relative ${isMyCard ? 'animate-card-float' : ''}`}>
+              {/* Card Wrapper with Looping Background Animation for User's Own Card or MVP Card */}
+              <div className={`relative ${isMyCard || isMvp ? 'animate-card-float' : ''}`}>
+                {/* 1. If it's user's own card */}
                 {isMyCard && (
                   <div className="absolute -inset-4 sm:-inset-6 pointer-events-none -z-10 flex items-center justify-center">
-                    {/* Layer 1: Continuous Smooth Rotating Conic Aurora (Amber, Gold, Emerald, Cyan) */}
+                    {/* Layer 1: Continuous Smooth Rotating Conic Aurora */}
                     <div
-                      className="absolute inset-0 rounded-[2.8rem] opacity-50 blur-2xl animate-card-spin-slow"
+                      className="absolute inset-0 rounded-[2.8rem] opacity-55 blur-2xl animate-card-spin-slow"
                       style={{
-                        background:
-                          'conic-gradient(from 0deg at 50% 50%, rgba(245, 158, 11, 0.65) 0deg, rgba(234, 88, 12, 0.4) 60deg, rgba(16, 185, 129, 0.5) 140deg, rgba(6, 182, 212, 0.45) 210deg, rgba(217, 119, 6, 0.55) 290deg, rgba(245, 158, 11, 0.65) 360deg)',
+                        background: isMvp
+                          ? 'conic-gradient(from 0deg at 50% 50%, rgba(245, 158, 11, 0.85) 0deg, rgba(251, 191, 36, 0.7) 60deg, rgba(79, 70, 229, 0.45) 140deg, rgba(245, 158, 11, 0.85) 210deg, rgba(217, 119, 6, 0.65) 290deg, rgba(245, 158, 11, 0.85) 360deg)'
+                          : 'conic-gradient(from 0deg at 50% 50%, rgba(245, 158, 11, 0.65) 0deg, rgba(234, 88, 12, 0.4) 60deg, rgba(16, 185, 129, 0.5) 140deg, rgba(6, 182, 212, 0.45) 210deg, rgba(217, 119, 6, 0.55) 290deg, rgba(245, 158, 11, 0.65) 360deg)',
                       }}
                     />
 
                     {/* Layer 2: Gentle Breathing Glow Pulse (Luminous Ambient Aura) */}
-                    <div className="absolute -inset-2 rounded-[2.4rem] bg-gradient-to-tr from-amber-500/25 via-emerald-500/20 to-cyan-500/25 blur-xl animate-card-aura" />
+                    <div className="absolute -inset-2 rounded-[2.4rem] bg-gradient-to-tr from-amber-500/30 via-yellow-400/25 to-amber-600/30 blur-xl animate-card-aura" />
 
                     {/* Layer 3: Expanding Hologram Beam Wave Ripple */}
-                    <div className="absolute inset-0 rounded-[2rem] border-2 border-amber-400/40 animate-card-ripple" />
+                    <div className="absolute inset-0 rounded-[2rem] border-2 border-amber-400/50 animate-card-ripple" />
+                  </div>
+                )}
+
+                {/* 2. If it's MVP and not user's own card (Çarpıcı Kozmik Altın Aura) */}
+                {!isMyCard && isMvp && (
+                  <div className="absolute -inset-4 sm:-inset-6 pointer-events-none -z-10 flex items-center justify-center">
+                    {/* Layer 1: Cosmic Starlight & Gold Conic Beam (Obsidian Black, Deep Cosmic Violet, Radiant Gold, Starburst Amber) */}
+                    <div
+                      className="absolute inset-0 rounded-[2.8rem] opacity-75 blur-2xl animate-mvp-spin-aurora"
+                      style={{
+                        background:
+                          'conic-gradient(from 0deg at 50% 50%, rgba(245, 158, 11, 0.85) 0deg, rgba(217, 119, 6, 0.55) 45deg, rgba(79, 70, 229, 0.4) 110deg, rgba(251, 191, 36, 0.95) 180deg, rgba(234, 88, 12, 0.5) 240deg, rgba(124, 58, 237, 0.35) 300deg, rgba(245, 158, 11, 0.85) 360deg)',
+                      }}
+                    />
+
+                    {/* Layer 2: Radiant Breathing Gold & Cosmic Starlight Pulse */}
+                    <div className="absolute -inset-2 rounded-[2.4rem] bg-gradient-to-tr from-amber-500/40 via-yellow-400/35 to-amber-600/40 blur-xl animate-mvp-cosmic-aura" />
+
+                    {/* Layer 3: Expanding Starburst Ripple Wave */}
+                    <div className="absolute inset-0 rounded-[2rem] border-2 border-amber-400/60 animate-mvp-ripple" />
                   </div>
                 )}
 
