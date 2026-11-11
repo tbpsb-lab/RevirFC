@@ -15,7 +15,7 @@ EA Sports FC 27 tarzı dinamik oyuncu kartları, $C(11,5) = 462$ kombinasyonlu k
 - **6 Temel Halı Saha Metriği:** PAC (Kondisyon), SHO (Bitiricilik), PAS (Oyun Kurma), DRI (Dar Alan Tekniği), DEF (Kademe), PHY (İkili Mücadele & Direnç).
 - **Dinamik Kart Temaları:**
   - 🥇 **Altın Nadir (Gold Rare):** Standart kart.
-  - 🏆 **TOTW (Siyah-Altın):** Geçen maçın MVP'si o hafta sahaya siyah parlayan kartla çıkar.
+  - 🏆 **MVP (Siyah-Altın Kozmik):** Geçen maçın MVP'si (Most Valuable Player) o hafta sahaya siyah kristal parlayan ve 3D MVP simgeli kartla çıkar.
   - 🔥 **In-Form (Alevli):** Son 3 maçta reytingi sürekli yükselen oyuncular.
   - 🩹 **Revir Kartı (Bandaj İkonlu):** "Hafif Sakat" bildirimi yapan oyuncunun kartında sargı rozeti ve revir teması belirir.
 - **PlayStyles+ Rozetleri:** Ciğersiz (relentless), Balyoz (power_shot), Ahtapot (octopus), Beton Duvar (wall), İleride Bekleyen (poacher), Maestro, Ayak Tenisçisi.

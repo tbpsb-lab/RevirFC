@@ -106,14 +106,14 @@ export const FCCard: React.FC<Props> = ({
           ovalIconColor: 'text-[#FACC15]',
           ovalDropShadow: 'drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)]',
           nameTop: 'top-[52.0%]',
-          statTop: 'top-[82.2%]',
+          statTop: 'top-[81.2%]',
           statBounds: 'left-[11.3%] right-[11.3%]',
-          ovalsTop: 'top-[65.2%]',
-          ovalsBounds: 'left-[10.5%] right-[10.5%]',
-          ovalsHeight: 'h-[7.2%]',
+          ovalsTop: 'top-[67.0%]',
+          ovalsBounds: 'left-[9.5%] right-[9.5%]',
+          ovalsHeight: 'h-[5.8%]',
           photoFrame: 'top-[11%] left-[12%] right-[8%] h-[44%]',
           isGold: false,
-          label: 'TOTW • MVP',
+          label: 'MVP (Most Valuable Player) 🏆',
         };
       case 'inform':
         return {
@@ -235,6 +235,7 @@ export const FCCard: React.FC<Props> = ({
       flagWidth: 'w-5.5 h-3.5',
       logoWidth: 'w-5.5 h-5.5',
       shieldSize: 'w-7 h-8',
+      mvpShieldSize: 'w-10 h-11',
       pillText: 'text-[8px]',
       pillPad: 'px-1.5 py-0.5',
     },
@@ -250,6 +251,7 @@ export const FCCard: React.FC<Props> = ({
       flagWidth: 'w-8 h-5',
       logoWidth: 'w-8 h-8',
       shieldSize: 'w-11 h-13',
+      mvpShieldSize: 'w-15 h-17',
       pillText: 'text-[10px]',
       pillPad: 'px-2.5 py-0.5',
     },
@@ -265,6 +267,7 @@ export const FCCard: React.FC<Props> = ({
       flagWidth: 'w-10 h-6',
       logoWidth: 'w-10 h-10',
       shieldSize: 'w-14 h-16',
+      mvpShieldSize: 'w-20 h-23',
       pillText: 'text-xs',
       pillPad: 'px-3 py-1',
     },
@@ -399,7 +402,11 @@ export const FCCard: React.FC<Props> = ({
 
         {/* Sağ Üst Tema Kalkanı (3D Parallax: translateZ(6px) - Zarif ve doğal derinlikli 3D kalkan) */}
         <div
-          className={`absolute top-[13.0%] right-[13.5%] ${sizeConfig.shieldSize} pointer-events-none z-30 select-none`}
+          className={`absolute ${
+            theme === 'totw'
+              ? `top-[9.8%] right-[9.5%] ${sizeConfig.mvpShieldSize}`
+              : `top-[13.0%] right-[13.5%] ${sizeConfig.shieldSize}`
+          } pointer-events-none z-30 select-none`}
           style={{
             transform: `translateZ(6px) translate3d(${pX * 0.06}px, ${pY * 0.06}px, 0)`,
             transition: isHovered ? 'none' : 'transform 0.35s ease-out',

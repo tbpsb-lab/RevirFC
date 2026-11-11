@@ -138,7 +138,11 @@ export const TacticalPitch: React.FC<Props> = ({
           <img
             src={THEME_SHIELDS[theme]}
             alt=""
-            className="absolute top-[12%] right-[14%] w-2 h-2.5 sm:w-2.5 sm:h-3 md:w-3 md:h-3.5 object-contain pointer-events-none z-20 opacity-90 drop-shadow-sm select-none"
+            className={`absolute ${
+              theme === 'totw'
+                ? 'top-[10%] right-[11%] w-2.5 h-3.5 sm:w-3.5 sm:h-4.5 md:w-4 md:h-5'
+                : 'top-[12%] right-[14%] w-2 h-2.5 sm:w-2.5 sm:h-3 md:w-3 md:h-3.5'
+            } object-contain pointer-events-none z-20 opacity-90 drop-shadow-sm select-none`}
           />
 
           {/* İsim Plakası (Kart üzerinde) */}

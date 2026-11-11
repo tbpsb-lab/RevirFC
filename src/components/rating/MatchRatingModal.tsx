@@ -211,7 +211,7 @@ export const MatchRatingModal: React.FC<Props> = ({
             {/* MVP */}
             <div className="bg-neutral-800/80 p-3 rounded-xl border border-amber-500/40">
               <label className="text-xs font-bold text-amber-300 block mb-1">
-                🏆 MVP (Haftanın TOTW Siyah Kartı)
+                🏆 Haftanın MVP'si (Most Valuable Player)
               </label>
               <select
                 value={awards.mvpId}

@@ -49,7 +49,7 @@ interface Props {
 
 const THEME_INFO: Record<CardTheme, { label: string; icon: string; title: string; desc: string }> = {
   gold: { label: 'Altın', icon: '🟡', title: 'Standart FC 27 Kartı', desc: 'Her oyuncunun temel lig kartıdır.' },
-  totw: { label: 'TOTW', icon: '⚫', title: 'Haftanın MVP Takımı', desc: 'Haftanın en iyi oyuncularına Kurul tarafından hediye edilir.' },
+  totw: { label: 'MVP', icon: '⭐', title: 'Haftanın En Değerli Oyuncusu (MVP)', desc: 'Haftanın en iyi oyuncusuna Kurul ve maç sonu oylaması tarafından hediye edilir.' },
   inform: { label: 'In-Form', icon: '🔥', title: 'Alevli / Formda', desc: 'Yüksek form grafiği ve parlayan performanslar için Kurul tarafından verilir.' },
   revir: { label: 'Revir', icon: '🩹', title: 'Bandajlı Sakat Raporu', desc: 'Maç öncesi sakatlık check-in durumu bildiren oyunculara otomatik atanır.' },
   legend: { label: 'Efsane', icon: '👑', title: 'Kulüp Efsanesi', desc: 'İsmail Abi ve Gölcür Abi gibi kulüp efsanelerine özel unvandır.' },
@@ -715,7 +715,7 @@ export const CardCustomizer: React.FC<Props> = ({
                     <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
                       {[
                         { id: 'gold' as CardTheme, label: 'Altın', icon: '🟡', desc: 'Standart (OVR 75+)' },
-                        { id: 'totw' as CardTheme, label: 'TOTW', icon: '⚫', desc: 'Haftanın MVP’si' },
+                        { id: 'totw' as CardTheme, label: 'MVP', icon: '⭐', desc: 'Haftanın En Değerli Oyuncusu' },
                         { id: 'inform' as CardTheme, label: 'In-Form', icon: '🔥', desc: 'Formda / Alevli' },
                         { id: 'revir' as CardTheme, label: 'Revir', icon: '🩹', desc: 'Bandajlı Sakat' },
                         { id: 'legend' as CardTheme, label: 'Efsane', icon: '👑', desc: 'İsmail & Gölcür Abi' },
@@ -748,9 +748,9 @@ export const CardCustomizer: React.FC<Props> = ({
                         <div>
                           <span className="font-bold text-white block">{themeDetails.title}</span>
                           <span className="text-[10px] text-neutral-400">
-                            {currentTheme === 'gold' && 'Standart kartınız. Sakatlıkta Revir 🩹, MVP olunca TOTW/Alev 🔥 takılır.'}
+                            {currentTheme === 'gold' && 'Standart kartınız. Sakatlıkta Revir 🩹, En iyi oyuncu seçilince MVP ⭐ veya Alev 🔥 takılır.'}
                             {currentTheme === 'revir' && 'Maç öncesi hafif sakatım check-in durumu bildirdiğiniz için takıldı.'}
-                            {currentTheme === 'totw' && 'Haftanın MVP takımı seçildiğiniz için Kurul tarafından hediye edildi.'}
+                            {currentTheme === 'totw' && 'Haftanın En Değerli Oyuncusu (MVP) seçildiğiniz için Kurul tarafından hediye edildi.'}
                             {currentTheme === 'inform' && 'Formda performansınız için Kurul tarafından hediye edildi.'}
                             {currentTheme === 'bidon' && 'Maç sonu oylamasında ceza/mizah kartı olarak takıldı.'}
                             {currentTheme === 'legend' && 'Kulüp efsanesi unvanı.'}

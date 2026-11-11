@@ -142,7 +142,7 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
                 : 'bg-neutral-950 text-amber-400 border-amber-500/30'
             }`}
           >
-            <Crown className="w-3 h-3" /> TOTW (Siyah)
+            <Crown className="w-3 h-3" /> MVP (Siyah-Altın)
           </button>
           <button
             onClick={() => setThemeFilter('inform')}
