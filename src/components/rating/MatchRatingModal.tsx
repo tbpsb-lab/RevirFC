@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Player, Match, MatchRatingVote, MatchAwards } from '../../types';
+import { Player, Match, MatchRatingVote, MatchAwards, MatchBallot } from '../../types';
 import { Star, ShieldAlert, Award, MessageSquare, Send, ThumbsDown, Trophy } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -7,7 +7,7 @@ interface Props {
   match: Match;
   currentRaterPlayer: Player;
   players: Player[];
-  onSaveRatings: (votes: MatchRatingVote[], awards: MatchAwards) => void;
+  onSaveRatings: (votes: MatchRatingVote[], awards: MatchAwards, ballot?: MatchBallot) => void;
   onClose: () => void;
 }
 
@@ -49,7 +49,7 @@ export const MatchRatingModal: React.FC<Props> = ({
   const [awards, setAwards] = useState<MatchAwards>(() => ({
     mvpId: candidatePlayers[0]?.id || matchPlayers[0]?.id,
     wallId: candidatePlayers.find((p) => p.position === 'DEF' || p.position === 'GK')?.id || candidatePlayers[1]?.id || matchPlayers[0]?.id,
-    bidonId: candidatePlayers[candidatePlayers.length - 1]?.id || matchPlayers[matchPlayers.length - 1]?.id,
+    bidonId: undefined, // Her hafta bidon seçilmek zorunda değil, varsayılan pas geçilebilir
   }));
 
   const handleScoreChange = (targetId: string, score: number) => {
@@ -82,6 +82,14 @@ export const MatchRatingModal: React.FC<Props> = ({
       isAnonymous: data.isAnonymous,
     }));
 
+    const ballot: MatchBallot = {
+      raterId: currentRaterPlayer.id,
+      mvpId: awards.mvpId,
+      wallId: awards.wallId,
+      bidonId: awards.bidonId || undefined,
+      submittedAt: new Date().toISOString(),
+    };
+
     // Trigger celebration confetti
     confetti({
       particleCount: 80,
@@ -89,7 +97,7 @@ export const MatchRatingModal: React.FC<Props> = ({
       origin: { y: 0.6 },
     });
 
-    onSaveRatings(votes, awards);
+    onSaveRatings(votes, awards, ballot);
     onClose();
   };
 
@@ -229,7 +237,7 @@ export const MatchRatingModal: React.FC<Props> = ({
                   setAwards((prev) => ({
                     ...prev,
                     mvpId: newMvpId,
-                    bidonId: prev.bidonId === newMvpId ? candidatePlayers.find((p) => p.id !== newMvpId)?.id : prev.bidonId,
+                    bidonId: prev.bidonId === newMvpId ? undefined : prev.bidonId,
                   }));
                 }}
                 className="w-full bg-neutral-900 border border-neutral-700 rounded-lg p-2 text-xs text-white cursor-pointer"
@@ -262,14 +270,18 @@ export const MatchRatingModal: React.FC<Props> = ({
 
             {/* Günün Bidonu */}
             <div className="bg-neutral-800/80 p-3 rounded-xl border border-rose-500/40">
-              <label className="text-xs font-bold text-rose-300 block mb-1">
-                🪵 Günün Bidonu (Esprili)
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-xs font-bold text-rose-300 block">
+                  🪵 Günün Bidonu (Termosla Çay Borçlusu ☕)
+                </label>
+                <span className="text-[10px] text-neutral-400 font-medium">Opsiyonel</span>
+              </div>
               <select
-                value={awards.bidonId}
-                onChange={(e) => setAwards({ ...awards, bidonId: e.target.value })}
+                value={awards.bidonId || ''}
+                onChange={(e) => setAwards({ ...awards, bidonId: e.target.value ? e.target.value : undefined })}
                 className="w-full bg-neutral-900 border border-neutral-700 rounded-lg p-2 text-xs text-white cursor-pointer"
               >
+                <option value="">-- Bu Hafta Bidon Yok (Herkes İyiydi / Pas Geç) --</option>
                 {candidatePlayers
                   .filter((p) => p.id !== awards.mvpId)
                   .map((p) => (
@@ -278,6 +290,9 @@ export const MatchRatingModal: React.FC<Props> = ({
                     </option>
                   ))}
               </select>
+              <p className="text-[10px] text-neutral-400 mt-1">
+                Her hafta seçilmek zorunda değildir. Seçilirse haftaya takıma koca bir termos çay getirir ☕
+              </p>
             </div>
           </div>
         </div>

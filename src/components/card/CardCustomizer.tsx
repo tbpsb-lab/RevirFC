@@ -45,15 +45,16 @@ interface Props {
   canEdit?: boolean;
   isPendingUser?: boolean;
   isOwnCard?: boolean;
+  allPlayers?: Player[];
 }
 
 const THEME_INFO: Record<CardTheme, { label: string; icon: string; title: string; desc: string }> = {
   gold: { label: 'Altın', icon: '🟡', title: 'Standart FC 27 Kartı', desc: 'Her oyuncunun temel lig kartıdır.' },
   totw: { label: 'MVP', icon: '⭐', title: 'Haftanın En Değerli Oyuncusu (MVP)', desc: 'Haftanın en iyi oyuncusuna Kurul ve maç sonu oylaması tarafından hediye edilir.' },
-  inform: { label: 'In-Form', icon: '🔥', title: 'Alevli / Formda', desc: 'Yüksek form grafiği ve parlayan performanslar için Kurul tarafından verilir.' },
+  inform: { label: 'In-Form', icon: '🔥', title: 'Alevli / Formda', desc: 'Sadece Kurul tarafından verilir (Maksimum 3 kişi). Yüksek form grafiği ve parlayan performanslar içindir.' },
   revir: { label: 'Revir', icon: '🩹', title: 'Bandajlı Sakat Raporu', desc: 'Maç öncesi sakatlık check-in durumu bildiren oyunculara otomatik atanır.' },
   legend: { label: 'Efsane', icon: '👑', title: 'Kulüp Efsanesi', desc: 'İsmail Abi ve Gölcür Abi gibi kulüp efsanelerine özel unvandır.' },
-  bidon: { label: 'Bidon', icon: '🛢️', title: 'Günün Bidonu', desc: 'Maç sonu oylamasında günün bidonu seçilen oyuncuya mizah/ceza olarak Kurul tarafından takılır.' },
+  bidon: { label: 'Bidon', icon: '🛢️', title: 'Günün Bidonu', desc: 'Maç sonu oylamasında günün bidonu seçilen oyuncuya takılır. Haftaya koca bir termos çay borçlanır ☕' },
 };
 
 export const CardCustomizer: React.FC<Props> = ({
@@ -64,6 +65,7 @@ export const CardCustomizer: React.FC<Props> = ({
   canEdit = true,
   isPendingUser = false,
   isOwnCard = false,
+  allPlayers,
 }) => {
   const [editedPlayer, setEditedPlayer] = useState<Player>({ ...player });
   const [selectedPlaystyleCategory, setSelectedPlaystyleCategory] = useState<'all' | 'tactical' | 'status' | 'humor'>('all');
@@ -726,7 +728,18 @@ export const CardCustomizer: React.FC<Props> = ({
                           <button
                             key={item.id}
                             type="button"
-                            onClick={() => setEditedPlayer({ ...editedPlayer, theme: item.id })}
+                            onClick={() => {
+                              if (item.id === 'inform' && allPlayers) {
+                                const currentInformCount = allPlayers.filter(
+                                  (p) => p.theme === 'inform' && p.id !== editedPlayer.id
+                                ).length;
+                                if (currentInformCount >= 3) {
+                                  alert('Kurul Kuralı: Aynı anda en fazla 3 oyuncuda Alev (In-Form) kartı bulunabilir!');
+                                  return;
+                                }
+                              }
+                              setEditedPlayer({ ...editedPlayer, theme: item.id });
+                            }}
                             className={`p-1.5 rounded-lg border text-center transition-all cursor-pointer ${
                               isSelected
                                 ? 'bg-amber-500 text-black font-black border-amber-400 shadow-md'

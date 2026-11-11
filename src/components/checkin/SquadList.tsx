@@ -16,6 +16,7 @@ import {
   Trophy,
   Bell,
   Lock,
+  ShieldCheck,
 } from 'lucide-react';
 
 interface Props {
@@ -25,6 +26,7 @@ interface Props {
   onOpenCheckIn: (player: Player) => void;
   onRunBalancing: () => void;
   onOpenRating: () => void;
+  onOpenCommittee?: () => void;
   onToggleParticipation: (playerId: string) => void;
   onOpenReminderHub?: () => void;
   isPendingUser?: boolean;
@@ -38,6 +40,7 @@ export const SquadList: React.FC<Props> = ({
   onOpenCheckIn,
   onRunBalancing,
   onOpenRating,
+  onOpenCommittee,
   onToggleParticipation,
   onOpenReminderHub,
   isPendingUser = false,
@@ -153,6 +156,22 @@ export const SquadList: React.FC<Props> = ({
             >
               <Trophy className="w-4 h-4" /> 360° Puanlama
             </button>
+
+            {isAdmin && onOpenCommittee && (
+              <button
+                onClick={onOpenCommittee}
+                className="bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-black font-black text-xs px-4 py-2.5 rounded-xl shadow-lg shadow-amber-500/25 flex items-center gap-1.5 transition-transform active:scale-95 cursor-pointer"
+                title="Oylama sandığı sonuçlarını incele, MVP, Bidon ve Alevli kartlara son mührü bas"
+              >
+                <ShieldCheck className="w-4 h-4 text-black" />
+                <span>🔏 Kurul Masası & Son Mühür</span>
+                {match.awards?.isConfirmedByCommittee && (
+                  <span className="bg-black/30 text-black text-[9px] px-1.5 py-0.5 rounded-full font-black">
+                    MÜHÜRLÜ
+                  </span>
+                )}
+              </button>
+            )}
 
             {onOpenReminderHub && (
               <button

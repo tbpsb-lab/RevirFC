@@ -9,6 +9,7 @@ import {
   CheckInEntry,
   MatchRatingVote,
   MatchAwards,
+  MatchBallot,
   PlayerScoutingEntry,
 } from './types';
 import {
@@ -31,6 +32,7 @@ import { SquadList } from './components/checkin/SquadList';
 import { CheckInModal } from './components/checkin/CheckInModal';
 import { TacticalPitch } from './components/match/TacticalPitch';
 import { MatchRatingModal } from './components/rating/MatchRatingModal';
+import { CommitteeDecisionModal } from './components/rating/CommitteeDecisionModal';
 import { LockerRoomFeed } from './components/locker/LockerRoomFeed';
 import { PhotoGallery } from './components/locker/PhotoGallery';
 import { ChemistryMatrix } from './components/stats/ChemistryMatrix';
@@ -177,6 +179,7 @@ function MainApp() {
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [checkInPlayer, setCheckInPlayer] = useState<Player | null>(null);
   const [showRatingModal, setShowRatingModal] = useState(false);
+  const [isCommitteeModalOpen, setIsCommitteeModalOpen] = useState(false);
   const [showFirebaseModal, setShowFirebaseModal] = useState(false);
   const [showReminderModal, setShowReminderModal] = useState(false);
 
@@ -294,11 +297,14 @@ function MainApp() {
     }
   };
 
-  // Handle post-match 360 ratings and EMA updates
-  const handleSaveRatings = (votes: MatchRatingVote[], awards: MatchAwards) => {
-    const startersList = players.filter((p) => match.starters.includes(p.id));
+  // Handle post-match 360 ratings and individual ballots
+  const handleSaveRatings = (votes: MatchRatingVote[], provisionalAwards: MatchAwards, ballot?: MatchBallot) => {
     const teamAIds = new Set(match.teamA?.players.map((x) => x.player.id) || []);
     const teamBIds = new Set(match.teamB?.players.map((x) => x.player.id) || []);
+
+    // Check if awards were already sealed by Kurul
+    const isAlreadyConfirmed = Boolean(match.awards?.isConfirmedByCommittee);
+    const activeAwards = isAlreadyConfirmed ? match.awards! : provisionalAwards;
 
     const updatedPlayers = players.map((p) => {
       if (!match.starters.includes(p.id)) return p;
@@ -315,15 +321,16 @@ function MainApp() {
         opponentIds,
       });
 
-      // Update theme: İsmail Abi & Gölcür Abi always remain Legend
+      // Update theme:
+      // İsmail Abi & Gölcür Abi always remain Legend
       let newTheme = p.theme;
       if (p.id === 'p4' || p.id === 'p9') {
         newTheme = 'legend';
-      } else if (awards.mvpId === p.id) {
+      } else if (activeAwards.mvpId === p.id) {
         newTheme = 'totw';
-      } else if (awards.bidonId === p.id) {
+      } else if (activeAwards.bidonId === p.id) {
         newTheme = 'bidon';
-      } else if (calc.deltaOVR >= 2) {
+      } else if (activeAwards.inFormIds?.includes(p.id)) {
         newTheme = 'inform';
       } else if (p.theme === 'totw' || p.theme === 'bidon') {
         newTheme = 'gold'; // previous MVP / Bidon resets to gold
@@ -338,24 +345,64 @@ function MainApp() {
       };
     });
 
+    // Update ballot collection
+    const updatedBallots = ballot
+      ? [...(match.ballots || []).filter((b) => b.raterId !== ballot.raterId), ballot]
+      : (match.ballots || []);
+
     setPlayers(updatedPlayers);
     setMatch((prev) => ({
       ...prev,
       stage: 'rating',
-      awards,
+      awards: activeAwards,
       ratings: votes,
+      ballots: updatedBallots,
+    }));
+  };
+
+  // Handle Kurul Veto, Son Mühür & Resmi Kart Dağıtımı
+  const handleCommitteeConfirmAwards = (finalAwards: MatchAwards) => {
+    const updatedPlayers = players.map((p) => {
+      // Efsaneler her zaman Efsane kalır
+      if (p.id === 'p4' || p.id === 'p9') {
+        return { ...p, theme: 'legend' as const };
+      }
+      // 1. Haftanın MVP'si
+      if (finalAwards.mvpId === p.id) {
+        return { ...p, theme: 'totw' as const };
+      }
+      // 2. Günün Bidonu
+      if (finalAwards.bidonId === p.id) {
+        return { ...p, theme: 'bidon' as const };
+      }
+      // 3. Alevli (In-Form) Kartlar (Kurul tarafından seçilen en fazla 3 kişi)
+      if (finalAwards.inFormIds?.includes(p.id)) {
+        return { ...p, theme: 'inform' as const };
+      }
+      // Eski özel kartlar, bu hafta yeni unvan almadıysa standart altına döner
+      if (p.theme === 'totw' || p.theme === 'bidon' || p.theme === 'inform') {
+        return { ...p, theme: 'gold' as const };
+      }
+      return p;
+    });
+
+    setPlayers(updatedPlayers);
+    setMatch((prev) => ({
+      ...prev,
+      stage: 'rating',
+      awards: finalAwards,
     }));
 
-    // If Günün Bidonu chosen, add funny Baklava debt to ledger
-    if (awards.bidonId) {
-      const bidonPlayer = players.find((p) => p.id === awards.bidonId);
+    // If Günün Bidonu chosen, add funny Thermos Tea debt to ledger (Termosla Çay ☕)
+    if (finalAwards.bidonId) {
+      const bidonPlayer = players.find((p) => p.id === finalAwards.bidonId);
       if (bidonPlayer) {
         setDebts((prev) => [
           {
             id: `debt-${Date.now()}`,
             debtorPlayerId: bidonPlayer.id,
-            description: 'Maç sonu oylamasında Günün Bidonu seçildi! Baklava ısmarlayacak 🪵🍯',
-            treatType: 'baklava',
+            description: 'Maç sonu oylamasında Günün Bidonu seçildi! Haftaya sahaya koca bir termos çay getirecek ☕🫖',
+            treatType: 'çay',
             status: 'pending',
             createdAt: new Date().toISOString(),
           },
@@ -364,38 +411,67 @@ function MainApp() {
       }
     }
 
-    // Announce MVP and Bidon in the Locker Room (Soyunma Odası)
-    const mvpPlayer = players.find((p) => p.id === awards.mvpId);
-    const bidonPlayer = awards.bidonId ? players.find((p) => p.id === awards.bidonId) : undefined;
+    // Official Kurul Mührü Announcements in Soyunma Odası (Locker Room)
+    const mvpPlayer = players.find((p) => p.id === finalAwards.mvpId);
+    const bidonPlayer = finalAwards.bidonId ? players.find((p) => p.id === finalAwards.bidonId) : undefined;
+    const inFormPlayers = (finalAwards.inFormIds || [])
+      .map((id) => players.find((p) => p.id === id))
+      .filter(Boolean) as Player[];
+
+    const newAnnouncements: LockerPost[] = [];
+
     if (mvpPlayer) {
-      const newAnnouncements: LockerPost[] = [
-        {
-          id: `post-${Date.now()}-mvp`,
-          matchId: match.id,
-          authorPlayerId: 'system',
-          authorName: 'Revir FC Resmi Bülteni 📢',
-          text: `🏆 HAFTANIN MVP'Sİ: ${mvpPlayer.name}! Maç sonu oylamasında sahanın en değerlisi seçilerek 1 haftalığına parlayan Siyah-Kozmik Kristal MVP kartını göğsüne taktı! Tebrikler! ⚽⭐`,
-          isAnonymous: false,
-          reactions: { fire: [mvpPlayer.id], laugh: [], violin: [], revir: [], goat: [mvpPlayer.id] },
-          createdAt: new Date().toISOString(),
-        },
-      ];
-
-      if (bidonPlayer) {
-        newAnnouncements.push({
-          id: `post-${Date.now()}-bidon`,
-          matchId: match.id,
-          authorPlayerId: 'system',
-          authorName: 'Revir FC Disiplin & Mizah Kurulu 🛢️',
-          text: `🪵 GÜNÜN BİDONU: ${bidonPlayer.name}! Maç sonu oylamasında haftanın bidonu seçildi. Kendisine paslı teneke kart takıldı ve kasaya takıma baklava ısmarlama borcu yazıldı! Afiyet olsun! 🍯😂`,
-          isAnonymous: false,
-          reactions: { fire: [], laugh: [bidonPlayer.id], violin: [], revir: [], goat: [] },
-          createdAt: new Date().toISOString(),
-        });
-      }
-
-      setPosts((prev) => [...newAnnouncements, ...prev]);
+      newAnnouncements.push({
+        id: `post-${Date.now()}-mvp`,
+        matchId: match.id,
+        authorPlayerId: 'system',
+        authorName: 'Revir FC Kurul Mührü 🔏',
+        text: `🏆 HAFTANIN RESMİ MVP'Sİ: ${mvpPlayer.name}! Kurul mührü ve maç sonu oylarıyla haftanın en değerlisi tescillendi! 1 hafta boyunca parlayan Siyah-Kozmik Kristal MVP kartını göğsüne taktı! ⭐⚽`,
+        isAnonymous: false,
+        reactions: { fire: [mvpPlayer.id], laugh: [], violin: [], revir: [], goat: [mvpPlayer.id] },
+        createdAt: new Date().toISOString(),
+      });
     }
+
+    if (bidonPlayer) {
+      newAnnouncements.push({
+        id: `post-${Date.now()}-bidon`,
+        matchId: match.id,
+        authorPlayerId: 'system',
+        authorName: 'Revir FC Kurul Mührü 🔏',
+        text: `🪵 GÜNÜN BİDONU: ${bidonPlayer.name}! Kurul kararıyla haftanın bidon kartı takıldı. Takıma haftaya koca bir termos sıcak çay getirme borcu yazıldı! Afiyet olsun! ☕🫖😂`,
+        isAnonymous: false,
+        reactions: { fire: [], laugh: [bidonPlayer.id], violin: [], revir: [], goat: [] },
+        createdAt: new Date().toISOString(),
+      });
+    } else {
+      newAnnouncements.push({
+        id: `post-${Date.now()}-nobidon`,
+        matchId: match.id,
+        authorPlayerId: 'system',
+        authorName: 'Revir FC Kurul Mührü 🔏',
+        text: `👏 KURUL KARARI: Bu hafta kimseye Günün Bidonu verilmedi! Kurul tüm kadronun mücadelesinden memnun kaldı, çaylar kulüpten! ☕✨`,
+        isAnonymous: false,
+        reactions: { fire: [], laugh: [], violin: [], revir: [], goat: [] },
+        createdAt: new Date().toISOString(),
+      });
+    }
+
+    if (inFormPlayers.length > 0) {
+      const names = inFormPlayers.map((p) => p.name).join(', ');
+      newAnnouncements.push({
+        id: `post-${Date.now()}-inform`,
+        matchId: match.id,
+        authorPlayerId: 'system',
+        authorName: 'Revir FC Kurul Mührü 🔏',
+        text: `🔥 ALEV ALANLAR (IN-FORM): Kurul tarafından bu haftanın parlayan yıldızları ${names} seçildi! Alevli In-Form kartları hayırlı olsun! 🔥⚽`,
+        isAnonymous: false,
+        reactions: { fire: inFormPlayers.map((p) => p.id), laugh: [], violin: [], revir: [], goat: [] },
+        createdAt: new Date().toISOString(),
+      });
+    }
+
+    setPosts((prev) => [...newAnnouncements, ...prev]);
   };
 
   // Add post to locker room
@@ -588,6 +664,7 @@ function MainApp() {
             onOpenCheckIn={(p) => setCheckInPlayer(p)}
             onRunBalancing={handleRunBalancing}
             onOpenRating={() => setShowRatingModal(true)}
+            onOpenCommittee={() => setIsCommitteeModalOpen(true)}
             onToggleParticipation={handleToggleParticipation}
             onOpenReminderHub={() => setShowReminderModal(true)}
             isPendingUser={isPendingUser}
@@ -668,6 +745,7 @@ function MainApp() {
       {editingPlayer && (
         <CardCustomizer
           player={editingPlayer}
+          allPlayers={players}
           isAdmin={isAdminOrCaptain}
           isPendingUser={isPendingUser}
           isOwnCard={Boolean(currentUser?.claimedPlayerId && currentUser.claimedPlayerId === editingPlayer.id)}
@@ -695,6 +773,16 @@ function MainApp() {
           players={players}
           onSaveRatings={handleSaveRatings}
           onClose={() => setShowRatingModal(false)}
+        />
+      )}
+
+      {isCommitteeModalOpen && (
+        <CommitteeDecisionModal
+          isOpen={isCommitteeModalOpen}
+          match={match}
+          players={players}
+          onConfirmAwards={handleCommitteeConfirmAwards}
+          onClose={() => setIsCommitteeModalOpen(false)}
         />
       )}
 

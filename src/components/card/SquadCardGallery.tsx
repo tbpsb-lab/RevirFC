@@ -35,12 +35,47 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
     rankMap.set(p.id, idx + 1);
   });
 
-  // 2. Base list order:
-  //    - First: Logged-in user's own card (myPlayer)
-  //    - Followed by: All other players sorted strictly by score (OVR descending)
+  // 2. Base list order with 5-Tier Deduplicated Hierarchy:
+  //    Tier 1: Current User's card (myPlayer) - always 1st if claimed & approved
+  //    Tier 2: Haftanın MVP'si (theme === 'totw' && not already added)
+  //    Tier 3: Günün Bidonu (theme === 'bidon' && not already added, if selected that week)
+  //    Tier 4: Alevli In-Form Kartlar (theme === 'inform' && not already added, max 3)
+  //    Tier 5: Remaining squad sorted by OVR descending (and Turkish name)
+  //    -> Strictly ZERO duplicates!
   const myPlayer = myPlayerId ? players.find((p) => p.id === myPlayerId) : undefined;
-  const otherPlayers = players
-    .filter((p) => p.id !== myPlayerId)
+  const orderedPlayers: Player[] = [];
+  const addedIds = new Set<string>();
+
+  // 1. Current user
+  if (myPlayer) {
+    orderedPlayers.push(myPlayer);
+    addedIds.add(myPlayer.id);
+  }
+
+  // 2. MVP (theme === 'totw')
+  const mvp = players.find((p) => p.theme === 'totw');
+  if (mvp && !addedIds.has(mvp.id)) {
+    orderedPlayers.push(mvp);
+    addedIds.add(mvp.id);
+  }
+
+  // 3. Bidon (theme === 'bidon', optional)
+  const bidon = players.find((p) => p.theme === 'bidon');
+  if (bidon && !addedIds.has(bidon.id)) {
+    orderedPlayers.push(bidon);
+    addedIds.add(bidon.id);
+  }
+
+  // 4. In-Form cards (theme === 'inform', max 3)
+  const informs = players.filter((p) => p.theme === 'inform' && !addedIds.has(p.id)).slice(0, 3);
+  for (const p of informs) {
+    orderedPlayers.push(p);
+    addedIds.add(p.id);
+  }
+
+  // 5. Remaining squad sorted by currentOVR descending
+  const remaining = players
+    .filter((p) => !addedIds.has(p.id))
     .sort((a, b) => {
       if (b.currentOVR !== a.currentOVR) {
         return b.currentOVR - a.currentOVR;
@@ -48,7 +83,10 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
       return a.name.localeCompare(b.name, 'tr');
     });
 
-  const orderedPlayers = myPlayer ? [myPlayer, ...otherPlayers] : leaderboard;
+  for (const p of remaining) {
+    orderedPlayers.push(p);
+    addedIds.add(p.id);
+  }
 
   // 3. Filter by search, position, and theme
   const filtered = orderedPlayers.filter((p) => {
@@ -200,16 +238,35 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
                 isMyCard ? 'z-20 scale-[1.02]' : 'z-10'
               }`}
             >
-              {/* Top Badge: "Senin Kartın" or Score Rank */}
+              {/* Top Badge: "Senin Kartın", "MVP", "Bidon", "In-Form", or Score Rank */}
               {isMyCard ? (
                 <div className="flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/30 to-amber-500/20 border border-amber-400/70 shadow-lg shadow-amber-500/25 text-amber-300 text-[11px] font-black tracking-wide uppercase mb-2.5 animate-pulse">
                   <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-spin-slow" />
                   <span>Senin Kartın</span>
+                  {player.theme === 'totw' && <span className="text-yellow-300 font-extrabold">• 🏆 MVP</span>}
+                  {player.theme === 'inform' && <span className="text-orange-400 font-extrabold">• 🔥 IN-FORM</span>}
+                  {player.theme === 'bidon' && <span className="text-rose-400 font-extrabold">• 🪵 BİDON</span>}
                   <span className="text-amber-200/70 font-mono text-[10px] font-normal">#{rank}</span>
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
                   </span>
+                </div>
+              ) : player.theme === 'totw' ? (
+                <div className="flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-neutral-900 via-amber-950/60 to-neutral-900 border border-amber-400/70 shadow-lg shadow-amber-500/20 text-amber-300 text-[11px] font-black tracking-wide uppercase mb-2.5">
+                  <Crown className="w-3.5 h-3.5 text-amber-400" />
+                  <span>🏆 Haftanın MVP'si</span>
+                  <span className="text-amber-200/70 font-mono text-[10px]">#{rank}</span>
+                </div>
+              ) : player.theme === 'bidon' ? (
+                <div className="flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-neutral-900 via-rose-950/50 to-neutral-900 border border-rose-500/60 shadow-lg shadow-rose-500/20 text-rose-300 text-[11px] font-black tracking-wide uppercase mb-2.5">
+                  <span>🪵 Günün Bidonu • ☕ Çay Borçlusu</span>
+                </div>
+              ) : player.theme === 'inform' ? (
+                <div className="flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-neutral-900 via-orange-950/60 to-neutral-900 border border-orange-500/70 shadow-lg shadow-orange-500/20 text-orange-300 text-[11px] font-black tracking-wide uppercase mb-2.5">
+                  <Flame className="w-3.5 h-3.5 text-orange-400 animate-pulse" />
+                  <span>🔥 Alev • In-Form</span>
+                  <span className="text-orange-200/70 font-mono text-[10px]">#{rank}</span>
                 </div>
               ) : (
                 <div className="flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-neutral-900/80 border border-neutral-800 text-neutral-400 text-[10px] font-mono font-bold mb-2.5">

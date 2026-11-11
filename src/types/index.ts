@@ -146,10 +146,22 @@ export interface MatchRatingVote {
   isAnonymous?: boolean;
 }
 
+export interface MatchBallot {
+  raterId: string;
+  mvpId?: string;
+  wallId?: string;
+  bidonId?: string; // empty or undefined if "Bu Hafta Bidon Yok"
+  submittedAt: string;
+}
+
 export interface MatchAwards {
-  mvpId?: string;       // Haftanın TOTW Kartı
-  wallId?: string;      // Etten Duvar
-  bidonId?: string;     // Günün Bidonu
+  mvpId?: string;          // Haftanın MVP Kartı (Tekil)
+  wallId?: string;         // Etten Duvar (En İyi Savunma/GK)
+  bidonId?: string;        // Günün Bidonu (Opsiyonel / Tekil)
+  inFormIds?: string[];    // Kurul tarafından atanan Alevli In-Form Kartlar (Maksimum 3)
+  isConfirmedByCommittee?: boolean; // Kurul Son Mührü basıldı mı?
+  confirmedAt?: string;
+  confirmedBy?: string;
 }
 
 export interface Match {
@@ -166,6 +178,7 @@ export interface Match {
   score?: MatchScore;
   awards?: MatchAwards;
   ratings?: MatchRatingVote[];
+  ballots?: MatchBallot[];
   tacticalNotes?: string;
 }
 
