@@ -283,7 +283,7 @@ export const MatchRatingModal: React.FC<Props> = ({
               >
                 <option value="">-- Bu Hafta Bidon Yok (Herkes İyiydi / Pas Geç) --</option>
                 {candidatePlayers
-                  .filter((p) => p.id !== awards.mvpId)
+                  .filter((p) => p.id !== awards.mvpId && !p.isLegend)
                   .map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.name} (#{p.number})
@@ -291,7 +291,7 @@ export const MatchRatingModal: React.FC<Props> = ({
                   ))}
               </select>
               <p className="text-[10px] text-neutral-400 mt-1">
-                Her hafta seçilmek zorunda değildir. Seçilirse haftaya takıma koca bir termos çay getirir ☕
+                Her hafta seçilmek zorunda değildir. Kulüp Efsaneleri bidon seçilemez 👑. Seçilirse haftaya takıma koca bir termos çay getirir ☕
               </p>
             </div>
           </div>

@@ -738,7 +738,12 @@ export const CardCustomizer: React.FC<Props> = ({
                                   return;
                                 }
                               }
-                              setEditedPlayer({ ...editedPlayer, theme: item.id });
+                              if (item.id === 'bidon' && (editedPlayer.isLegend || player.isLegend)) {
+                                alert('Kulüp Kuralı: Kulüp Efsaneleri (Legend) asla Bidon seçilemez!');
+                                return;
+                              }
+                              const isNowLegend = item.id === 'legend' ? true : item.id === 'gold' ? false : editedPlayer.isLegend;
+                              setEditedPlayer({ ...editedPlayer, theme: item.id, isLegend: isNowLegend });
                             }}
                             className={`p-1.5 rounded-lg border text-center transition-all cursor-pointer ${
                               isSelected

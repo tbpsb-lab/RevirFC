@@ -83,6 +83,7 @@ export interface Player {
   name: string;
   nickname: string;
   pendingNickname?: string; // Kullanıcı tarafından değiştirilmiş, yönetici onayı bekleyen lakap
+  isLegend?: boolean; // Sadece yönetici tarafından atanabilen kulüp efsanesi unvanı (Bidon olamaz, MVP/Alev/Revir olabilir)
   position: PreferredPosition;
   number: number;
   photoUrl: string;

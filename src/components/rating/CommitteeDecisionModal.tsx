@@ -237,7 +237,7 @@ export const CommitteeDecisionModal: React.FC<Props> = ({
                 </span>
               </div>
               <p className="text-[11px] text-neutral-400 mb-2">
-                Her hafta bidon seçilmek zorunda değildir; herkes iyi oynamışsa &quot;Bu Hafta Bidon Yok&quot; seçilebilir. Seçilirse takıma termosla çay getirme cezası yazılır.
+                Her hafta bidon seçilmek zorunda değildir; herkes iyi oynamışsa &quot;Bu Hafta Bidon Yok&quot; seçilebilir. Kulüp Efsaneleri asla bidon seçilemez 👑. Seçilirse takıma termosla çay getirme cezası yazılır.
               </p>
               <select
                 value={selectedBidonId}
@@ -246,7 +246,7 @@ export const CommitteeDecisionModal: React.FC<Props> = ({
               >
                 <option value="">-- 🛡️ Bu Hafta Bidon Yok (Herkes İyi Oynadı / Kurul Affetti) --</option>
                 {candidatePlayers
-                  .filter((p) => p.id !== selectedMvpId)
+                  .filter((p) => p.id !== selectedMvpId && !p.isLegend)
                   .map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.name} (#{p.number}) • ({bidonTallies[p.id] || 0} oy aldı)

@@ -67,7 +67,8 @@ function MainApp() {
           return {
             ...p,
             name: 'İsmail',
-            theme: 'legend',
+            isLegend: true,
+            theme: p.theme === 'totw' || p.theme === 'inform' || p.theme === 'revir' ? p.theme : 'legend',
             baseOVR: 88,
             currentOVR: Math.max(p.currentOVR, 88),
           };
@@ -76,7 +77,8 @@ function MainApp() {
           return {
             ...p,
             name: 'Gölcür',
-            theme: 'legend',
+            isLegend: true,
+            theme: p.theme === 'totw' || p.theme === 'inform' || p.theme === 'revir' ? p.theme : 'legend',
             baseOVR: 88,
             currentOVR: Math.max(p.currentOVR, 88),
           };
@@ -85,7 +87,8 @@ function MainApp() {
           return {
             ...p,
             name: 'Cevdet',
-            theme: 'legend',
+            isLegend: true,
+            theme: p.theme === 'totw' || p.theme === 'inform' || p.theme === 'revir' ? p.theme : 'legend',
             baseOVR: Math.max(p.baseOVR, 86),
             currentOVR: Math.max(p.currentOVR, 86),
           };
@@ -248,7 +251,14 @@ function MainApp() {
           ? {
               ...p,
               currentStatus: checkIn.status,
-              theme: checkIn.status === 'light_injury' ? 'revir' : p.theme === 'revir' ? 'gold' : p.theme,
+              theme:
+                checkIn.status === 'light_injury'
+                  ? 'revir'
+                  : p.theme === 'revir'
+                  ? p.isLegend
+                    ? 'legend'
+                    : 'gold'
+                  : p.theme,
             }
           : p
       )
@@ -331,18 +341,19 @@ function MainApp() {
       });
 
       // Update theme:
-      // İsmail, Gölcür & Cevdet always remain Legend
       let newTheme = p.theme;
-      if (p.id === 'p4' || p.id === 'p9' || p.id === 'p7') {
-        newTheme = 'legend';
-      } else if (activeAwards.mvpId === p.id) {
+      if (activeAwards.mvpId === p.id) {
         newTheme = 'totw';
-      } else if (activeAwards.bidonId === p.id) {
+      } else if (activeAwards.bidonId === p.id && !p.isLegend) {
         newTheme = 'bidon';
       } else if (activeAwards.inFormIds?.includes(p.id)) {
         newTheme = 'inform';
-      } else if (p.theme === 'totw' || p.theme === 'bidon') {
-        newTheme = 'gold'; // previous MVP / Bidon resets to gold
+      } else if (p.currentStatus === 'light_injury') {
+        newTheme = 'revir';
+      } else if (p.theme === 'totw' || p.theme === 'bidon' || p.theme === 'inform' || p.theme === 'revir') {
+        newTheme = p.isLegend ? 'legend' : 'gold';
+      } else if (p.isLegend) {
+        newTheme = 'legend';
       }
 
       return {
@@ -372,27 +383,27 @@ function MainApp() {
   // Handle Kurul Veto, Son Mühür & Resmi Kart Dağıtımı
   const handleCommitteeConfirmAwards = (finalAwards: MatchAwards) => {
     const updatedPlayers = players.map((p) => {
-      // Efsaneler her zaman Efsane kalır (İsmail, Gölcür, Cevdet)
-      if (p.id === 'p4' || p.id === 'p9' || p.id === 'p7') {
-        return { ...p, theme: 'legend' as const };
-      }
-      // 1. Haftanın MVP'si
+      // 1. Haftanın MVP'si (Efsane olsa bile hak ettiğinde MVP olabilir!)
       if (finalAwards.mvpId === p.id) {
         return { ...p, theme: 'totw' as const };
       }
-      // 2. Günün Bidonu
-      if (finalAwards.bidonId === p.id) {
+      // 2. Günün Bidonu (Efsaneler ASLA bidon seçilemez!)
+      if (finalAwards.bidonId === p.id && !p.isLegend) {
         return { ...p, theme: 'bidon' as const };
       }
-      // 3. Alevli (In-Form) Kartlar (Kurul tarafından seçilen en fazla 3 kişi)
+      // 3. Alevli (In-Form) Kartlar (Efsane olsa bile hak ettiğinde Alev olabilir!)
       if (finalAwards.inFormIds?.includes(p.id)) {
         return { ...p, theme: 'inform' as const };
       }
-      // Eski özel kartlar, bu hafta yeni unvan almadıysa standart altına döner
-      if (p.theme === 'totw' || p.theme === 'bidon' || p.theme === 'inform') {
-        return { ...p, theme: 'gold' as const };
+      // 4. Eğer aktif hafif sakatlık (revir) check-in durumu varsa korunur
+      if (p.currentStatus === 'light_injury') {
+        return { ...p, theme: 'revir' as const };
       }
-      return p;
+      // 5. Özel unvan almayanlar: Efsaneler 'legend' temasına, standart oyuncular 'gold'a döner!
+      if (p.isLegend) {
+        return { ...p, theme: 'legend' as const };
+      }
+      return { ...p, theme: 'gold' as const };
     });
 
     setPlayers(updatedPlayers);

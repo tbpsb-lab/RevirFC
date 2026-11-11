@@ -76,6 +76,7 @@ export const INITIAL_PLAYERS: Player[] = [
     baseOVR: 88,
     currentOVR: 88,
     stats: { pac: 72, sho: 45, pas: 78, dri: 70, def: 92, phy: 89 },
+    isLegend: true,
     theme: 'legend', // İsmail, Gölcür, Cevdet Efsane
     playstyles: ['octopus', 'first_touch'],
     matchesPlayed: 52,
@@ -139,6 +140,7 @@ export const INITIAL_PLAYERS: Player[] = [
     baseOVR: 86,
     currentOVR: 86,
     stats: { pac: 74, sho: 58, pas: 76, dri: 72, def: 88, phy: 90 },
+    isLegend: true,
     theme: 'legend', // Kulüp Efsanesi
     playstyles: ['slide_tackler', 'first_touch'],
     matchesPlayed: 45,
@@ -181,6 +183,7 @@ export const INITIAL_PLAYERS: Player[] = [
     baseOVR: 88,
     currentOVR: 88,
     stats: { pac: 78, sho: 90, pas: 75, dri: 78, def: 52, phy: 91 },
+    isLegend: true,
     theme: 'legend', // İsmail, Gölcür, Cevdet Efsane
     playstyles: ['power_shot', 'ice_cold'],
     matchesPlayed: 55,
