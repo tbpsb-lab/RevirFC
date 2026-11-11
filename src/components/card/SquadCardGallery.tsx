@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Player, PreferredPosition, CardTheme } from '../../types';
 import { FCCard } from './FCCard';
 import { useAuth } from '../../context/AuthContext';
+import { getAccess } from '../../services/permissions';
 import { Search, Filter, Sparkles, Crown, Flame, Bandage, Shield, Star } from 'lucide-react';
 
 interface Props {
@@ -15,7 +16,7 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
   const [posFilter, setPosFilter] = useState<string>('ALL');
   const [themeFilter, setThemeFilter] = useState<string>('ALL');
 
-  const isAdminOrCaptain = currentUser?.role === 'admin' || currentUser?.role === 'captain';
+  const isAdminOrCaptain = getAccess(currentUser, players).isCommittee;
   const isApproved = currentUser?.status === 'approved';
   const isPending = currentUser?.status === 'pending';
 

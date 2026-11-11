@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserProfile, UserRole, UserStatus } from '../types';
 import { MOCK_USERS } from '../services/mockData';
+import { safeSetItem } from '../services/safeStorage';
 import { auth, isFirebaseConfigured } from '../services/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 
@@ -62,12 +63,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_USERS_KEY, JSON.stringify(allUsers));
+    safeSetItem(LOCAL_STORAGE_USERS_KEY, JSON.stringify(allUsers));
   }, [allUsers]);
 
   useEffect(() => {
     if (currentUser) {
-      localStorage.setItem(LOCAL_STORAGE_CURRENT_KEY, JSON.stringify(currentUser));
+      safeSetItem(LOCAL_STORAGE_CURRENT_KEY, JSON.stringify(currentUser));
     }
   }, [currentUser]);
 

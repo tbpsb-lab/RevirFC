@@ -2,6 +2,10 @@ import React, { useState, useRef } from 'react';
 import { Player, CardTheme, PlayerStats } from '../../types';
 import { PLAYSTYLE_CONFIG } from './PlayStyleBadge';
 import { getNationFlagUrl, getClubLogoUrl } from '../../data/teamsAndNations';
+import { getPlayerPositions } from '../../services/positions';
+
+// Fotoğraf IndexedDB'den yüklenene kadar (idb: referansı) gösterilen şeffaf 1x1 görsel
+const TRANSPARENT_PIXEL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 import { Download } from 'lucide-react';
 import { toPng } from 'html-to-image';
 
@@ -105,11 +109,12 @@ export const FCCard: React.FC<Props> = ({
           ovalTextColor: 'text-[#FEF08A]',
           ovalIconColor: 'text-[#FACC15]',
           ovalDropShadow: 'drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)]',
-          nameTop: 'top-[52.4%]', // Siyah metalik isimliğin tam ortasına hizalandı
-          statTop: 'top-[77.6%]',
-          statBounds: 'left-[11.3%] right-[11.3%]',
-          ovalsTop: 'top-[65.8%]', // Altın parıltılı kapsüllerin tam içine oturtuldu
-          ovalsBounds: 'left-[9.5%] right-[9.5%]',
+          nameTop: 'top-[60.2%]', // İsim: isimlik plakasının MERKEZİ
+          nickTop: 'top-[54.4%]', // Lakap: plakanın hemen üstü (MERKEZ)
+          statTop: 'top-[82.9%]', // MERKEZ: etiket altındaki boş hücrenin ortası
+          statBounds: 'left-[11.5%] right-[11.1%]',
+          ovalsTop: 'top-[70.0%]', // MERKEZ: oval yuvanın ortası
+          ovalsBounds: 'left-[12.4%] right-[11.0%]',
           ovalsHeight: 'h-[5.8%]',
           photoFrame: 'top-[11%] left-[12%] right-[8%] h-[44%]',
           isGold: false,
@@ -125,11 +130,12 @@ export const FCCard: React.FC<Props> = ({
           ovalTextColor: 'text-[#FFEDD5]',
           ovalIconColor: 'text-[#FB923C]',
           ovalDropShadow: 'drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)]',
-          nameTop: 'top-[50.0%]', // Ateşli cam hattın üstü ve altı dengeli
-          statTop: 'top-[76.6%]', // Sayılar akkor kömür tabanının hemen üstünde net okunur
-          statBounds: 'left-[11.3%] right-[11.3%]',
-          ovalsTop: 'top-[66.6%]', // İki dumanlı ateş halkasının tam göbeğine yerleştirildi
-          ovalsBounds: 'left-[10.5%] right-[10.5%]',
+          nameTop: 'top-[60.1%]', // İsim: isimlik plakasının MERKEZİ
+          nickTop: 'top-[54.5%]', // Lakap: plakanın hemen üstü (MERKEZ)
+          statTop: 'top-[82.9%]', // MERKEZ: etiket altındaki boş hücrenin ortası
+          statBounds: 'left-[11.5%] right-[11.1%]',
+          ovalsTop: 'top-[69.6%]', // MERKEZ: oval yuvanın ortası
+          ovalsBounds: 'left-[12.4%] right-[12.6%]',
           ovalsHeight: 'h-[6.5%]',
           photoFrame: 'top-[11%] left-[12%] right-[8%] h-[44%]',
           isGold: false,
@@ -145,11 +151,12 @@ export const FCCard: React.FC<Props> = ({
           ovalTextColor: 'text-[#E0F2FE]',
           ovalIconColor: 'text-[#38BDF8]',
           ovalDropShadow: 'drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)]',
-          nameTop: 'top-[53.5%]',
-          statTop: 'top-[81.0%]', // Sayılar alt kavis yerine dikey bölmelerin ortasına taşındı
-          statBounds: 'left-[11.3%] right-[11.3%]',
-          ovalsTop: 'top-[65.6%]',
-          ovalsBounds: 'left-[10.5%] right-[10.5%]',
+          nameTop: 'top-[60.1%]', // İsim: isimlik plakasının MERKEZİ
+          nickTop: 'top-[54.5%]', // Lakap: plakanın hemen üstü (MERKEZ)
+          statTop: 'top-[82.9%]', // MERKEZ: etiket altındaki boş hücrenin ortası
+          statBounds: 'left-[11.5%] right-[11.1%]',
+          ovalsTop: 'top-[70.0%]', // MERKEZ: oval yuvanın ortası
+          ovalsBounds: 'left-[11.5%] right-[11.3%]',
           ovalsHeight: 'h-[6.5%]',
           photoFrame: 'top-[11%] left-[12%] right-[8%] h-[44%]',
           isGold: false,
@@ -165,11 +172,12 @@ export const FCCard: React.FC<Props> = ({
           ovalTextColor: 'text-[#78350F]',
           ovalIconColor: 'text-[#B45309]',
           ovalDropShadow: 'drop-shadow-[0_1px_0_rgba(255,255,255,0.8)]',
-          nameTop: 'top-[54.0%]', // Mermer şerit isimliğin tam ortası
-          statTop: 'top-[81.0%]', // Sayılar alt mermer kavisten yukarı alınıp ortalandı
-          statBounds: 'left-[11.3%] right-[11.3%]',
-          ovalsTop: 'top-[72.0%]', // Beyaz mermer kapsüllerin tam merkezine oturtuldu
-          ovalsBounds: 'left-[11.5%] right-[11.5%]',
+          nameTop: 'top-[63.5%]', // İsim: isimlik plakasının MERKEZİ
+          nickTop: 'top-[57.3%]', // Lakap: plakanın hemen üstü (MERKEZ)
+          statTop: 'top-[84.8%]', // MERKEZ: etiket altındaki boş hücrenin ortası
+          statBounds: 'left-[11.7%] right-[11.3%]',
+          ovalsTop: 'top-[73.4%]', // MERKEZ: oval yuvanın ortası
+          ovalsBounds: 'left-[13.7%] right-[13.2%]',
           ovalsHeight: 'h-[5.8%]',
           photoFrame: 'top-[12%] left-[16%] right-[16%] h-[46%]',
           isGold: false,
@@ -185,11 +193,12 @@ export const FCCard: React.FC<Props> = ({
           ovalTextColor: 'text-[#FBBF24]',
           ovalIconColor: 'text-[#F59E0B]',
           ovalDropShadow: 'drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)]',
-          nameTop: 'top-[52.4%]', // Lakap koli kapağı üstünde, isim koli bandının tam merkezinde
-          statTop: 'top-[77.8%]', // Sayılar dip metal sınırdan yukarı taşınıp paslı tablonun ortasına alındı
-          statBounds: 'left-[11.3%] right-[11.3%]',
-          ovalsTop: 'top-[69.5%]', // Paslı oval yuvaların tam ortasına hizalandı
-          ovalsBounds: 'left-[10.5%] right-[10.5%]',
+          nameTop: 'top-[60.1%]', // İsim: isimlik plakasının MERKEZİ
+          nickTop: 'top-[54.0%]', // Lakap: plakanın hemen üstü (MERKEZ)
+          statTop: 'top-[83.2%]', // MERKEZ: etiket altındaki boş hücrenin ortası
+          statBounds: 'left-[11.5%] right-[11.1%]',
+          ovalsTop: 'top-[70.0%]', // MERKEZ: oval yuvanın ortası
+          ovalsBounds: 'left-[15.1%] right-[14.5%]',
           ovalsHeight: 'h-[6.2%]',
           photoFrame: 'top-[11%] left-[12%] right-[8%] h-[44%]',
           isGold: false,
@@ -206,11 +215,12 @@ export const FCCard: React.FC<Props> = ({
           ovalTextColor: 'text-[#FEF08A]',
           ovalIconColor: 'text-[#FACC15]',
           ovalDropShadow: 'drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)]',
-          nameTop: 'top-[51.8%]', // Altın kurdele isimliğin tam ortası
-          statTop: 'top-[78.4%]', // Sayılar HIZ-ŞUT etiketlerinden aşağı indirilip altın tabanda ortalandı
-          statBounds: 'left-[11.3%] right-[11.3%]',
-          ovalsTop: 'top-[67.0%]', // Altın oval halkaların tam ortasına oturtuldu
-          ovalsBounds: 'left-[9.5%] right-[9.5%]',
+          nameTop: 'top-[60.6%]', // İsim: isimlik plakasının MERKEZİ
+          nickTop: 'top-[54.8%]', // Lakap: plakanın hemen üstü (MERKEZ)
+          statTop: 'top-[79.7%]', // MERKEZ: etiket altındaki boş hücrenin ortası
+          statBounds: 'left-[17.0%] right-[16.6%]',
+          ovalsTop: 'top-[68.6%]', // MERKEZ: oval yuvanın ortası
+          ovalsBounds: 'left-[15.7%] right-[15.5%]',
           ovalsHeight: 'h-[5.8%]',
           photoFrame: 'top-[11%] left-[12%] right-[8%] h-[44%]',
           isGold: false,
@@ -230,6 +240,8 @@ export const FCCard: React.FC<Props> = ({
       posText: 'text-[9px]',
       numberText: 'text-[10px]',
       nameText: 'text-xs',
+      nameBigText: 'text-[11px]',
+      nickText: 'text-[8px]',
       nicknameText: 'text-[9px]',
       statVal: 'text-[10px]',
       flagWidth: 'w-5.5 h-3.5',
@@ -246,6 +258,8 @@ export const FCCard: React.FC<Props> = ({
       posText: 'text-xs font-black',
       numberText: 'text-[13px]',
       nameText: 'text-lg font-black',
+      nameBigText: 'text-base',
+      nickText: 'text-[10px]',
       nicknameText: 'text-xs font-bold',
       statVal: 'text-sm font-black',
       flagWidth: 'w-8 h-5',
@@ -262,6 +276,8 @@ export const FCCard: React.FC<Props> = ({
       posText: 'text-sm font-black',
       numberText: 'text-[16px]',
       nameText: 'text-2xl font-black',
+      nameBigText: 'text-xl',
+      nickText: 'text-xs',
       nicknameText: 'text-sm font-bold',
       statVal: 'text-base font-black',
       flagWidth: 'w-10 h-6',
@@ -276,6 +292,7 @@ export const FCCard: React.FC<Props> = ({
   // 3D Parallax fare hareketine göre dinamik mikro kayma çarpanları
   const pX = rotate.y;
   const pY = -rotate.x;
+  const positions = getPlayerPositions(player);
 
   return (
     <div
@@ -332,7 +349,7 @@ export const FCCard: React.FC<Props> = ({
             title={photoInteractive ? 'Fotoğrafı sürükleyin veya fare tekerleğiyle yakınlaştırın' : undefined}
           >
             <img
-              src={player.photoUrl}
+              src={player.photoUrl.startsWith('idb:') ? TRANSPARENT_PIXEL : player.photoUrl}
               alt={player.name}
               style={{
                 transform: player.photoAdjustments
@@ -370,9 +387,17 @@ export const FCCard: React.FC<Props> = ({
           <span className={`font-black tracking-tighter leading-none ${themeConfig.ovrColor} ${sizeConfig.ovrText} drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)]`}>
             {ovr}
           </span>
-          {/* Mevki (MID) */}
-          <span className={`tracking-wider uppercase text-white font-black mt-1 ${sizeConfig.posText} drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)]`}>
-            {player.position}
+          {/* Mevki(ler): ana mevki + ek mevkiler yan yana (MID FWD). Çoğaldıkça yazı küçülür, kolon dışına taşmaz. */}
+          <span
+            className={`inline-flex items-baseline justify-center whitespace-nowrap tracking-wider uppercase font-black mt-1 ${sizeConfig.posText} drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)]`}
+            style={{ fontSize: positions.length === 1 ? undefined : positions.length === 2 ? '0.82em' : '0.66em', gap: positions.length === 1 ? 0 : '0.35em' }}
+            title={positions.join(' / ')}
+          >
+            {positions.map((pos, i) => (
+              <span key={pos} className={i === 0 ? 'text-white' : 'text-amber-200/90'}>
+                {pos}
+              </span>
+            ))}
           </span>
           {/* Forma Numarası (#10) - Net, yüksek kontrastlı altın/kehribar rengi ve büyütülmüş font */}
           <span className={`font-mono font-black tracking-tight text-amber-200 ${sizeConfig.numberText} mt-0.5 drop-shadow-[0_2px_4px_rgba(0,0,0,1)] filter`}>
@@ -440,28 +465,36 @@ export const FCCard: React.FC<Props> = ({
           />
         </div>
 
-        {/* Oyuncu Adı ve Halı Saha Lakabı (3D Parallax: translateZ(3px)) */}
+        {/* Lakap: isimliğin hemen üstünde (3D Parallax: translateZ(3px)) */}
         <div
-          className={`absolute left-0 right-0 ${themeConfig.nameTop} flex flex-col items-center justify-center text-center z-20 pointer-events-none`}
+          className={`absolute left-0 right-0 ${themeConfig.nickTop} flex items-center justify-center text-center z-20 pointer-events-none`}
           style={{
-            transform: `translateZ(3px) translate3d(${pX * 0.03}px, ${pY * 0.03}px, 0)`,
+            transform: `translateY(-50%) translateZ(3px) translate3d(${pX * 0.03}px, ${pY * 0.03}px, 0)`,
             transition: isHovered ? 'none' : 'transform 0.35s ease-out',
           }}
         >
-          {/* Lakap: İsmin üstünde, resmin alt kısmına doğru */}
           <p
-            className={`font-bold italic ${themeConfig.nicknameColor} text-[11px] sm:text-xs tracking-wide ${
+            className={`font-bold italic ${themeConfig.nicknameColor} ${sizeConfig.nickText} tracking-wide leading-none ${
               theme === 'legend'
                 ? 'drop-shadow-none'
                 : 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)]'
-            } mb-0.5 truncate w-full px-4`}
+            } truncate w-full px-4`}
           >
             "{player.nickname}"
           </p>
-          {/* İsim: Tam isimlik kısmının ortasında */}
+        </div>
+
+        {/* Oyuncu Adı: isimlik plakasının tam ortasında (3D Parallax: translateZ(3px)) */}
+        <div
+          className={`absolute left-0 right-0 ${themeConfig.nameTop} flex items-center justify-center text-center z-20 pointer-events-none`}
+          style={{
+            transform: `translateY(-50%) translateZ(3px) translate3d(${pX * 0.03}px, ${pY * 0.03}px, 0)`,
+            transition: isHovered ? 'none' : 'transform 0.35s ease-out',
+          }}
+        >
           <h3
-            className={`font-black uppercase tracking-wide ${themeConfig.nameColor} ${
-              theme === 'legend' || theme === 'bidon' || theme === 'gold' ? 'text-lg sm:text-xl' : sizeConfig.nameText
+            className={`font-black uppercase tracking-wide leading-none ${themeConfig.nameColor} ${
+              theme === 'legend' || theme === 'bidon' || theme === 'gold' ? sizeConfig.nameBigText : sizeConfig.nameText
             } ${
               theme === 'legend' || theme === 'bidon' || theme === 'gold'
                 ? 'drop-shadow-none'
@@ -477,7 +510,7 @@ export const FCCard: React.FC<Props> = ({
           <div
             className={`absolute ${themeConfig.ovalsTop} ${themeConfig.ovalsBounds} ${themeConfig.ovalsHeight} grid grid-cols-2 gap-2 z-20 pointer-events-none select-none`}
             style={{
-              transform: `translateZ(3.5px) translate3d(${pX * 0.035}px, ${pY * 0.035}px, 0)`,
+              transform: `translateY(-50%) translateZ(3.5px) translate3d(${pX * 0.035}px, ${pY * 0.035}px, 0)`,
               transition: isHovered ? 'none' : 'transform 0.35s ease-out',
             }}
           >
@@ -489,11 +522,11 @@ export const FCCard: React.FC<Props> = ({
               return (
                 <div
                   key={idx}
-                  className="h-full w-full flex items-center justify-center gap-1.5 px-1"
+                  className={`h-full w-full flex items-center justify-center ${size === 'sm' ? 'gap-0.5 px-0.5' : 'gap-1.5 px-1'}`}
                   title={`${cfg.label}: ${cfg.description}`}
                 >
-                  <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${themeConfig.ovalIconColor} shrink-0 ${themeConfig.ovalDropShadow}`} />
-                  <span className={`text-[10px] sm:text-[11px] md:text-xs font-bold tracking-tight truncate ${themeConfig.ovalTextColor} ${themeConfig.ovalDropShadow}`}>
+                  <Icon className={`${size === 'sm' ? 'w-2 h-2' : size === 'md' ? 'w-3.5 h-3.5' : 'w-4 h-4'} ${themeConfig.ovalIconColor} shrink-0 ${themeConfig.ovalDropShadow}`} />
+                  <span className={`${sizeConfig.pillText} font-bold tracking-tight truncate ${themeConfig.ovalTextColor} ${themeConfig.ovalDropShadow}`}>
                     {cfg.label}
                   </span>
                 </div>
@@ -506,7 +539,7 @@ export const FCCard: React.FC<Props> = ({
         <div
           className={`absolute ${themeConfig.statBounds} ${themeConfig.statTop} grid grid-cols-6 text-center pointer-events-none select-none z-20`}
           style={{
-            transform: `translateZ(2.5px) translate3d(${pX * 0.025}px, ${pY * 0.025}px, 0)`,
+            transform: `translateY(-50%) translateZ(2.5px) translate3d(${pX * 0.025}px, ${pY * 0.025}px, 0)`,
             transition: isHovered ? 'none' : 'transform 0.35s ease-out',
           }}
         >

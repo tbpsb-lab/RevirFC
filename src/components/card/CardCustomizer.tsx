@@ -16,6 +16,7 @@ import {
   DEFAULT_NATION,
 } from '../../data/teamsAndNations';
 import { removeImageBackground } from '../../services/backgroundRemoval';
+import { ALL_POSITIONS, POSITION_LABELS, MAX_POSITIONS, formatPositions } from '../../services/positions';
 import imageCompression from 'browser-image-compression';
 import {
   Upload,
@@ -44,11 +45,107 @@ interface Props {
   onSave: (updated: Player) => void;
   onClose: () => void;
   isAdmin?: boolean;
+  /** Yalnızca Yönetici: Efsane atama, lakap değişikliğini doğrudan kaydetme. (isAdmin = Kurul + Yönetici) */
+  isSuperAdmin?: boolean;
+  /** Yönetici/Kaptan veya Kurul üyesi: ana + ek mevkileri belirleyebilir. */
+  canEditPositions?: boolean;
   canEdit?: boolean;
   isPendingUser?: boolean;
   isOwnCard?: boolean;
   allPlayers?: Player[];
 }
+
+/**
+ * Ana mevki + ek mevkiler (en fazla 2 ek) seçici. Sadece Kurul/Yönetici düzenleyebilir.
+ */
+const PositionEditor: React.FC<{
+  value: Pick<Player, 'position' | 'secondaryPositions'>;
+  editable: boolean;
+  onChange: (next: { position: PreferredPosition; secondaryPositions: PreferredPosition[] }) => void;
+}> = ({ value, editable, onChange }) => {
+  const secondary = (value.secondaryPositions ?? []).filter((p) => p !== value.position);
+
+  const setPrimary = (pos: PreferredPosition) => {
+    onChange({ position: pos, secondaryPositions: secondary.filter((p) => p !== pos) });
+  };
+
+  const toggleSecondary = (pos: PreferredPosition) => {
+    if (pos === value.position) return;
+    if (secondary.includes(pos)) {
+      onChange({ position: value.position, secondaryPositions: secondary.filter((p) => p !== pos) });
+    } else if (secondary.length < MAX_POSITIONS - 1) {
+      onChange({ position: value.position, secondaryPositions: [...secondary, pos] });
+    }
+  };
+
+  return (
+    <div className="bg-neutral-950/50 p-2.5 rounded-xl border border-neutral-800 space-y-2">
+      <div className="flex items-center justify-between">
+        <label className="text-xs font-bold text-neutral-300">⚽ İdeal Mevkiler</label>
+        <span className="text-[10px] text-amber-400/80 font-normal">
+          {editable ? 'Kurul / Yönetici belirler' : '🔒 Mevkileri Kurul belirler'}
+        </span>
+      </div>
+
+      <div>
+        <span className="text-[10px] text-neutral-400 block mb-1">Ana mevki</span>
+        <div className="grid grid-cols-4 gap-1.5">
+          {ALL_POSITIONS.map((pos) => (
+            <button
+              key={pos}
+              type="button"
+              disabled={!editable}
+              onClick={() => setPrimary(pos)}
+              title={POSITION_LABELS[pos]}
+              className={`py-1.5 rounded-lg border text-[11px] font-black transition-all ${
+                value.position === pos
+                  ? 'bg-amber-500 text-black border-amber-400'
+                  : 'bg-neutral-800/80 text-neutral-300 border-neutral-700'
+              } ${editable ? 'cursor-pointer hover:border-neutral-500' : 'cursor-not-allowed opacity-70'}`}
+            >
+              {pos}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <span className="text-[10px] text-neutral-400 block mb-1">
+          Ek mevkiler <span className="text-neutral-500">(en fazla {MAX_POSITIONS - 1})</span>
+        </span>
+        <div className="grid grid-cols-4 gap-1.5">
+          {ALL_POSITIONS.map((pos) => {
+            const isPrimary = value.position === pos;
+            const isOn = secondary.includes(pos);
+            const full = !isOn && secondary.length >= MAX_POSITIONS - 1;
+            return (
+              <button
+                key={pos}
+                type="button"
+                disabled={!editable || isPrimary || full}
+                onClick={() => toggleSecondary(pos)}
+                title={isPrimary ? 'Ana mevki' : POSITION_LABELS[pos]}
+                className={`py-1.5 rounded-lg border text-[11px] font-black transition-all ${
+                  isOn
+                    ? 'bg-amber-200/90 text-black border-amber-300'
+                    : 'bg-neutral-800/80 text-neutral-300 border-neutral-700'
+                } ${
+                  !editable || isPrimary || full ? 'cursor-not-allowed opacity-40' : 'cursor-pointer hover:border-neutral-500'
+                }`}
+              >
+                {pos}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <p className="text-[10px] text-neutral-400">
+        Kartta: <span className="font-black text-white">{formatPositions(value)}</span>
+      </p>
+    </div>
+  );
+};
 
 const THEME_INFO: Record<CardTheme, { label: string; icon: string; title: string; desc: string }> = {
   gold: { label: 'Altın', icon: '🟡', title: 'Standart FC 27 Kartı', desc: 'Her oyuncunun temel lig kartıdır.' },
@@ -64,6 +161,8 @@ export const CardCustomizer: React.FC<Props> = ({
   onSave,
   onClose,
   isAdmin = false,
+  isSuperAdmin = false,
+  canEditPositions = false,
   canEdit = true,
   isPendingUser = false,
   isOwnCard = false,
@@ -565,16 +664,27 @@ export const CardCustomizer: React.FC<Props> = ({
                     <div>
                       <p className="font-bold text-white text-xs">Arkadaşının Kartını İnceliyorsun</p>
                       <p className="text-neutral-400 text-[11px] mt-0.5">
-                        Halı saha kuralları gereği her oyuncu yalnızca kendi kartını düzenleyebilir.
+                        {canEditPositions
+                          ? 'Kurul üyesi olarak bu oyuncunun ideal mevkilerini aşağıdan belirleyebilirsin.'
+                          : 'Halı saha kuralları gereği her oyuncu yalnızca kendi kartını düzenleyebilir.'}
                       </p>
                     </div>
                   </div>
                 )}
 
+                {/* Kurul üyeleri başkasının kartında yalnızca mevkileri düzenleyebilir */}
+                {!isPendingUser && canEditPositions && (
+                  <PositionEditor
+                    value={editedPlayer}
+                    editable
+                    onChange={(next) => setEditedPlayer({ ...editedPlayer, ...next })}
+                  />
+                )}
+
                 {/* Player Header Identity */}
                 <div className="bg-neutral-950/70 p-3.5 rounded-2xl border border-neutral-800 flex items-center justify-between">
                   <div>
-                    <span className="text-xs text-neutral-400 font-mono">#{editedPlayer.number || 10} • {editedPlayer.position}</span>
+                    <span className="text-xs text-neutral-400 font-mono">#{editedPlayer.number || 10} • {formatPositions(editedPlayer)}</span>
                     <h3 className="text-lg font-black text-white">{editedPlayer.name}</h3>
                     <p className="text-xs text-amber-400 font-semibold italic">"{editedPlayer.nickname}"</p>
                   </div>
@@ -731,7 +841,12 @@ export const CardCustomizer: React.FC<Props> = ({
                             key={item.id}
                             type="button"
                             onClick={() => {
-                              if (item.id === 'bidon' && (editedPlayer.isLegend || player.isLegend)) {
+                              const wasLegend = Boolean(editedPlayer.isLegend || player.isLegend);
+                              if (!isSuperAdmin && (item.id === 'legend' || (item.id === 'gold' && wasLegend))) {
+                                alert('Efsane (Legend) unvanını yalnızca Yönetici verebilir veya kaldırabilir.');
+                                return;
+                              }
+                              if (item.id === 'bidon' && wasLegend) {
                                 alert('Kulüp Kuralı: Kulüp Efsaneleri (Legend) asla Bidon seçilemez!');
                                 return;
                               }
@@ -747,8 +862,8 @@ export const CardCustomizer: React.FC<Props> = ({
                               isSelected
                                 ? 'bg-amber-500 text-black font-black border-amber-400 shadow-md'
                                 : 'bg-neutral-800/80 text-neutral-300 border-neutral-700 hover:border-neutral-500'
-                            }`}
-                            title={item.desc}
+                            } ${item.id === 'legend' && !isSuperAdmin ? 'opacity-50' : ''}`}
+                            title={item.id === 'legend' && !isSuperAdmin ? 'Sadece Yönetici atayabilir' : item.desc}
                           >
                             <span className="text-sm block">{item.icon}</span>
                             <span className="text-[10px] font-bold block truncate">{item.label}</span>
@@ -785,7 +900,7 @@ export const CardCustomizer: React.FC<Props> = ({
                   <div className="col-span-5">
                     <div className="flex items-center justify-between mb-1">
                       <label className="block text-xs font-bold text-neutral-300">Halı Saha Lakabı</label>
-                      {!isAdmin && (
+                      {!isSuperAdmin && (
                         <span className="text-[9px] text-amber-300 bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 rounded font-bold">
                           Yönetici Onaylı
                         </span>
@@ -798,7 +913,7 @@ export const CardCustomizer: React.FC<Props> = ({
                       placeholder="Örn: Balyoz, Doktor..."
                       className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-400"
                     />
-                    {!isAdmin && (
+                    {!isSuperAdmin && (
                       <p className="text-[10px] text-neutral-400 mt-1">
                         {player.pendingNickname ? (
                           <span className="text-amber-300 font-bold block truncate">
@@ -812,18 +927,9 @@ export const CardCustomizer: React.FC<Props> = ({
                   </div>
                   <div className="col-span-4">
                     <label className="block text-xs font-bold text-neutral-300 mb-1">Mevki</label>
-                    <select
-                      value={editedPlayer.position}
-                      onChange={(e) =>
-                        setEditedPlayer({ ...editedPlayer, position: e.target.value as PreferredPosition })
-                      }
-                      className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-2.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-400 cursor-pointer"
-                    >
-                      <option value="MID">MID (Orta Saha)</option>
-                      <option value="FWD">FWD (Forvet)</option>
-                      <option value="DEF">DEF (Defans)</option>
-                      <option value="GK">GK (Kaleci)</option>
-                    </select>
+                    <div className="w-full bg-neutral-800/60 border border-neutral-700 rounded-lg px-2.5 py-2 text-xs sm:text-sm text-white font-black text-center truncate" title="Mevkileri aşağıdaki 'İdeal Mevkiler' bölümünden Kurul/Yönetici belirler">
+                      {formatPositions(editedPlayer)}
+                    </div>
                   </div>
                   <div className="col-span-3">
                     <label className="block text-xs font-bold text-neutral-300 mb-1">Forma No</label>
@@ -841,6 +947,13 @@ export const CardCustomizer: React.FC<Props> = ({
                     </p>
                   </div>
                 </div>
+
+                {/* İdeal Mevkiler (ana + ek): sadece Kurul / Yönetici düzenler */}
+                <PositionEditor
+                  value={editedPlayer}
+                  editable={canEditPositions}
+                  onChange={(next) => setEditedPlayer({ ...editedPlayer, ...next })}
+                />
 
                 {/* Country (Bayrak) & Team (Arma) Selection */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-neutral-950/40 p-2.5 rounded-xl border border-neutral-800">
@@ -1203,7 +1316,7 @@ export const CardCustomizer: React.FC<Props> = ({
             )}
             {!canEdit && !isPendingUser && (
               <span className="text-xs text-neutral-400">
-                🔒 Yalnızca kendi kartınızı düzenleyebilirsiniz.
+                {canEditPositions ? '🛡️ Kurul yetkisiyle yalnızca mevkileri düzenleyebilirsiniz.' : '🔒 Yalnızca kendi kartınızı düzenleyebilirsiniz.'}
               </span>
             )}
           </div>
@@ -1213,23 +1326,57 @@ export const CardCustomizer: React.FC<Props> = ({
               onClick={onClose}
               className="px-4 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs font-bold cursor-pointer transition-colors"
             >
-              {canEdit ? 'İptal' : 'Kapat'}
+              {canEdit || canEditPositions ? 'İptal' : 'Kapat'}
             </button>
+            {!canEdit && canEditPositions && !isPendingUser && (
+              <button
+                type="button"
+                onClick={() => {
+                  // Kurul üyesi başkasının kartında SADECE mevkileri günceller; diğer alanlara dokunulmaz.
+                  onSave({
+                    ...player,
+                    position: editedPlayer.position,
+                    secondaryPositions: editedPlayer.secondaryPositions,
+                  });
+                  onClose();
+                }}
+                className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-black flex items-center gap-2 shadow-lg shadow-amber-500/25 cursor-pointer transition-transform active:scale-95"
+              >
+                <Check className="w-4 h-4" /> Mevkileri Kaydet
+              </button>
+            )}
             {canEdit && (
               <button
                 type="button"
                 onClick={() => {
                   let playerToSave = { ...editedPlayer };
+                  if (!canEditPositions) {
+                    // Mevkileri yalnızca Kurul/Yönetici belirler; kendi kartını düzenleyen oyuncu değiştiremez.
+                    playerToSave.position = player.position;
+                    playerToSave.secondaryPositions = player.secondaryPositions;
+                  }
                   if (!isAdmin) {
+                    // Düz oyuncu: tema/unvan, statlar ve Kurul'un taktığı 2. PlayStyle rozeti korunur.
+                    playerToSave.theme = player.theme;
+                    playerToSave.stats = player.stats;
+                    playerToSave.baseOVR = player.baseOVR;
+                    playerToSave.currentOVR = player.currentOVR;
+                    const ownSlot1 = editedPlayer.playstyles[0];
+                    const keptSlot2 = player.playstyles[1];
+                    playerToSave.playstyles = [ownSlot1, keptSlot2].filter(Boolean) as typeof player.playstyles;
+                  }
+                  if (!isSuperAdmin) {
+                    // Efsane unvanı yalnızca Yönetici'de; Kurul/Oyuncu değiştiremez.
+                    playerToSave.isLegend = player.isLegend;
+                    // Lakap değişikliği Yönetici onayına gider (Kurul dahil).
                     const trimmedInput = (editedPlayer.nickname || '').trim();
                     if (trimmedInput !== player.nickname) {
-                      // Normal player requested a new nickname: queue for admin approval
                       playerToSave.pendingNickname = trimmedInput;
                       playerToSave.nickname = player.nickname;
-                      alert(`"${trimmedInput}" lakap değişikliği talebiniz alındı! Yönetici onayından sonra kartınızda güncellenecektir.`);
+                      alert(`"${trimmedInput}" lakap değişikliği talebiniz alındı! Yönetici onayından sonra kartta güncellenecektir.`);
                     }
                   } else {
-                    // Admin directly saves, clears any pending request
+                    // Yönetici doğrudan kaydeder, bekleyen talebi temizler
                     playerToSave.pendingNickname = undefined;
                   }
                   onSave(playerToSave);

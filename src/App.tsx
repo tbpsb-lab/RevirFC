@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import {
   Player,
@@ -22,6 +22,9 @@ import {
 } from './services/mockData';
 import { run462BalancingAlgorithm } from './services/balancingEngine';
 import { calculatePlayerMatchRating } from './services/ratingEngine';
+import { safeSetItem, STORAGE_ERROR_EVENT } from './services/safeStorage';
+import { externalizeImages, hydrateImages, isIdbRef } from './services/photoStore';
+import { getAccess } from './services/permissions';
 
 import { Navbar, NavTab } from './components/layout/Navbar';
 import { PendingApprovalGate } from './components/layout/PendingApprovalGate';
@@ -185,7 +188,7 @@ function MainApp() {
   });
 
   useEffect(() => {
-    localStorage.setItem('revirfc_scouting_v2', JSON.stringify(savedScoutingEntries));
+    safeSetItem('revirfc_scouting_v2', JSON.stringify(savedScoutingEntries));
   }, [savedScoutingEntries]);
 
   // Modals state
@@ -206,29 +209,106 @@ function MainApp() {
   };
 
   // Sync state to LocalStorage
+  // Oyuncu fotoğrafları (base64) localStorage kotasını doldurduğu için IndexedDB'ye taşınır;
+  // localStorage'a yalnızca hafif "idb:" referanslı JSON yazılır. Önce görsel, sonra JSON yazılır.
+  const playersPersistSeq = useRef(0);
   useEffect(() => {
-    localStorage.setItem('revirfc_players_v3', JSON.stringify(players));
+    const seq = ++playersPersistSeq.current;
+    externalizeImages(players, {
+      prefix: 'player',
+      keyOf: (p) => p.id,
+      get: (p) => p.photoUrl,
+      set: (p, url) => ({ ...p, photoUrl: url }),
+    }).then((slim) => {
+      if (seq !== playersPersistSeq.current) return; // daha yeni bir kayıt var
+      safeSetItem('revirfc_players_v3', JSON.stringify(slim));
+    });
   }, [players]);
 
+  // Açılışta "idb:" referanslarını gerçek görsellere çevir
   useEffect(() => {
-    localStorage.setItem('revirfc_match_v2', JSON.stringify(match));
+    let cancelled = false;
+    hydrateImages(
+      players,
+      { get: (p) => p.photoUrl, set: (p, url) => ({ ...p, photoUrl: url }) },
+      '/players/alper.png'
+    ).then((hydrated) => {
+      if (cancelled) return;
+      if (hydrated.some((p, i) => p.photoUrl !== players[i].photoUrl)) {
+        // Hydrate sırasında kullanıcı bir değişiklik yaptıysa onu ezme: yalnızca fotoğraf alanını uygula
+        setPlayers((prev) =>
+          prev.map((p) => {
+            const h = hydrated.find((x) => x.id === p.id);
+            return h && isIdbRef(p.photoUrl) ? { ...p, photoUrl: h.photoUrl } : p;
+          })
+        );
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    safeSetItem('revirfc_match_v2', JSON.stringify(match));
   }, [match]);
 
   useEffect(() => {
-    localStorage.setItem('revirfc_posts_v2', JSON.stringify(posts));
+    safeSetItem('revirfc_posts_v2', JSON.stringify(posts));
   }, [posts]);
 
+  const photosPersistSeq = useRef(0);
   useEffect(() => {
-    localStorage.setItem('revirfc_photos_v2', JSON.stringify(photos));
+    const seq = ++photosPersistSeq.current;
+    externalizeImages(photos, {
+      prefix: 'archive',
+      keyOf: (p) => p.id,
+      get: (p) => p.imageUrl,
+      set: (p, url) => ({ ...p, imageUrl: url }),
+    }).then((slim) => {
+      if (seq !== photosPersistSeq.current) return;
+      safeSetItem('revirfc_photos_v2', JSON.stringify(slim));
+    });
   }, [photos]);
 
   useEffect(() => {
-    localStorage.setItem('revirfc_debts_v2', JSON.stringify(debts));
+    let cancelled = false;
+    hydrateImages(photos, { get: (p) => p.imageUrl, set: (p, url) => ({ ...p, imageUrl: url }) }).then((hydrated) => {
+      if (cancelled) return;
+      if (hydrated.some((p, i) => p.imageUrl !== photos[i].imageUrl)) {
+        setPhotos((prev) =>
+          prev.map((p) => {
+            const h = hydrated.find((x) => x.id === p.id);
+            return h && isIdbRef(p.imageUrl) ? { ...p, imageUrl: h.imageUrl } : p;
+          })
+        );
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    safeSetItem('revirfc_debts_v2', JSON.stringify(debts));
   }, [debts]);
 
-  const isPendingUser = currentUser?.status === 'pending';
-  const isAdminOrCaptain = currentUser?.role === 'admin' || currentUser?.role === 'captain';
-  const isApprovedUser = currentUser?.status === 'approved';
+  // Depolama hatası olursa kullanıcıya görünür uyarı (sessizce kaybolmasın)
+  const [storageError, setStorageError] = useState(false);
+  useEffect(() => {
+    const onErr = () => setStorageError(true);
+    window.addEventListener(STORAGE_ERROR_EVENT, onErr);
+    return () => window.removeEventListener(STORAGE_ERROR_EVENT, onErr);
+  }, []);
+
+  const access = getAccess(currentUser, players);
+  const isPendingUser = access.isPending;
+  const isSuperAdmin = access.isSuperAdmin;
+  // Kurul + Yönetici: kart/unvan/mevki yönetimi (ayrıntılı yetki matrisi: services/permissions.ts)
+  const isAdminOrCaptain = access.isCommittee;
+  const isApprovedUser = access.isApproved;
 
   // Current logged in member's claimed player
   const claimedPlayer = currentUser?.claimedPlayerId
@@ -752,6 +832,18 @@ function MainApp() {
         pendingApprovalCount={totalAdminPendingCount}
       />
 
+      {/* Kayıt (depolama) hatası: sessizce kaybolmasın */}
+      {storageError && (
+        <div className="bg-rose-700 text-white px-4 py-2.5 text-xs flex items-center justify-between gap-3 border-b border-rose-300/40">
+          <p className="font-bold">
+            ⚠️ Değişiklikler tarayıcıya kaydedilemedi (depolama dolu olabilir). Büyük fotoğrafları küçültüp tekrar deneyin; sayfayı yenilemeden önce işlemi tekrarlayın.
+          </p>
+          <button onClick={() => setStorageError(false)} className="shrink-0 px-2.5 py-1 rounded-lg bg-black/40 font-black cursor-pointer">
+            Kapat
+          </button>
+        </div>
+      )}
+
       {/* Pending User Showcase Notification Banner */}
       {isPendingUser && (
         <div className="bg-gradient-to-r from-amber-600 via-amber-500 to-orange-600 text-black px-4 py-3 shadow-lg border-b border-amber-300/40">
@@ -913,6 +1005,8 @@ function MainApp() {
           player={editingPlayer}
           allPlayers={players}
           isAdmin={isAdminOrCaptain}
+          isSuperAdmin={isSuperAdmin}
+          canEditPositions={isAdminOrCaptain}
           isPendingUser={isPendingUser}
           isOwnCard={Boolean(currentUser?.claimedPlayerId && currentUser.claimedPlayerId === editingPlayer.id)}
           canEdit={Boolean(isAdminOrCaptain || (isApprovedUser && currentUser?.claimedPlayerId === editingPlayer.id))}
