@@ -719,11 +719,11 @@ export const CardCustomizer: React.FC<Props> = ({
                     <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
                       {[
                         { id: 'gold' as CardTheme, label: 'Altın', icon: '🟡', desc: 'Standart (OVR 75+)' },
-                        { id: 'totw' as CardTheme, label: 'MVP', icon: '⭐', desc: 'Haftanın En Değerli Oyuncusu' },
-                        { id: 'inform' as CardTheme, label: 'Ateş Ediyo!', icon: '🔥', desc: 'Ateş Ediyo! (Maks 3)' },
+                        { id: 'totw' as CardTheme, label: 'MVP', icon: '⭐', desc: 'Haftanın En Değerli Oyuncusu (Tekil - Eski MVP düşer)' },
+                        { id: 'inform' as CardTheme, label: 'Ateş Ediyo!', icon: '🔥', desc: 'Ateş Ediyo! (Maks 3 - 4. seçilirse en eski alev düşer)' },
                         { id: 'revir' as CardTheme, label: 'Revir', icon: '🩹', desc: 'Bandajlı Sakat' },
                         { id: 'legend' as CardTheme, label: 'Efsane', icon: '👑', desc: 'İsmail, Gölcür & Cevdet' },
-                        { id: 'bidon' as CardTheme, label: 'Bidon', icon: '🛢️', desc: 'Haftanın Bidonu' },
+                        { id: 'bidon' as CardTheme, label: 'Bidon', icon: '🛢️', desc: 'Haftanın Bidonu (Tekil - Eski Bidon düşer, Efsane alamaz)' },
                       ].map((item) => {
                         const isSelected = currentTheme === item.id;
                         return (
@@ -731,21 +731,17 @@ export const CardCustomizer: React.FC<Props> = ({
                             key={item.id}
                             type="button"
                             onClick={() => {
-                              if (item.id === 'inform' && allPlayers) {
-                                const currentInformCount = allPlayers.filter(
-                                  (p) => p.theme === 'inform' && p.id !== editedPlayer.id
-                                ).length;
-                                if (currentInformCount >= 3) {
-                                  alert('Kurul Kuralı: Aynı anda en fazla 3 oyuncuda Ateş Ediyo! kartı bulunabilir!');
-                                  return;
-                                }
-                              }
                               if (item.id === 'bidon' && (editedPlayer.isLegend || player.isLegend)) {
                                 alert('Kulüp Kuralı: Kulüp Efsaneleri (Legend) asla Bidon seçilemez!');
                                 return;
                               }
                               const isNowLegend = item.id === 'legend' ? true : item.id === 'gold' ? false : editedPlayer.isLegend;
-                              setEditedPlayer({ ...editedPlayer, theme: item.id, isLegend: isNowLegend });
+                              setEditedPlayer({
+                                ...editedPlayer,
+                                theme: item.id,
+                                isLegend: isNowLegend,
+                                inFormAwardedAt: item.id === 'inform' ? (editedPlayer.inFormAwardedAt || Date.now()) : undefined,
+                              });
                             }}
                             className={`p-1.5 rounded-lg border text-center transition-all cursor-pointer ${
                               isSelected

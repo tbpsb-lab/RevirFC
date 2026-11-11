@@ -84,6 +84,7 @@ export interface Player {
   nickname: string;
   pendingNickname?: string; // Kullanıcı tarafından değiştirilmiş, yönetici onayı bekleyen lakap
   isLegend?: boolean; // Sadece yönetici tarafından atanabilen kulüp efsanesi unvanı (Bidon olamaz, MVP/Ateş Ediyo!/Revir olabilir)
+  inFormAwardedAt?: number; // Ateş Ediyo! kartının atandığı timestamp (en fazla 3 kişi: 4. seçildiğinde en eski olan düşer)
   position: PreferredPosition;
   number: number;
   photoUrl: string;

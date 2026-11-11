@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import {
   Player,
+  CardTheme,
   Match,
   LockerPost,
   PhotoArchiveItem,
@@ -263,6 +264,111 @@ function MainApp() {
           : p
       )
     );
+  };
+
+  // Handle saving customized player card with strict club rules:
+  // 1. MVP ('totw') is strictly single (tekil). If updated is totw, any previous MVP drops to legend/gold.
+  // 2. Bidon ('bidon') is strictly single (tekil). If updated is bidon, any previous Bidon drops to legend/gold.
+  // 3. Ateş Ediyo! ('inform') is maximum 3. If a 4th is added, the oldest inform card automatically drops to legend/gold.
+  const handleSavePlayerCard = (updated: Player) => {
+    const getBaseTheme = (p: Player): CardTheme => {
+      if (p.currentStatus === 'light_injury') return 'revir';
+      if (p.isLegend) return 'legend';
+      return 'gold';
+    };
+
+    setPlayers((prev) => {
+      let demotedInformId: string | null = null;
+      if (updated.theme === 'inform') {
+        const otherInForms = prev.filter((p) => p.id !== updated.id && p.theme === 'inform');
+        if (otherInForms.length >= 3) {
+          const sorted = [...otherInForms].sort((a, b) => {
+            const timeA = a.inFormAwardedAt || 0;
+            const timeB = b.inFormAwardedAt || 0;
+            return timeA - timeB;
+          });
+          demotedInformId = sorted[0].id;
+        }
+      }
+
+      return prev.map((p) => {
+        if (p.id === updated.id) {
+          return {
+            ...updated,
+            inFormAwardedAt: updated.theme === 'inform' ? (updated.inFormAwardedAt || Date.now()) : undefined,
+          };
+        }
+
+        // Kural 1: Yönetici dahil 2 MVP olamaz. Yeni MVP seçilince eski MVP gold/legend'a düşer.
+        if (updated.theme === 'totw' && p.theme === 'totw') {
+          return {
+            ...p,
+            theme: getBaseTheme(p),
+          };
+        }
+
+        // Kural 2: Yönetici dahil 2 Bidon olamaz. Yeni Bidon seçilince eski Bidon gold/legend'a düşer.
+        if (updated.theme === 'bidon' && p.theme === 'bidon') {
+          return {
+            ...p,
+            theme: getBaseTheme(p),
+          };
+        }
+
+        // Kural 3: En fazla 3 Ateş Ediyo! kartı olabilir. 4. eklendiğinde en eski alev gold/legend'a düşer.
+        if (demotedInformId && p.id === demotedInformId) {
+          return {
+            ...p,
+            theme: getBaseTheme(p),
+            inFormAwardedAt: undefined,
+          };
+        }
+
+        return p;
+      });
+    });
+
+    // Synchronize match awards state
+    setMatch((prevMatch) => {
+      const currentAwards = prevMatch.awards || {};
+      let newMvpId = currentAwards.mvpId;
+      let newBidonId = currentAwards.bidonId;
+      let newInFormIds = [...(currentAwards.inFormIds || [])];
+
+      if (updated.theme === 'totw') {
+        newMvpId = updated.id;
+        if (newBidonId === updated.id) newBidonId = undefined;
+        newInFormIds = newInFormIds.filter((id) => id !== updated.id);
+      } else if (updated.theme === 'bidon') {
+        newBidonId = updated.id;
+        if (newMvpId === updated.id) newMvpId = undefined;
+        newInFormIds = newInFormIds.filter((id) => id !== updated.id);
+      } else if (updated.theme === 'inform') {
+        if (newMvpId === updated.id) newMvpId = undefined;
+        if (newBidonId === updated.id) newBidonId = undefined;
+        if (!newInFormIds.includes(updated.id)) {
+          if (newInFormIds.length >= 3) {
+            newInFormIds = [...newInFormIds.slice(1), updated.id];
+          } else {
+            newInFormIds.push(updated.id);
+          }
+        }
+      } else {
+        if (newMvpId === updated.id) newMvpId = undefined;
+        if (newBidonId === updated.id) newBidonId = undefined;
+        newInFormIds = newInFormIds.filter((id) => id !== updated.id);
+      }
+
+      return {
+        ...prevMatch,
+        awards: {
+          ...currentAwards,
+          mvpId: newMvpId,
+          bidonId: newBidonId,
+          inFormIds: newInFormIds,
+        },
+      };
+    });
   };
 
   // Run 462 balancing algorithm
@@ -810,9 +916,7 @@ function MainApp() {
           isPendingUser={isPendingUser}
           isOwnCard={Boolean(currentUser?.claimedPlayerId && currentUser.claimedPlayerId === editingPlayer.id)}
           canEdit={Boolean(isAdminOrCaptain || (isApprovedUser && currentUser?.claimedPlayerId === editingPlayer.id))}
-          onSave={(updated) => {
-            setPlayers((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
-          }}
+          onSave={handleSavePlayerCard}
           onClose={() => setEditingPlayer(null)}
         />
       )}

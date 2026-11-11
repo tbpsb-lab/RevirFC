@@ -81,7 +81,8 @@ export const CommitteeDecisionModal: React.FC<Props> = ({
         return prev.filter((id) => id !== playerId);
       }
       if (prev.length >= 3) {
-        return prev; // Max 3 reached
+        // En eski alevi düşür (FIFO: en baştaki düşer) ve 4. olanı listeye ekle
+        return [...prev.slice(1), playerId];
       }
       return [...prev, playerId];
     });
@@ -266,11 +267,11 @@ export const CommitteeDecisionModal: React.FC<Props> = ({
                     ? 'bg-orange-500/20 border-orange-400 text-orange-300'
                     : 'bg-neutral-800 border-neutral-700 text-neutral-300'
                 }`}>
-                  {selectedInFormIds.length} / 3 Oyuncu Seçildi
+                  {selectedInFormIds.length} / 3 Oyuncu (4. seçilirse en eski düşer)
                 </span>
               </div>
               <p className="text-[11px] text-neutral-400 mb-3">
-                Bu kartları sadece Kurul verebilir. Sahada durdurulamayan, alev alev yanan en fazla 3 oyuncuyu işaretleyin:
+                Bu kartları sadece Kurul verebilir. Sahada durdurulamayan, alev alev yanan en fazla 3 oyuncuyu işaretleyin (4. seçilirse en eski alev kartı otomatik olarak düşer):
               </p>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
@@ -278,18 +279,17 @@ export const CommitteeDecisionModal: React.FC<Props> = ({
                   const isSelected = selectedInFormIds.includes(p.id);
                   const isMvp = selectedMvpId === p.id;
                   const isBidon = selectedBidonId === p.id;
-                  const isMaxReached = selectedInFormIds.length >= 3 && !isSelected;
 
                   return (
                     <button
                       key={p.id}
                       type="button"
-                      disabled={isMaxReached || isMvp || isBidon}
+                      disabled={isMvp || isBidon}
                       onClick={() => toggleInForm(p.id)}
                       className={`p-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer ${
                         isSelected
                           ? 'bg-gradient-to-r from-orange-600/40 to-amber-600/30 border-orange-400 text-white shadow-md shadow-orange-500/20'
-                          : isMaxReached || isMvp || isBidon
+                          : isMvp || isBidon
                           ? 'bg-neutral-950/40 border-neutral-800/60 text-neutral-600 cursor-not-allowed opacity-50'
                           : 'bg-neutral-950 border-neutral-800 text-neutral-300 hover:border-neutral-600'
                       }`}
