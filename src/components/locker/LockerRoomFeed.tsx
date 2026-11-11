@@ -39,7 +39,7 @@ export const LockerRoomFeed: React.FC<Props> = ({
     emoji: string;
     label: string;
   }[] = [
-    { key: 'fire', emoji: '🔥', label: 'Alev' },
+    { key: 'fire', emoji: '🔥', label: 'Ateş Ediyo!' },
     { key: 'laugh', emoji: '😂', label: 'Kahkaha' },
     { key: 'violin', emoji: '🎻', label: 'Bahane' },
     { key: 'revir', emoji: '🚑', label: 'Revirlik' },

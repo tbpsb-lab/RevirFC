@@ -58,7 +58,7 @@ export const DessertLedger: React.FC<Props> = ({
             <Coffee className="w-5 h-5 text-amber-400" /> Kulüp Kasası & Tatlı / Çay Çetelesi
           </h3>
           <p className="text-xs text-neutral-400 mt-0.5">
-            İddia kaybedenlerin veya Günün Bidonu seçilenlerin baklava/çay borçları unutulmaz!
+            İddia kaybedenlerin veya Haftanın Bidonu seçilenlerin baklava/çay borçları unutulmaz!
           </p>
         </div>
         <button

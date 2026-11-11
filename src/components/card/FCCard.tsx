@@ -133,7 +133,7 @@ export const FCCard: React.FC<Props> = ({
           ovalsHeight: 'h-[7.2%]',
           photoFrame: 'top-[11%] left-[12%] right-[8%] h-[44%]',
           isGold: false,
-          label: 'IN-FORM 🔥',
+          label: 'ATEŞ EDİYO! 🔥',
         };
       case 'revir':
         return {
@@ -193,7 +193,7 @@ export const FCCard: React.FC<Props> = ({
           ovalsHeight: 'h-[7.2%]',
           photoFrame: 'top-[11%] left-[12%] right-[8%] h-[44%]',
           isGold: false,
-          label: 'GÜNÜN BİDONU 🛢️',
+          label: 'HAFTANIN BİDONU 🛢️',
         };
       case 'gold':
       default:

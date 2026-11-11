@@ -51,10 +51,10 @@ interface Props {
 const THEME_INFO: Record<CardTheme, { label: string; icon: string; title: string; desc: string }> = {
   gold: { label: 'Altın', icon: '🟡', title: 'Standart FC 27 Kartı', desc: 'Her oyuncunun temel lig kartıdır.' },
   totw: { label: 'MVP', icon: '⭐', title: 'Haftanın En Değerli Oyuncusu (MVP)', desc: 'Haftanın en iyi oyuncusuna Kurul ve maç sonu oylaması tarafından hediye edilir.' },
-  inform: { label: 'In-Form', icon: '🔥', title: 'Alevli / Formda', desc: 'Sadece Kurul tarafından verilir (Maksimum 3 kişi). Yüksek form grafiği ve parlayan performanslar içindir.' },
+  inform: { label: 'Ateş Ediyo!', icon: '🔥', title: 'Ateş Ediyo! 🔥', desc: 'Sadece Kurul tarafından verilir (Maksimum 3 kişi). Sahada durdurulamayan, alev alev yanan performanslar içindir.' },
   revir: { label: 'Revir', icon: '🩹', title: 'Bandajlı Sakat Raporu', desc: 'Maç öncesi sakatlık check-in durumu bildiren oyunculara otomatik atanır.' },
   legend: { label: 'Efsane', icon: '👑', title: 'Kulüp Efsanesi', desc: 'İsmail, Gölcür ve Cevdet gibi kulüp efsanelerine özel unvandır.' },
-  bidon: { label: 'Bidon', icon: '🛢️', title: 'Günün Bidonu', desc: 'Maç sonu oylamasında günün bidonu seçilen oyuncuya takılır. Haftaya koca bir termos çay borçlanır ☕' },
+  bidon: { label: 'Bidon', icon: '🛢️', title: 'Haftanın Bidonu', desc: 'Maç sonu oylamasında haftanın bidonu seçilen oyuncuya takılır. Haftaya koca bir termos çay borçlanır ☕' },
 };
 
 export const CardCustomizer: React.FC<Props> = ({
@@ -718,10 +718,10 @@ export const CardCustomizer: React.FC<Props> = ({
                       {[
                         { id: 'gold' as CardTheme, label: 'Altın', icon: '🟡', desc: 'Standart (OVR 75+)' },
                         { id: 'totw' as CardTheme, label: 'MVP', icon: '⭐', desc: 'Haftanın En Değerli Oyuncusu' },
-                        { id: 'inform' as CardTheme, label: 'In-Form', icon: '🔥', desc: 'Formda / Alevli' },
+                        { id: 'inform' as CardTheme, label: 'Ateş Ediyo!', icon: '🔥', desc: 'Ateş Ediyo! (Maks 3)' },
                         { id: 'revir' as CardTheme, label: 'Revir', icon: '🩹', desc: 'Bandajlı Sakat' },
                         { id: 'legend' as CardTheme, label: 'Efsane', icon: '👑', desc: 'İsmail, Gölcür & Cevdet' },
-                        { id: 'bidon' as CardTheme, label: 'Bidon', icon: '🛢️', desc: 'Günün Ceza Kartı' },
+                        { id: 'bidon' as CardTheme, label: 'Bidon', icon: '🛢️', desc: 'Haftanın Bidonu' },
                       ].map((item) => {
                         const isSelected = currentTheme === item.id;
                         return (
@@ -734,7 +734,7 @@ export const CardCustomizer: React.FC<Props> = ({
                                   (p) => p.theme === 'inform' && p.id !== editedPlayer.id
                                 ).length;
                                 if (currentInformCount >= 3) {
-                                  alert('Kurul Kuralı: Aynı anda en fazla 3 oyuncuda Alev (In-Form) kartı bulunabilir!');
+                                  alert('Kurul Kuralı: Aynı anda en fazla 3 oyuncuda Ateş Ediyo! kartı bulunabilir!');
                                   return;
                                 }
                               }
@@ -766,11 +766,11 @@ export const CardCustomizer: React.FC<Props> = ({
                         <div>
                           <span className="font-bold text-white block">{themeDetails.title}</span>
                           <span className="text-[10px] text-neutral-400">
-                            {currentTheme === 'gold' && 'Standart kartınız. Sakatlıkta Revir 🩹, En iyi oyuncu seçilince MVP ⭐ veya Alev 🔥 takılır.'}
+                            {currentTheme === 'gold' && 'Standart kartınız. Sakatlıkta Revir 🩹, En iyi oyuncu seçilince MVP ⭐ veya Ateş Ediyo! 🔥 takılır.'}
                             {currentTheme === 'revir' && 'Maç öncesi hafif sakatım check-in durumu bildirdiğiniz için takıldı.'}
                             {currentTheme === 'totw' && 'Haftanın En Değerli Oyuncusu (MVP) seçildiğiniz için Kurul tarafından hediye edildi.'}
-                            {currentTheme === 'inform' && 'Formda performansınız için Kurul tarafından hediye edildi.'}
-                            {currentTheme === 'bidon' && 'Maç sonu oylamasında ceza/mizah kartı olarak takıldı.'}
+                            {currentTheme === 'inform' && 'Ateş Ediyo! performansı için Kurul tarafından hediye edildi.'}
+                            {currentTheme === 'bidon' && 'Maç sonu oylamasında Haftanın Bidonu seçildiğiniz için takıldı (Haftaya termosla sıcak çay borçlusunuz ☕).'}
                             {currentTheme === 'legend' && 'Kulüp efsanesi unvanı.'}
                           </span>
                         </div>

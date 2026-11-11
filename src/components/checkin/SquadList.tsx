@@ -161,7 +161,7 @@ export const SquadList: React.FC<Props> = ({
               <button
                 onClick={onOpenCommittee}
                 className="bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-black font-black text-xs px-4 py-2.5 rounded-xl shadow-lg shadow-amber-500/25 flex items-center gap-1.5 transition-transform active:scale-95 cursor-pointer"
-                title="Oylama sandığı sonuçlarını incele, MVP, Bidon ve Alevli kartlara son mührü bas"
+                title="Oylama sandığı sonuçlarını incele, MVP, Haftanın Bidonu ve Ateş Ediyo! kartlarına son mührü bas"
               >
                 <ShieldCheck className="w-4 h-4 text-black" />
                 <span>🔏 Kurul Masası & Son Mühür</span>

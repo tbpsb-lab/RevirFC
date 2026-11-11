@@ -83,7 +83,7 @@ export interface Player {
   name: string;
   nickname: string;
   pendingNickname?: string; // Kullanıcı tarafından değiştirilmiş, yönetici onayı bekleyen lakap
-  isLegend?: boolean; // Sadece yönetici tarafından atanabilen kulüp efsanesi unvanı (Bidon olamaz, MVP/Alev/Revir olabilir)
+  isLegend?: boolean; // Sadece yönetici tarafından atanabilen kulüp efsanesi unvanı (Bidon olamaz, MVP/Ateş Ediyo!/Revir olabilir)
   position: PreferredPosition;
   number: number;
   photoUrl: string;
@@ -159,8 +159,8 @@ export interface MatchBallot {
 export interface MatchAwards {
   mvpId?: string;          // Haftanın MVP Kartı (Tekil)
   wallId?: string;         // Etten Duvar (En İyi Savunma/GK)
-  bidonId?: string;        // Günün Bidonu (Opsiyonel / Tekil)
-  inFormIds?: string[];    // Kurul tarafından atanan Alevli In-Form Kartlar (Maksimum 3)
+  bidonId?: string;        // Haftanın Bidonu (Opsiyonel / Tekil)
+  inFormIds?: string[];    // Kurul tarafından atanan Ateş Ediyo! Kartları (Maksimum 3)
   isConfirmedByCommittee?: boolean; // Kurul Son Mührü basıldı mı?
   confirmedAt?: string;
   confirmedBy?: string;

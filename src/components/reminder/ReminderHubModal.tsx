@@ -63,7 +63,7 @@ export const ReminderHubModal: React.FC<Props> = ({
       return `⚽ *RevirFC 27 • Maç Öncesi Check-In Hatırlatması*\n\nBeyler selam! ${match.title} için kadro dengeleme algoritması çalıştırılacak.\nHenüz sağlık/revir durumu bildirmeyen arkadaşlar:\n👉 ${names || 'Herkes bildirdi!'}\n\n3 saniyede durumunuzu seçip onaylayın:\n🔗 ${siteUrl}`;
     } else if (activeTab === 'rating') {
       const names = missingRatingPlayers.map((p) => p.name).join(', ');
-      return `🏆 *RevirFC 27 • Maç Sonu 360° Puanlama*\n\nMaç bitti! Haftanın MVP'si (Most Valuable Player) ve Günün Bidonu'nu belirlemek için karneler 24 saat açık.\nPuanlamasını yapmayanlar:\n👉 ${names || 'Herkes tamamladı!'}\n\nOylarınızı gönderin, kartlar güncellensin:\n🔗 ${siteUrl}`;
+      return `🏆 *RevirFC 27 • Maç Sonu 360° Puanlama*\n\nMaç bitti! Haftanın MVP'si (Most Valuable Player) ve Haftanın Bidonu'nu belirlemek için karneler 24 saat açık.\nPuanlamasını yapmayanlar:\n👉 ${names || 'Herkes tamamladı!'}\n\nOylarınızı gönderin, kartlar güncellensin:\n🔗 ${siteUrl}`;
     } else {
       const pendingCommittee = committeeStatus.filter((c) => !c.isDone).map((c) => `${c.name} (${c.scoredCount}/${c.total})`).join(', ');
       return `⭐ *RevirFC 27 • Kurul Kalibrasyon Hatırlatması*\n\nKurul üyelerimiz (${pendingCommittee || 'Tümü tamamlandı!'}), 20 kişilik kadronun baz reyting konsensüsünü tamamlamak için linke tıklayıp kaydırıcılarla puanları kaydedebilirsiniz:\n🔗 ${siteUrl}/?tab=scouting`;

@@ -564,7 +564,7 @@ export const MOCK_DEBTS: DessertDebt[] = [
   {
     id: 'debt-1',
     debtorPlayerId: 'p8',
-    description: 'Boş kaleye kaçırdığı için Günün Bidonu seçildi + iddia kaybı',
+    description: 'Boş kaleye kaçırdığı için Haftanın Bidonu seçildi + iddia kaybı',
     treatType: 'baklava',
     status: 'pending',
     createdAt: '2026-11-06T12:00:00.000Z',

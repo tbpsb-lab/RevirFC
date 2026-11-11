@@ -219,7 +219,7 @@ export const MatchRatingModal: React.FC<Props> = ({
           })}
         </div>
 
-        {/* Post-Match Podium Awards (MVP, Wall, Günün Bidonu) */}
+        {/* Post-Match Podium Awards (MVP, Wall, Haftanın Bidonu) */}
         <div className="mt-6 pt-4 border-t border-neutral-800">
           <h3 className="text-sm font-black text-amber-300 uppercase tracking-wider mb-3 flex items-center gap-2">
             <Trophy className="w-4 h-4 text-amber-400" /> Maç Sonu 3'lü Ödül Kürsüsü
@@ -268,11 +268,11 @@ export const MatchRatingModal: React.FC<Props> = ({
               </select>
             </div>
 
-            {/* Günün Bidonu */}
+            {/* Haftanın Bidonu */}
             <div className="bg-neutral-800/80 p-3 rounded-xl border border-rose-500/40">
               <div className="flex items-center justify-between mb-1">
                 <label className="text-xs font-bold text-rose-300 block">
-                  🪵 Günün Bidonu (Termosla Çay Borçlusu ☕)
+                  🪵 Haftanın Bidonu (Termosla Çay Borçlusu ☕)
                 </label>
                 <span className="text-[10px] text-neutral-400 font-medium">Opsiyonel</span>
               </div>

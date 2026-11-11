@@ -67,7 +67,7 @@ export const CommitteeDecisionModal: React.FC<Props> = ({
     return match.awards?.wallId || candidatePlayers.find((p) => p.position === 'DEF' || p.position === 'GK')?.id || candidatePlayers[0]?.id || '';
   });
 
-  // Alev (In-Form) cards: strictly max 3 players!
+  // Ateş Ediyo! cards: strictly max 3 players!
   const [selectedInFormIds, setSelectedInFormIds] = useState<string[]>(() => {
     if (match.awards?.inFormIds && match.awards.inFormIds.length > 0) {
       return match.awards.inFormIds.slice(0, 3);
@@ -226,11 +226,11 @@ export const CommitteeDecisionModal: React.FC<Props> = ({
               </select>
             </div>
 
-            {/* 2. Günün Bidonu Selection (Termosla Çay Borçlusu ☕) */}
+            {/* 2. Haftanın Bidonu Selection (Termosla Çay Borçlusu ☕) */}
             <div className="bg-gradient-to-r from-neutral-900 to-rose-950/20 p-4 rounded-2xl border border-rose-500/40">
               <div className="flex items-center justify-between mb-2">
                 <label className="text-sm font-black text-rose-300 flex items-center gap-2">
-                  <Coffee className="w-4 h-4 text-rose-400" /> 🪵 Günün Bidonu (Termosla Sıcak Çay Borçlusu ☕)
+                  <Coffee className="w-4 h-4 text-rose-400" /> 🪵 Haftanın Bidonu (Termosla Sıcak Çay Borçlusu ☕)
                 </label>
                 <span className="text-[10px] text-rose-400 font-bold px-2 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/30">
                   Opsiyonel • Kurul Affı Geçerli
@@ -255,11 +255,11 @@ export const CommitteeDecisionModal: React.FC<Props> = ({
               </select>
             </div>
 
-            {/* 3. Alevli (In-Form) Kartlar (Sadece Kurul Verir • Maksimum 3 Kişi) */}
+            {/* 3. Ateş Ediyo! Kartları (Sadece Kurul Verir • Maksimum 3 Kişi) */}
             <div className="bg-gradient-to-r from-neutral-900 to-orange-950/20 p-4 rounded-2xl border border-orange-500/40">
               <div className="flex items-center justify-between mb-2">
                 <label className="text-sm font-black text-orange-400 flex items-center gap-2">
-                  <Flame className="w-4 h-4 text-orange-400" /> 🔥 Alevli (In-Form) Kartlar (Sadece Kurul • Maks 3)
+                  <Flame className="w-4 h-4 text-orange-400" /> 🔥 Ateş Ediyo! Kartları (Sadece Kurul • Maks 3)
                 </label>
                 <span className={`text-[10px] font-black px-2.5 py-0.5 rounded-full border ${
                   selectedInFormIds.length === 3
@@ -270,7 +270,7 @@ export const CommitteeDecisionModal: React.FC<Props> = ({
                 </span>
               </div>
               <p className="text-[11px] text-neutral-400 mb-3">
-                Bu kartları sadece Kurul verebilir. Haftanın parlayan ve yüksek mücadele gösteren en fazla 3 oyuncusunu işaretleyin:
+                Bu kartları sadece Kurul verebilir. Sahada durdurulamayan, alev alev yanan en fazla 3 oyuncuyu işaretleyin:
               </p>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">

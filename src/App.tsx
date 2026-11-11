@@ -387,11 +387,11 @@ function MainApp() {
       if (finalAwards.mvpId === p.id) {
         return { ...p, theme: 'totw' as const };
       }
-      // 2. Günün Bidonu (Efsaneler ASLA bidon seçilemez!)
+      // 2. Haftanın Bidonu (Efsaneler ASLA bidon seçilemez!)
       if (finalAwards.bidonId === p.id && !p.isLegend) {
         return { ...p, theme: 'bidon' as const };
       }
-      // 3. Alevli (In-Form) Kartlar (Efsane olsa bile hak ettiğinde Alev olabilir!)
+      // 3. Ateş Ediyo! Kartları (Efsane olsa bile hak ettiğinde Ateş Ediyo! olabilir!)
       if (finalAwards.inFormIds?.includes(p.id)) {
         return { ...p, theme: 'inform' as const };
       }
@@ -413,7 +413,7 @@ function MainApp() {
       awards: finalAwards,
     }));
 
-    // If Günün Bidonu chosen, add funny Thermos Tea debt to ledger (Termosla Çay ☕)
+    // If Haftanın Bidonu chosen, add funny Thermos Tea debt to ledger (Termosla Çay ☕)
     if (finalAwards.bidonId) {
       const bidonPlayer = players.find((p) => p.id === finalAwards.bidonId);
       if (bidonPlayer) {
@@ -421,7 +421,7 @@ function MainApp() {
           {
             id: `debt-${Date.now()}`,
             debtorPlayerId: bidonPlayer.id,
-            description: 'Maç sonu oylamasında Günün Bidonu seçildi! Haftaya sahaya koca bir termos çay getirecek ☕🫖',
+            description: 'Maç sonu oylamasında Haftanın Bidonu seçildi! Haftaya sahaya koca bir termos çay getirecek ☕🫖',
             treatType: 'çay',
             status: 'pending',
             createdAt: new Date().toISOString(),
@@ -459,7 +459,7 @@ function MainApp() {
         matchId: match.id,
         authorPlayerId: 'system',
         authorName: 'Revir FC Kurul Mührü 🔏',
-        text: `🪵 GÜNÜN BİDONU: ${bidonPlayer.name}! Kurul kararıyla haftanın bidon kartı takıldı. Takıma haftaya koca bir termos sıcak çay getirme borcu yazıldı! Afiyet olsun! ☕🫖😂`,
+        text: `🪵 HAFTANIN BİDONU: ${bidonPlayer.name}! Kurul kararıyla haftanın bidon kartı takıldı. Takıma haftaya koca bir termos sıcak çay getirme borcu yazıldı! Afiyet olsun! ☕🫖😂`,
         isAnonymous: false,
         reactions: { fire: [], laugh: [bidonPlayer.id], violin: [], revir: [], goat: [] },
         createdAt: new Date().toISOString(),
@@ -470,7 +470,7 @@ function MainApp() {
         matchId: match.id,
         authorPlayerId: 'system',
         authorName: 'Revir FC Kurul Mührü 🔏',
-        text: `👏 KURUL KARARI: Bu hafta kimseye Günün Bidonu verilmedi! Kurul tüm kadronun mücadelesinden memnun kaldı, çaylar kulüpten! ☕✨`,
+        text: `👏 KURUL KARARI: Bu hafta kimseye Haftanın Bidonu verilmedi! Kurul tüm kadronun mücadelesinden memnun kaldı, çaylar kulüpten! ☕✨`,
         isAnonymous: false,
         reactions: { fire: [], laugh: [], violin: [], revir: [], goat: [] },
         createdAt: new Date().toISOString(),
@@ -484,7 +484,7 @@ function MainApp() {
         matchId: match.id,
         authorPlayerId: 'system',
         authorName: 'Revir FC Kurul Mührü 🔏',
-        text: `🔥 ALEV ALANLAR (IN-FORM): Kurul tarafından bu haftanın parlayan yıldızları ${names} seçildi! Alevli In-Form kartları hayırlı olsun! 🔥⚽`,
+        text: `🔥 ATEŞ EDİYO!: Kurul tarafından bu haftanın sahada durdurulamayan yıldızları ${names} seçildi! Ateş Ediyo! kartları hayırlı olsun! 🔥⚽`,
         isAnonymous: false,
         reactions: { fire: inFormPlayers.map((p) => p.id), laugh: [], violin: [], revir: [], goat: [] },
         createdAt: new Date().toISOString(),

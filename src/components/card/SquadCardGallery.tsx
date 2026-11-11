@@ -38,8 +38,8 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
   // 2. Base list order with 5-Tier Deduplicated Hierarchy:
   //    Tier 1: Current User's card (myPlayer) - always 1st if claimed & approved
   //    Tier 2: Haftanın MVP'si (theme === 'totw' && not already added)
-  //    Tier 3: Günün Bidonu (theme === 'bidon' && not already added, if selected that week)
-  //    Tier 4: Alevli In-Form Kartlar (theme === 'inform' && not already added, max 3)
+  //    Tier 3: Haftanın Bidonu (theme === 'bidon' && not already added, if selected that week)
+  //    Tier 4: Ateş Ediyo! Kartlar (theme === 'inform' && not already added, max 3)
   //    Tier 5: Remaining squad sorted by OVR descending (and Turkish name)
   //    -> Strictly ZERO duplicates!
   const myPlayer = myPlayerId ? players.find((p) => p.id === myPlayerId) : undefined;
@@ -66,7 +66,7 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
     addedIds.add(bidon.id);
   }
 
-  // 4. In-Form cards (theme === 'inform', max 3)
+  // 4. Ateş Ediyo! cards (theme === 'inform', max 3)
   const informs = players.filter((p) => p.theme === 'inform' && !addedIds.has(p.id)).slice(0, 3);
   for (const p of informs) {
     orderedPlayers.push(p);
@@ -190,7 +190,7 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
                 : 'bg-neutral-950 text-orange-400 border-orange-500/30'
             }`}
           >
-            <Flame className="w-3 h-3" /> In-Form 🔥
+            <Flame className="w-3 h-3" /> Ateş Ediyo! 🔥
           </button>
           <button
             onClick={() => setThemeFilter('revir')}
@@ -220,7 +220,7 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
                 : 'bg-neutral-950 text-amber-600 border-amber-700/30'
             }`}
           >
-            🛢️ Günün Bidonu
+            🛢️ Haftanın Bidonu
           </button>
         </div>
       </div>
@@ -239,14 +239,14 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
                 isMvp ? 'z-20 scale-[1.03]' : isMyCard ? 'z-10' : 'z-10'
               }`}
             >
-              {/* Top Badge: "Senin Kartın", "MVP", "Bidon", "In-Form", or Score Rank */}
+              {/* Top Badge: "Senin Kartın", "MVP", "Haftanın Bidonu", "Ateş Ediyo!", or Score Rank */}
               {isMyCard ? (
                 <div className="flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/30 to-amber-500/20 border border-amber-400/70 shadow-lg shadow-amber-500/25 text-amber-300 text-[11px] font-black tracking-wide uppercase mb-2.5 animate-pulse">
                   <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-spin-slow" />
                   <span>Senin Kartın</span>
                   {player.theme === 'totw' && <span className="text-yellow-300 font-extrabold">• 🏆 MVP</span>}
-                  {player.theme === 'inform' && <span className="text-orange-400 font-extrabold">• 🔥 IN-FORM</span>}
-                  {player.theme === 'bidon' && <span className="text-rose-400 font-extrabold">• 🪵 BİDON</span>}
+                  {player.theme === 'inform' && <span className="text-orange-400 font-extrabold">• 🔥 ATEŞ EDİYO!</span>}
+                  {player.theme === 'bidon' && <span className="text-rose-400 font-extrabold">• 🪵 HAFTANIN BİDONU</span>}
                   <span className="text-amber-200/70 font-mono text-[10px] font-normal">#{rank}</span>
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
@@ -261,12 +261,12 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
                 </div>
               ) : player.theme === 'bidon' ? (
                 <div className="flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-neutral-900 via-rose-950/50 to-neutral-900 border border-rose-500/60 shadow-lg shadow-rose-500/20 text-rose-300 text-[11px] font-black tracking-wide uppercase mb-2.5">
-                  <span>🪵 Günün Bidonu • ☕ Çay Borçlusu</span>
+                  <span>🪵 Haftanın Bidonu • ☕ Çay Borçlusu</span>
                 </div>
               ) : player.theme === 'inform' ? (
                 <div className="flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-neutral-900 via-orange-950/60 to-neutral-900 border border-orange-500/70 shadow-lg shadow-orange-500/20 text-orange-300 text-[11px] font-black tracking-wide uppercase mb-2.5">
                   <Flame className="w-3.5 h-3.5 text-orange-400 animate-pulse" />
-                  <span>🔥 Alev • In-Form</span>
+                  <span>🔥 Ateş Ediyo!</span>
                   <span className="text-orange-200/70 font-mono text-[10px]">#{rank}</span>
                 </div>
               ) : (
