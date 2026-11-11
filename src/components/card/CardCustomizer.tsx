@@ -4,6 +4,8 @@ import { FCCard } from './FCCard';
 import { PLAYSTYLE_CONFIG, PLAYSTYLE_CATEGORIES } from './PlayStyleBadge';
 import {
   NATIONS,
+  PRIMARY_NATIONS,
+  OTHER_NATIONS,
   BIG_FOUR_TR_CLUBS,
   OTHER_TR_CLUBS,
   WORLD_TOP_CLUBS,
@@ -877,11 +879,20 @@ export const CardCustomizer: React.FC<Props> = ({
                         }}
                         className="w-full bg-neutral-800 border border-neutral-700 rounded-lg pl-10 pr-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-400 cursor-pointer"
                       >
-                        {NATIONS.map((nat) => (
-                          <option key={nat.code} value={nat.code}>
-                            {nat.name}
-                          </option>
-                        ))}
+                        <optgroup label="⭐ Öne Çıkanlar & Türk Dünyası">
+                          {PRIMARY_NATIONS.map((nat) => (
+                            <option key={nat.code} value={nat.code}>
+                              {nat.name}
+                            </option>
+                          ))}
+                        </optgroup>
+                        <optgroup label="🌍 Tüm Dünya Ülkeleri (A-Z)">
+                          {OTHER_NATIONS.map((nat) => (
+                            <option key={nat.code} value={nat.code}>
+                              {nat.name}
+                            </option>
+                          ))}
+                        </optgroup>
                       </select>
                     </div>
                   </div>
