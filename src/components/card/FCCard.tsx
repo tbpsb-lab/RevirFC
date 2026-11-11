@@ -128,7 +128,7 @@ export const FCCard: React.FC<Props> = ({
           nameTop: 'top-[50.0%]', // Ateşli cam hattın üstü ve altı dengeli
           statTop: 'top-[76.6%]', // Sayılar akkor kömür tabanının hemen üstünde net okunur
           statBounds: 'left-[11.3%] right-[11.3%]',
-          ovalsTop: 'top-[65.4%]', // İki dumanlı ateş halkasının tam göbeğine yerleştirildi
+          ovalsTop: 'top-[66.6%]', // İki dumanlı ateş halkasının tam göbeğine yerleştirildi
           ovalsBounds: 'left-[10.5%] right-[10.5%]',
           ovalsHeight: 'h-[6.5%]',
           photoFrame: 'top-[11%] left-[12%] right-[8%] h-[44%]',
@@ -168,7 +168,7 @@ export const FCCard: React.FC<Props> = ({
           nameTop: 'top-[54.0%]', // Mermer şerit isimliğin tam ortası
           statTop: 'top-[81.0%]', // Sayılar alt mermer kavisten yukarı alınıp ortalandı
           statBounds: 'left-[11.3%] right-[11.3%]',
-          ovalsTop: 'top-[70.8%]', // Beyaz mermer kapsüllerin tam merkezine oturtuldu
+          ovalsTop: 'top-[72.0%]', // Beyaz mermer kapsüllerin tam merkezine oturtuldu
           ovalsBounds: 'left-[11.5%] right-[11.5%]',
           ovalsHeight: 'h-[5.8%]',
           photoFrame: 'top-[12%] left-[16%] right-[16%] h-[46%]',
@@ -185,10 +185,10 @@ export const FCCard: React.FC<Props> = ({
           ovalTextColor: 'text-[#FBBF24]',
           ovalIconColor: 'text-[#F59E0B]',
           ovalDropShadow: 'drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)]',
-          nameTop: 'top-[54.0%]', // Lakap koli kapağı üstünde, isim koli bandının tam merkezinde
+          nameTop: 'top-[52.4%]', // Lakap koli kapağı üstünde, isim koli bandının tam merkezinde
           statTop: 'top-[77.8%]', // Sayılar dip metal sınırdan yukarı taşınıp paslı tablonun ortasına alındı
           statBounds: 'left-[11.3%] right-[11.3%]',
-          ovalsTop: 'top-[67.8%]', // Paslı oval yuvaların tam ortasına hizalandı
+          ovalsTop: 'top-[69.5%]', // Paslı oval yuvaların tam ortasına hizalandı
           ovalsBounds: 'left-[10.5%] right-[10.5%]',
           ovalsHeight: 'h-[6.2%]',
           photoFrame: 'top-[11%] left-[12%] right-[8%] h-[44%]',
@@ -209,7 +209,7 @@ export const FCCard: React.FC<Props> = ({
           nameTop: 'top-[51.8%]', // Altın kurdele isimliğin tam ortası
           statTop: 'top-[78.4%]', // Sayılar HIZ-ŞUT etiketlerinden aşağı indirilip altın tabanda ortalandı
           statBounds: 'left-[11.3%] right-[11.3%]',
-          ovalsTop: 'top-[66.2%]', // Altın oval halkaların tam ortasına oturtuldu
+          ovalsTop: 'top-[67.0%]', // Altın oval halkaların tam ortasına oturtuldu
           ovalsBounds: 'left-[9.5%] right-[9.5%]',
           ovalsHeight: 'h-[5.8%]',
           photoFrame: 'top-[11%] left-[12%] right-[8%] h-[44%]',
