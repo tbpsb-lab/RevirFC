@@ -363,6 +363,39 @@ function MainApp() {
         ]);
       }
     }
+
+    // Announce MVP and Bidon in the Locker Room (Soyunma Odası)
+    const mvpPlayer = players.find((p) => p.id === awards.mvpId);
+    const bidonPlayer = awards.bidonId ? players.find((p) => p.id === awards.bidonId) : undefined;
+    if (mvpPlayer) {
+      const newAnnouncements: LockerPost[] = [
+        {
+          id: `post-${Date.now()}-mvp`,
+          matchId: match.id,
+          authorPlayerId: 'system',
+          authorName: 'Revir FC Resmi Bülteni 📢',
+          text: `🏆 HAFTANIN MVP'Sİ: ${mvpPlayer.name}! Maç sonu oylamasında sahanın en değerlisi seçilerek 1 haftalığına parlayan Siyah-Kozmik Kristal MVP kartını göğsüne taktı! Tebrikler! ⚽⭐`,
+          isAnonymous: false,
+          reactions: { fire: [mvpPlayer.id], laugh: [], violin: [], revir: [], goat: [mvpPlayer.id] },
+          createdAt: new Date().toISOString(),
+        },
+      ];
+
+      if (bidonPlayer) {
+        newAnnouncements.push({
+          id: `post-${Date.now()}-bidon`,
+          matchId: match.id,
+          authorPlayerId: 'system',
+          authorName: 'Revir FC Disiplin & Mizah Kurulu 🛢️',
+          text: `🪵 GÜNÜN BİDONU: ${bidonPlayer.name}! Maç sonu oylamasında haftanın bidonu seçildi. Kendisine paslı teneke kart takıldı ve kasaya takıma baklava ısmarlama borcu yazıldı! Afiyet olsun! 🍯😂`,
+          isAnonymous: false,
+          reactions: { fire: [], laugh: [bidonPlayer.id], violin: [], revir: [], goat: [] },
+          createdAt: new Date().toISOString(),
+        });
+      }
+
+      setPosts((prev) => [...newAnnouncements, ...prev]);
+    }
   };
 
   // Add post to locker room
