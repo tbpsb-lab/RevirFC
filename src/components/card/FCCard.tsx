@@ -168,7 +168,7 @@ export const FCCard: React.FC<Props> = ({
           nameTop: 'top-[54.5%]',
           statTop: 'top-[82.0%]',
           statBounds: 'left-[11.3%] right-[11.3%]',
-          ovalsTop: 'top-[69.0%]',
+          ovalsTop: 'top-[71.2%]', // Playstyles yuvaların tam ortasına aşağı kaydırıldı
           ovalsBounds: 'left-[11.5%] right-[11.5%]',
           ovalsHeight: 'h-[5.8%]',
           photoFrame: 'top-[12%] left-[16%] right-[16%] h-[46%]',
