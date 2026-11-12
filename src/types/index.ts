@@ -1,6 +1,18 @@
 export type UserRole = 'admin' | 'captain' | 'player';
 export type UserStatus = 'pending' | 'approved' | 'rejected';
 
+export interface InviteToken {
+  id: string;             // Benzersiz token kodu (örn: revir-admin-alper, revir-kurul-yuksel)
+  name: string;           // Kime özel oluşturuldu (örn: Alper, Yüksel, Akif)
+  role: UserRole;         // 'admin' | 'captain' | 'player'
+  claimedPlayerId: string;// Eşleşecek kart id'si ('p1', 'p3' vb.)
+  description: string;    // Açıklama
+  usedByEmail?: string;   // Giriş yapan hesap
+  usedAt?: string;        // Kullanıldığı tarih
+  isRevoked?: boolean;    // İptal edildi mi
+  createdAt: string;
+}
+
 export interface UserProfile {
   uid: string;
   email: string;

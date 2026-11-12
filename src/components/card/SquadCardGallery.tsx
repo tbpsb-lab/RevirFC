@@ -132,18 +132,6 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
 
       {/* Filters Header */}
       <div className="bg-neutral-900/90 border border-neutral-800 rounded-3xl p-5 shadow-xl flex flex-wrap items-center justify-between gap-4">
-        {/* Search */}
-        <div className="relative flex-1 min-w-[240px]">
-          <Search className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Oyuncu veya halı saha lakabı ara..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-neutral-950 border border-neutral-800 rounded-2xl pl-10 pr-4 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400"
-          />
-        </div>
-
         {/* Position filters */}
         <div className="flex items-center gap-1 bg-neutral-950 p-1 rounded-2xl border border-neutral-800 text-xs">
           {['ALL', 'FWD', 'MID', 'DEF', 'GK'].map((pos) => (

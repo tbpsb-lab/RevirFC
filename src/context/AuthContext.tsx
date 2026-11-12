@@ -1,9 +1,18 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { UserProfile, UserRole, UserStatus } from '../types';
+import { UserProfile, UserRole, UserStatus, InviteToken } from '../types';
 import { MOCK_USERS } from '../services/mockData';
 import { safeSetItem } from '../services/safeStorage';
 import { auth, isFirebaseConfigured } from '../services/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { markInviteUsed } from '../services/inviteService';
+
+interface RegisterWithInviteParams {
+  uid: string;
+  email: string;
+  displayName: string;
+  photoURL?: string;
+  token: InviteToken;
+}
 
 interface AuthContextType {
   currentUser: UserProfile | null;
@@ -14,6 +23,8 @@ interface AuthContextType {
   approveUser: (uid: string, claimedPlayerId: string, role?: UserRole) => void;
   rejectUser: (uid: string) => void;
   updateClaimedPlayer: (playerId: string) => void;
+  loginWithCredentials: (user: UserProfile) => void;
+  registerWithInvite: (params: RegisterWithInviteParams) => void;
   logout: () => void;
 }
 
@@ -139,6 +150,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAllUsers((prev) => prev.map((u) => (u.uid === updated.uid ? updated : u)));
   };
 
+  const loginWithCredentials = (user: UserProfile) => {
+    setCurrentUser(user);
+  };
+
+  const registerWithInvite = ({ uid, email, displayName, photoURL, token }: RegisterWithInviteParams) => {
+    const newUser: UserProfile = {
+      uid,
+      email,
+      displayName: displayName || token.name,
+      photoURL,
+      role: token.role,
+      status: 'approved', // Davet linki ile geldiği için anında onaylı!
+      claimedPlayerId: token.claimedPlayerId,
+      createdAt: new Date().toISOString(),
+    };
+
+    setAllUsers((prev) => {
+      const filtered = prev.filter((u) => u.uid !== uid && u.email !== email);
+      return [newUser, ...filtered];
+    });
+    setCurrentUser(newUser);
+    markInviteUsed(token.id, email);
+  };
+
   const logout = () => {
     if (isFirebaseConfigured && auth) {
       signOut(auth).catch(console.error);
@@ -158,6 +193,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         approveUser,
         rejectUser,
         updateClaimedPlayer,
+        loginWithCredentials,
+        registerWithInvite,
         logout,
       }}
     >

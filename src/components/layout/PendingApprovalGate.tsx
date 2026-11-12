@@ -35,17 +35,10 @@ export const PendingApprovalGate: React.FC = () => {
           </p>
         </div>
 
-        {/* Demo Switcher for fast review */}
         <div className="pt-4 border-t border-neutral-800">
-          <span className="text-[11px] text-neutral-400 block mb-2 font-semibold">
-            Test Deneyimi: Yönetici Rolüne Geçip Onaylamak İçin:
-          </span>
-          <button
-            onClick={() => switchMockRole('admin')}
-            className="w-full bg-amber-500 hover:bg-amber-400 text-black font-black text-xs py-2.5 rounded-xl shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 transition-all cursor-pointer"
-          >
-            <ShieldCheck className="w-4 h-4" /> Yönetici Olarak Giriş Yap & Üyeyi Onayla
-          </button>
+          <p className="text-[11px] text-neutral-400">
+            Davet linkiniz varsa linke tıklayarak veya yöneticinizden size özel davet linki talep ederek hesabınızı yetkilendirebilirsiniz.
+          </p>
         </div>
       </div>
     </div>

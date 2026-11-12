@@ -44,6 +44,10 @@ import { ChemistryMatrix } from './components/stats/ChemistryMatrix';
 import { EgoIndexCard } from './components/stats/EgoIndexCard';
 import { DessertLedger } from './components/stats/DessertLedger';
 import { AdminApprovalPanel } from './components/admin/AdminApprovalPanel';
+import { InviteManagerModal } from './components/admin/InviteManagerModal';
+import { AuthModal } from './components/auth/AuthModal';
+import { findInviteById } from './services/inviteService';
+import { InviteToken } from './types';
 import { ScoutingWizard } from './components/scouting/ScoutingWizard';
 import { ScoutingAdminDashboard } from './components/scouting/ScoutingAdminDashboard';
 import { ReminderHubModal } from './components/reminder/ReminderHubModal';
@@ -209,6 +213,23 @@ function MainApp() {
   const [isCommitteeModalOpen, setIsCommitteeModalOpen] = useState(false);
   const [showFirebaseModal, setShowFirebaseModal] = useState(false);
   const [showReminderModal, setShowReminderModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [activeInviteToken, setActiveInviteToken] = useState<InviteToken | null>(null);
+
+  // Check URL for ?invite=TOKEN
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const inviteCode = params.get('invite');
+      if (inviteCode) {
+        const found = findInviteById(inviteCode);
+        if (found) {
+          setActiveInviteToken(found);
+          setShowAuthModal(true);
+        }
+      }
+    } catch {}
+  }, []);
 
   const handleQuickCheckInForPlayer = (playerId: string) => {
     handleSaveCheckIn({
@@ -999,14 +1020,17 @@ function MainApp() {
         )}
 
         {activeTab === 'admin' && currentUser?.role === 'admin' && (
-          <AdminApprovalPanel
-            allUsers={allUsers}
-            players={players}
-            onApprove={approveUser}
-            onReject={rejectUser}
-            onApproveNickname={handleApproveNickname}
-            onRejectNickname={handleRejectNickname}
-          />
+          <div className="space-y-6">
+            <InviteManagerModal players={players} />
+            <AdminApprovalPanel
+              allUsers={allUsers}
+              players={players}
+              onApprove={approveUser}
+              onReject={rejectUser}
+              onApproveNickname={handleApproveNickname}
+              onRejectNickname={handleRejectNickname}
+            />
+          </div>
         )}
       </main>
 
@@ -1066,6 +1090,20 @@ function MainApp() {
           savedScoutingEntries={savedScoutingEntries}
           onQuickCheckInForPlayer={handleQuickCheckInForPlayer}
           onClose={() => setShowReminderModal(false)}
+        />
+      )}
+
+      {showAuthModal && (
+        <AuthModal
+          inviteToken={activeInviteToken}
+          onClose={() => {
+            setShowAuthModal(false);
+            setActiveInviteToken(null);
+          }}
+          onSuccess={() => {
+            setShowAuthModal(false);
+            setActiveInviteToken(null);
+          }}
         />
       )}
     </div>
