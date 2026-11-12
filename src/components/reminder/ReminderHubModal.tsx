@@ -40,7 +40,7 @@ export const ReminderHubModal: React.FC<Props> = ({
   const votedRaterIds = new Set(match.ratings?.map((r) => r.raterPlayerId) || []);
   const missingRatingPlayers = starters.filter((p) => !votedRaterIds.has(p.id));
 
-  // 3. Missing Committee Members (from Alper, Yüksel, Akif, İsmail)
+  // 3. Missing Committee Members (from Alper, Akif, Yüksel)
   const committeeStatus = COMMITTEE_MEMBERS.map((name) => {
     const scoredCount = players.filter((p) =>
       savedScoutingEntries.some((e) => e.playerId === p.id && e.evaluatorName === name)

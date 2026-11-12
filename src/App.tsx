@@ -15,6 +15,7 @@ import {
 } from './types';
 import {
   INITIAL_PLAYERS,
+  INITIAL_SCOUTING_ENTRIES,
   MOCK_ACTIVE_MATCH,
   MOCK_POSTS,
   MOCK_PHOTOS,
@@ -183,8 +184,18 @@ function MainApp() {
   const [scoutingView, setScoutingView] = useState<'wizard' | 'dashboard'>('wizard');
 
   const [savedScoutingEntries, setSavedScoutingEntries] = useState<PlayerScoutingEntry[]>(() => {
-    const saved = localStorage.getItem('revirfc_scouting_v2');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('revirfc_scouting_v2');
+      if (saved) {
+        const parsed: PlayerScoutingEntry[] = JSON.parse(saved);
+        // Merge with initial entries to ensure Yüksel and Alper entries are present if not overwritten
+        const entryKey = (e: PlayerScoutingEntry) => `${e.playerId}_${e.evaluatorName}`;
+        const existingKeys = new Set(parsed.map(entryKey));
+        const missingFromInitial = INITIAL_SCOUTING_ENTRIES.filter((e) => !existingKeys.has(entryKey(e)));
+        return [...parsed, ...missingFromInitial];
+      }
+    } catch {}
+    return INITIAL_SCOUTING_ENTRIES;
   });
 
   useEffect(() => {

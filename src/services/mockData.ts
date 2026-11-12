@@ -1,6 +1,6 @@
-import { Player, Match, LockerPost, PhotoArchiveItem, DessertDebt, UserProfile } from '../types';
+import { Player, Match, LockerPost, PhotoArchiveItem, DessertDebt, UserProfile, PlayerScoutingEntry } from '../types';
 
-export const COMMITTEE_MEMBERS = ['Alper', 'Yüksel', 'Akif', 'İsmail'] as const;
+export const COMMITTEE_MEMBERS = ['Alper', 'Akif', 'Yüksel'] as const;
 
 export const INITIAL_PLAYERS: Player[] = [
   {
@@ -579,6 +579,246 @@ export const MOCK_DEBTS: DessertDebt[] = [
   },
 ];
 
+export const INITIAL_SCOUTING_ENTRIES: PlayerScoutingEntry[] = [
+  // --- Yüksel'in Notları ---
+  {
+    playerId: 'p2', // Akif
+    evaluatorName: 'Yüksel',
+    pac: 7.9, sho: 8.0, pas: 8.5, dri: 7.7, def: 9.0, phy: 9.0,
+    gkRole: 'never',
+    playstyles: ['power_shot', 'ice_cold'],
+    secretNote: 'Hücumda bitirici, savunmaya desteği ve fiziği üst düzey.',
+    updatedAt: '2026-11-12T07:00:00.000Z',
+  },
+  {
+    playerId: 'p19', // Ömer
+    evaluatorName: 'Yüksel',
+    pac: 7.9, sho: 7.9, pas: 8.5, dri: 7.9, def: 8.8, phy: 8.7,
+    gkRole: 'emergency_only',
+    playstyles: ['tiki_taka', 'maestro'],
+    secretNote: 'Orta sahada pas trafiğini yönetir, defansif katkısı yüksek.',
+    updatedAt: '2026-11-12T07:00:00.000Z',
+  },
+  {
+    playerId: 'p20', // Mustafa
+    evaluatorName: 'Yüksel',
+    pac: 5.5, sho: 5.0, pas: 5.5, dri: 5.0, def: 6.0, phy: 7.0,
+    gkRole: 'emergency_only',
+    playstyles: ['wall', 'slide_tackler'],
+    secretNote: 'Fiziksel direnci iyi, savunmada sağlam kalır.',
+    updatedAt: '2026-11-12T07:00:00.000Z',
+  },
+  {
+    playerId: 'p18', // Selahattin
+    evaluatorName: 'Yüksel',
+    pac: 6.5, sho: 6.0, pas: 5.5, dri: 6.0, def: 6.5, phy: 6.0,
+    gkRole: 'yes',
+    playstyles: ['octopus'],
+    secretNote: 'İkinci kaleci, kalede refleksleri iyi.',
+    updatedAt: '2026-11-12T07:00:00.000Z',
+  },
+  {
+    playerId: 'p3', // Yüksel (Öz Değerlendirme)
+    evaluatorName: 'Yüksel',
+    pac: 8.0, sho: 8.0, pas: 8.6, dri: 7.7, def: 9.3, phy: 9.0,
+    gkRole: 'never',
+    playstyles: ['wall', 'interceptor'],
+    secretNote: 'Savunmanın belkemiği, ikili mücadelelerde ve pas dağıtımında iddialı.',
+    updatedAt: '2026-11-12T07:00:00.000Z',
+  },
+  {
+    playerId: 'p14', // Turap
+    evaluatorName: 'Yüksel',
+    pac: 8.2, sho: 8.0, pas: 7.9, dri: 7.8, def: 7.5, phy: 8.0,
+    gkRole: 'emergency_only',
+    playstyles: ['speedster', 'late_bloomer'],
+    secretNote: 'Genç ve dinamik, maç boyu temposu düşmüyor.',
+    updatedAt: '2026-11-12T07:00:00.000Z',
+  },
+  {
+    playerId: 'p4', // İsmail
+    evaluatorName: 'Yüksel',
+    pac: 8.5, sho: 8.6, pas: 9.8, dri: 8.8, def: 9.0, phy: 9.2,
+    gkRole: 'yes',
+    playstyles: ['octopus', 'first_touch'],
+    secretNote: 'Kulüp efsanesi, pas dağıtımı ve kurtarışları kusursuz.',
+    updatedAt: '2026-11-12T07:00:00.000Z',
+  },
+  {
+    playerId: 'p7', // Cevdet
+    evaluatorName: 'Yüksel',
+    pac: 7.5, sho: 7.0, pas: 7.8, dri: 7.0, def: 7.5, phy: 7.0,
+    gkRole: 'never',
+    playstyles: ['slide_tackler', 'first_touch'],
+    secretNote: 'Savaşçı ruhuyla defansta mücadele eder.',
+    updatedAt: '2026-11-12T07:00:00.000Z',
+  },
+  {
+    playerId: 'p1', // Alper
+    evaluatorName: 'Yüksel',
+    pac: 8.0, sho: 8.2, pas: 9.0, dri: 8.0, def: 7.5, phy: 8.0,
+    gkRole: 'never',
+    playstyles: ['ice_cold', 'commander'],
+    secretNote: 'Kaptan, oyun kurucu ve kilit pas ustası.',
+    updatedAt: '2026-11-12T07:00:00.000Z',
+  },
+  {
+    playerId: 'p8', // Elber
+    evaluatorName: 'Yüksel',
+    pac: 9.0, sho: 8.5, pas: 7.8, dri: 8.5, def: 7.0, phy: 8.5,
+    gkRole: 'never',
+    playstyles: ['poacher', 'finesse_shot'],
+    secretNote: 'Müthiş süratli ve bitirici, fırsatçı forvet.',
+    updatedAt: '2026-11-12T07:00:00.000Z',
+  },
+  {
+    playerId: 'p15', // İsmet
+    evaluatorName: 'Yüksel',
+    pac: 7.0, sho: 7.5, pas: 7.0, dri: 7.0, def: 6.7, phy: 7.8,
+    gkRole: 'emergency_only',
+    playstyles: ['wall', 'interceptor'],
+    secretNote: 'Savunma sigortası, dengeli ve fizikli.',
+    updatedAt: '2026-11-12T07:00:00.000Z',
+  },
+  {
+    playerId: 'p12', // Harun
+    evaluatorName: 'Yüksel',
+    pac: 5.5, sho: 6.5, pas: 6.9, dri: 5.5, def: 6.2, phy: 7.0,
+    gkRole: 'emergency_only',
+    playstyles: ['relentless', 'slide_tackler'],
+    secretNote: 'Mücadeleci, temaslı oyunu sever.',
+    updatedAt: '2026-11-12T07:00:00.000Z',
+  },
+  {
+    playerId: 'p17', // Mahmut
+    evaluatorName: 'Yüksel',
+    pac: 7.5, sho: 6.5, pas: 6.8, dri: 6.5, def: 6.7, phy: 7.9,
+    gkRole: 'emergency_only',
+    playstyles: ['poacher', 'late_bloomer'],
+    secretNote: 'Nöbetçi forvet, ceza sahasında fiziki gücünü hissettirir.',
+    updatedAt: '2026-11-12T07:00:00.000Z',
+  },
+
+  // --- Alper'in (Yönetici) Notları ---
+  {
+    playerId: 'p2', // Akif
+    evaluatorName: 'Alper',
+    pac: 7.8, sho: 8.2, pas: 8.8, dri: 7.9, def: 9.0, phy: 9.0,
+    gkRole: 'never',
+    playstyles: ['power_shot', 'ice_cold'],
+    secretNote: 'Balyoz vuruşları ve hücum-savunma dengesi harika.',
+    updatedAt: '2026-11-12T07:05:00.000Z',
+  },
+  {
+    playerId: 'p19', // Ömer
+    evaluatorName: 'Alper',
+    pac: 7.5, sho: 7.7, pas: 8.5, dri: 8.1, def: 8.8, phy: 8.6,
+    gkRole: 'emergency_only',
+    playstyles: ['tiki_taka', 'maestro'],
+    secretNote: 'Vizyoner orta saha, savunma arkasına kilit paslar atar.',
+    updatedAt: '2026-11-12T07:05:00.000Z',
+  },
+  {
+    playerId: 'p20', // Mustafa
+    evaluatorName: 'Alper',
+    pac: 5.6, sho: 5.3, pas: 5.5, dri: 5.2, def: 7.5, phy: 8.5,
+    gkRole: 'emergency_only',
+    playstyles: ['wall', 'slide_tackler'],
+    secretNote: 'Sert bek, ikili mücadelelerde geçit vermez.',
+    updatedAt: '2026-11-12T07:05:00.000Z',
+  },
+  {
+    playerId: 'p18', // Selahattin
+    evaluatorName: 'Alper',
+    pac: 6.7, sho: 6.2, pas: 5.9, dri: 6.3, def: 6.6, phy: 5.9,
+    gkRole: 'yes',
+    playstyles: ['octopus'],
+    secretNote: 'Kalede güven verir, ihtiyaç anında defansta da durur.',
+    updatedAt: '2026-11-12T07:05:00.000Z',
+  },
+  {
+    playerId: 'p3', // Yüksel
+    evaluatorName: 'Alper',
+    pac: 7.7, sho: 7.9, pas: 9.0, dri: 8.2, def: 9.2, phy: 9.1,
+    gkRole: 'never',
+    playstyles: ['wall', 'interceptor'],
+    secretNote: 'Beton gibi sağlam stoper, pas kalitesi üst düzey.',
+    updatedAt: '2026-11-12T07:05:00.000Z',
+  },
+  {
+    playerId: 'p14', // Turab (Turap)
+    evaluatorName: 'Alper',
+    pac: 8.4, sho: 8.0, pas: 7.8, dri: 7.5, def: 8.1, phy: 8.6,
+    gkRole: 'emergency_only',
+    playstyles: ['speedster', 'late_bloomer'],
+    secretNote: 'Genç dinamo, savunma ve orta saha hattını birbirine bağlar.',
+    updatedAt: '2026-11-12T07:05:00.000Z',
+  },
+  {
+    playerId: 'p4', // İsmail
+    evaluatorName: 'Alper',
+    pac: 8.6, sho: 8.5, pas: 9.3, dri: 9.0, def: 9.1, phy: 9.4,
+    gkRole: 'yes',
+    playstyles: ['octopus', 'first_touch'],
+    secretNote: 'Efsane kaleci, komple bir futbolcu gibi oyuna katılır.',
+    updatedAt: '2026-11-12T07:05:00.000Z',
+  },
+  {
+    playerId: 'p7', // Cevdet
+    evaluatorName: 'Alper',
+    pac: 7.5, sho: 7.3, pas: 7.0, dri: 7.4, def: 6.9, phy: 7.0,
+    gkRole: 'never',
+    playstyles: ['slide_tackler', 'first_touch'],
+    secretNote: 'Mücadeleci, geriye koşularda takımı toparlar.',
+    updatedAt: '2026-11-12T07:05:00.000Z',
+  },
+  {
+    playerId: 'p1', // Alper (Öz Değerlendirme)
+    evaluatorName: 'Alper',
+    pac: 8.3, sho: 8.3, pas: 8.7, dri: 8.3, def: 7.9, phy: 8.2,
+    gkRole: 'never',
+    playstyles: ['ice_cold', 'commander'],
+    secretNote: 'Kaptan, oyun aklı ve saha içi liderliğiyle yön verir.',
+    updatedAt: '2026-11-12T07:05:00.000Z',
+  },
+  {
+    playerId: 'p8', // Elber
+    evaluatorName: 'Alper',
+    pac: 9.2, sho: 9.3, pas: 8.0, dri: 8.7, def: 7.3, phy: 8.2,
+    gkRole: 'never',
+    playstyles: ['poacher', 'finesse_shot'],
+    secretNote: 'Olağanüstü şut ve hız, yakaladığı anda cezayı keser.',
+    updatedAt: '2026-11-12T07:05:00.000Z',
+  },
+  {
+    playerId: 'p15', // İsmet
+    evaluatorName: 'Alper',
+    pac: 8.0, sho: 7.2, pas: 7.5, dri: 7.6, def: 6.6, phy: 8.0,
+    gkRole: 'emergency_only',
+    playstyles: ['wall', 'interceptor'],
+    secretNote: 'Fiziğiyle caydırıcı, defansta güvenli bölge kurar.',
+    updatedAt: '2026-11-12T07:05:00.000Z',
+  },
+  {
+    playerId: 'p12', // Harun
+    evaluatorName: 'Alper',
+    pac: 6.0, sho: 6.8, pas: 6.9, dri: 6.2, def: 7.2, phy: 7.9,
+    gkRole: 'emergency_only',
+    playstyles: ['relentless', 'slide_tackler'],
+    secretNote: 'Halı saha Gatussosu, rakibi yıpratır ve top çalar.',
+    updatedAt: '2026-11-12T07:05:00.000Z',
+  },
+  {
+    playerId: 'p17', // Mahmut
+    evaluatorName: 'Alper',
+    pac: 8.0, sho: 7.0, pas: 6.5, dri: 7.1, def: 7.1, phy: 7.9,
+    gkRole: 'emergency_only',
+    playstyles: ['poacher', 'late_bloomer'],
+    secretNote: 'Fizikli ve hızlı forvet, araya kaçışları tehlikeli.',
+    updatedAt: '2026-11-12T07:05:00.000Z',
+  },
+];
+
 export const MOCK_USERS: UserProfile[] = [
   {
     uid: 'user-alper',
@@ -610,8 +850,8 @@ export const MOCK_USERS: UserProfile[] = [
   {
     uid: 'user-ismail',
     email: 'ismail@revirfc.com',
-    displayName: 'İsmail (Kurul & Legend)',
-    role: 'captain',
+    displayName: 'İsmail (Legend)',
+    role: 'player',
     status: 'approved',
     claimedPlayerId: 'p4',
     createdAt: '2026-10-02T00:00:00.000Z',

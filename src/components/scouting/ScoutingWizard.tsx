@@ -170,10 +170,10 @@ export const ScoutingWizard: React.FC<Props> = ({
 
         {/* Evaluator Selector & Link Share */}
         <div className="flex flex-wrap items-center gap-2">
-          {/* 4 Committee Members Fast Switcher */}
+          {/* 3 Committee Members Fast Switcher */}
           <div className="flex items-center gap-1 bg-neutral-950 p-1 rounded-2xl border border-neutral-800">
             <span className="text-[10px] text-neutral-400 font-bold px-2">Kurul:</span>
-            {['Alper', 'Yüksel', 'Akif', 'İsmail'].map((name) => (
+            {['Alper', 'Akif', 'Yüksel'].map((name) => (
               <button
                 key={name}
                 type="button"
