@@ -1,63 +1,102 @@
-import { doc, getDoc, setDoc, onSnapshot, collection, getDocs, writeBatch } from 'firebase/firestore';
-import { ref, uploadString, getDownloadURL } from 'firebase/storage';
-import { db, storage, isFirebaseConfigured } from './firebase';
+import { doc, setDoc, onSnapshot, collection, getDocs, writeBatch } from 'firebase/firestore';
+import { db, isFirebaseConfigured } from './firebase';
 import { Player, Match, PlayerScoutingEntry } from '../types';
 
 const PLAYERS_COLLECTION = 'players';
 const APP_STATE_COLLECTION = 'app_state';
 
-/**
- * Checks if a string is a base64 Data URL (e.g. from file upload or AI background removal)
- */
-export const isDataUrl = (url?: string): boolean => {
-  return Boolean(url && url.startsWith('data:image/'));
-};
+// Firestore document limit: 1 MiB.
+// We target < 150 KB for compressed photo base64 to stay safe with the rest of the player doc.
+const MAX_PHOTO_DIMENSION = 300; // px — portrait crop at 300x380 is plenty for the card UI
+const PHOTO_QUALITY = 0.72;      // WebP quality: 0.72 is visually indistinguishable from lossless for portraits
+const MAX_FIRESTORE_PHOTO_BYTES = 150_000; // 150 KB hard cap
 
 /**
- * Uploads a base64 Data URL image to Firebase Storage and returns the public HTTPS download URL.
- * If Firebase is not configured or upload fails, falls back gracefully to the original dataUrl.
+ * Checks if a string is a base64 Data URL (from file upload or AI dekupaj)
  */
-export async function uploadPlayerPhotoToStorage(playerId: string, dataUrl: string): Promise<string> {
-  if (!isFirebaseConfigured || !storage) {
-    console.warn('Firebase Storage not configured, skipping cloud image upload');
-    return dataUrl;
-  }
+export const isDataUrl = (url?: string): boolean =>
+  Boolean(url && url.startsWith('data:image/'));
 
-  try {
-    const timestamp = Date.now();
-    // Path: avatars/{playerId}_{timestamp}.png
-    const storageRef = ref(storage, `avatars/${playerId}_${timestamp}.png`);
-    
-    // uploadString with data_url format handles transparent PNGs from AI background removal
-    const uploadResult = await uploadString(storageRef, dataUrl, 'data_url', {
-      contentType: 'image/png',
-      cacheControl: 'public,max-age=31536000',
-    });
+/**
+ * Compresses a base64 Data URL using the browser Canvas API.
+ * - Resizes to fit within MAX_PHOTO_DIMENSION on the longest side
+ * - Converts to WebP at PHOTO_QUALITY
+ * - Falls back to the original if Canvas is unavailable or compression fails
+ */
+export async function compressPhotoForFirestore(dataUrl: string): Promise<string> {
+  return new Promise((resolve) => {
+    try {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          // Calculate new dimensions preserving aspect ratio
+          let { width, height } = img;
+          if (width > MAX_PHOTO_DIMENSION || height > MAX_PHOTO_DIMENSION) {
+            const ratio = Math.min(MAX_PHOTO_DIMENSION / width, MAX_PHOTO_DIMENSION / height);
+            width = Math.round(width * ratio);
+            height = Math.round(height * ratio);
+          }
 
-    const downloadUrl = await getDownloadURL(uploadResult.ref);
-    console.info(`✅ Photo uploaded to Firebase Storage for player ${playerId}:`, downloadUrl);
-    return downloadUrl;
-  } catch (error) {
-    console.error('Firebase Storage upload error:', error);
-    // Graceful fallback: return original data URL so local experience isn't broken
-    return dataUrl;
-  }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve(dataUrl);
+            return;
+          }
+
+          // Transparent background (for AI-dekupajed PNGs)
+          ctx.clearRect(0, 0, width, height);
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Try WebP first (smaller), fall back to PNG for browsers without WebP support
+          let compressed = canvas.toDataURL('image/webp', PHOTO_QUALITY);
+          if (!compressed.startsWith('data:image/webp')) {
+            // Safari < 16 doesn't support WebP encoding — fall back to JPEG (lossy but tiny)
+            compressed = canvas.toDataURL('image/jpeg', PHOTO_QUALITY);
+          }
+
+          // Safety check: if still too big, reduce quality further
+          if (compressed.length > MAX_FIRESTORE_PHOTO_BYTES * 1.37) {
+            // base64 is ~37% larger than binary
+            compressed = canvas.toDataURL('image/jpeg', 0.5);
+          }
+
+          console.info(
+            `📷 Photo compressed: ${Math.round(dataUrl.length / 1024)}KB → ${Math.round(compressed.length / 1024)}KB`
+          );
+          resolve(compressed);
+        } catch {
+          resolve(dataUrl);
+        }
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    } catch {
+      resolve(dataUrl);
+    }
+  });
 }
 
 /**
  * Saves a single player to Firestore.
- * If photoUrl is a base64 Data URL, it first uploads it to Firebase Storage.
+ * If photoUrl is a base64 Data URL (new upload or AI dekupaj), it is compressed first
+ * and stored directly inside the Firestore document — no Firebase Storage needed!
+ *
+ * All clients subscribed via subscribeToPlayers() receive the update in real time.
  */
 export async function savePlayerToCloud(player: Player): Promise<Player> {
   let finalPlayer = { ...player };
 
-  // If the photo was changed/dekupajed (base64 Data URL), upload to Storage first
+  // Compress the photo and store it directly in Firestore (no Storage bucket needed)
   if (isDataUrl(finalPlayer.photoUrl)) {
     try {
-      const cloudUrl = await uploadPlayerPhotoToStorage(finalPlayer.id, finalPlayer.photoUrl);
-      finalPlayer.photoUrl = cloudUrl;
+      const compressed = await compressPhotoForFirestore(finalPlayer.photoUrl);
+      finalPlayer.photoUrl = compressed;
+      console.info(`✅ Photo compressed and ready for Firestore (${Math.round(compressed.length / 1024)} KB)`);
     } catch (e) {
-      console.error('Failed to upload player image to storage before firestore save:', e);
+      console.warn('Photo compression warning, using original:', e);
     }
   }
 
@@ -65,7 +104,7 @@ export async function savePlayerToCloud(player: Player): Promise<Player> {
     try {
       const playerDocRef = doc(db, PLAYERS_COLLECTION, finalPlayer.id);
       await setDoc(playerDocRef, finalPlayer, { merge: true });
-      console.info(`✅ Player ${finalPlayer.name} saved to Firestore`);
+      console.info(`✅ Player "${finalPlayer.name}" saved to Firestore (photo embedded)`);
     } catch (error) {
       console.error(`Firestore save error for player ${finalPlayer.name}:`, error);
     }
@@ -75,7 +114,8 @@ export async function savePlayerToCloud(player: Player): Promise<Player> {
 }
 
 /**
- * Batch saves initial players to Firestore if the collection is empty.
+ * Batch seeds initial 22 players to Firestore if the collection is empty.
+ * Only runs once on first ever app open (or after clearing Firestore).
  */
 export async function seedPlayersIfEmpty(initialPlayers: Player[]): Promise<void> {
   if (!isFirebaseConfigured || !db) return;
@@ -90,22 +130,24 @@ export async function seedPlayersIfEmpty(initialPlayers: Player[]): Promise<void
         batch.set(ref, p);
       }
       await batch.commit();
-      console.info('✅ Initial players successfully seeded to Firestore.');
+      console.info('✅ 22 players seeded to Firestore successfully.');
     }
   } catch (error) {
-    console.warn('Seeding check failed or not permitted:', error);
+    console.warn('Firestore seeding skipped (insufficient permissions or already seeded):', error);
   }
 }
 
 /**
- * Real-time subscription to players collection.
- * When ANY user updates a player in Firestore, all active clients receive the update instantly.
+ * Real-time subscription to the players collection.
+ * When ANY user saves a card change (photo, nickname, position, theme, badges…),
+ * ALL active clients receive the update INSTANTLY via Firestore's real-time push.
  */
 export function subscribeToPlayers(
   onUpdate: (players: Player[]) => void,
   onError?: (err: Error) => void
 ): () => void {
   if (!isFirebaseConfigured || !db) {
+    console.info('Firestore not configured — running in local-only mode.');
     return () => {};
   }
 
@@ -115,15 +157,13 @@ export function subscribeToPlayers(
       colRef,
       (snapshot) => {
         if (!snapshot.empty) {
-          const playersList: Player[] = [];
-          snapshot.forEach((d) => {
-            playersList.push(d.data() as Player);
-          });
-          onUpdate(playersList);
+          const players: Player[] = [];
+          snapshot.forEach((d) => players.push(d.data() as Player));
+          onUpdate(players);
         }
       },
       (error) => {
-        console.warn('Firestore players snapshot listener warning:', error);
+        console.warn('Firestore real-time listener error:', error);
         onError?.(error);
       }
     );
@@ -135,7 +175,7 @@ export function subscribeToPlayers(
 }
 
 /**
- * Saves shared match state to Firestore
+ * Saves current match state to Firestore (shared across all clients)
  */
 export async function saveMatchToCloud(match: Match): Promise<void> {
   if (!isFirebaseConfigured || !db) return;
@@ -148,7 +188,7 @@ export async function saveMatchToCloud(match: Match): Promise<void> {
 }
 
 /**
- * Saves shared scouting entries to Firestore
+ * Saves scouting entries to Firestore (shared across kurul members)
  */
 export async function saveScoutingToCloud(entries: PlayerScoutingEntry[]): Promise<void> {
   if (!isFirebaseConfigured || !db) return;
