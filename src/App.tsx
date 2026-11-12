@@ -26,6 +26,11 @@ import { calculatePlayerMatchRating } from './services/ratingEngine';
 import { safeSetItem, STORAGE_ERROR_EVENT } from './services/safeStorage';
 import { externalizeImages, hydrateImages, isIdbRef } from './services/photoStore';
 import { getAccess } from './services/permissions';
+import {
+  savePlayerToCloud,
+  seedPlayersIfEmpty,
+  subscribeToPlayers,
+} from './services/cloudSync';
 
 import { Navbar, NavTab } from './components/layout/Navbar';
 import { PendingApprovalGate } from './components/layout/PendingApprovalGate';
@@ -264,6 +269,29 @@ function MainApp() {
     });
   }, [players]);
 
+  // Firestore Real-Time Sync & Seeding:
+  // 1. If collection is empty, seed initial players.
+  // 2. Real-time listener: when any player card (photo, nickname, position, badges) is updated,
+  //    all active users receive the update immediately.
+  useEffect(() => {
+    seedPlayersIfEmpty(INITIAL_PLAYERS);
+
+    const unsubscribe = subscribeToPlayers((cloudPlayers) => {
+      if (cloudPlayers && cloudPlayers.length > 0) {
+        setPlayers((prev) => {
+          // Merge cloud data over local, preserving any local in-flight fields if necessary
+          const cloudMap = new Map(cloudPlayers.map((cp) => [cp.id, cp]));
+          return prev.map((localP) => {
+            const cloudP = cloudMap.get(localP.id);
+            return cloudP ? { ...localP, ...cloudP } : localP;
+          });
+        });
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   // Açılışta "idb:" referanslarını gerçek görsellere çevir
   useEffect(() => {
     let cancelled = false;
@@ -487,6 +515,18 @@ function MainApp() {
           inFormIds: newInFormIds,
         },
       };
+    });
+
+    // Cloud Sync: Upload photo to Firebase Storage (if base64) and save player card to Firestore
+    savePlayerToCloud(updated).then((savedPlayer) => {
+      // If image URL changed from base64 to cloud HTTPS URL, update local state
+      if (savedPlayer.photoUrl !== updated.photoUrl) {
+        setPlayers((prev) =>
+          prev.map((p) => (p.id === savedPlayer.id ? { ...p, photoUrl: savedPlayer.photoUrl } : p))
+        );
+      }
+    }).catch((err) => {
+      console.warn('Background cloud sync warning for player save:', err);
     });
   };
 
