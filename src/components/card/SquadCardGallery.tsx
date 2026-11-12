@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { Player, PreferredPosition, CardTheme } from '../../types';
+import React from 'react';
+import { Player } from '../../types';
 import { FCCard } from './FCCard';
 import { useAuth } from '../../context/AuthContext';
 import { getAccess } from '../../services/permissions';
-import { Search, Filter, Sparkles, Crown, Flame, Bandage, Shield, Star } from 'lucide-react';
+import { Sparkles, Crown, Flame } from 'lucide-react';
 
 interface Props {
   players: Player[];
@@ -12,9 +12,6 @@ interface Props {
 
 export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) => {
   const { currentUser } = useAuth();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [posFilter, setPosFilter] = useState<string>('ALL');
-  const [themeFilter, setThemeFilter] = useState<string>('ALL');
 
   const isAdminOrCaptain = getAccess(currentUser, players).isCommittee;
   const isApproved = currentUser?.status === 'approved';
@@ -89,15 +86,8 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
     addedIds.add(p.id);
   }
 
-  // 3. Filter by search, position, and theme
-  const filtered = orderedPlayers.filter((p) => {
-    const matchesSearch =
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.nickname.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesPos = posFilter === 'ALL' || p.position === posFilter;
-    const matchesTheme = themeFilter === 'ALL' || p.theme === themeFilter;
-    return matchesSearch && matchesPos && matchesTheme;
-  });
+  // 3. All players shown (no filter)
+  const filtered = orderedPlayers;
 
   return (
     <div className="space-y-6">
@@ -127,90 +117,6 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
                 : '✨ Kendi kartınızı özgürce kişiselleştirebilir, lakap, takım ve rozetinizi seçebilirsiniz. Arkadaşlarınızın kartlarını salt okunur inceleyebilirsiniz.'}
             </p>
           </div>
-        </div>
-      </div>
-
-      {/* Filters Header */}
-      <div className="bg-neutral-900/90 border border-neutral-800 rounded-3xl p-5 shadow-xl flex flex-wrap items-center justify-between gap-4">
-        {/* Position filters */}
-        <div className="flex items-center gap-1 bg-neutral-950 p-1 rounded-2xl border border-neutral-800 text-xs">
-          {['ALL', 'FWD', 'MID', 'DEF', 'GK'].map((pos) => (
-            <button
-              key={pos}
-              onClick={() => setPosFilter(pos)}
-              className={`px-3 py-1.5 rounded-xl font-bold transition-all ${
-                posFilter === pos
-                  ? 'bg-amber-500 text-black shadow-md'
-                  : 'text-neutral-400 hover:text-white'
-              }`}
-            >
-              {pos === 'ALL' ? `Tümü (${players.length})` : pos}
-            </button>
-          ))}
-        </div>
-
-        {/* Theme filters */}
-        <div className="flex items-center gap-1.5 text-xs">
-          <button
-            onClick={() => setThemeFilter('ALL')}
-            className={`px-2.5 py-1.5 rounded-xl border font-bold transition-all ${
-              themeFilter === 'ALL'
-                ? 'bg-neutral-700 text-white border-neutral-500'
-                : 'bg-neutral-950 text-neutral-400 border-neutral-800'
-            }`}
-          >
-            Tüm Kartlar
-          </button>
-          <button
-            onClick={() => setThemeFilter('totw')}
-            className={`px-2.5 py-1.5 rounded-xl border font-bold flex items-center gap-1 transition-all ${
-              themeFilter === 'totw'
-                ? 'bg-amber-500 text-black border-amber-400 shadow-md'
-                : 'bg-neutral-950 text-amber-400 border-amber-500/30'
-            }`}
-          >
-            <Crown className="w-3 h-3" /> MVP (Siyah-Altın)
-          </button>
-          <button
-            onClick={() => setThemeFilter('inform')}
-            className={`px-2.5 py-1.5 rounded-xl border font-bold flex items-center gap-1 transition-all ${
-              themeFilter === 'inform'
-                ? 'bg-orange-500 text-black border-orange-400 shadow-md'
-                : 'bg-neutral-950 text-orange-400 border-orange-500/30'
-            }`}
-          >
-            <Flame className="w-3 h-3" /> Ateş Ediyo! 🔥
-          </button>
-          <button
-            onClick={() => setThemeFilter('revir')}
-            className={`px-2.5 py-1.5 rounded-xl border font-bold flex items-center gap-1 transition-all ${
-              themeFilter === 'revir'
-                ? 'bg-rose-500 text-white border-rose-400 shadow-md'
-                : 'bg-neutral-950 text-rose-400 border-rose-500/30'
-            }`}
-          >
-            <Bandage className="w-3 h-3" /> Revir 🩹
-          </button>
-          <button
-            onClick={() => setThemeFilter('legend')}
-            className={`px-2.5 py-1.5 rounded-xl border font-bold flex items-center gap-1 transition-all ${
-              themeFilter === 'legend'
-                ? 'bg-amber-100 text-amber-950 border-amber-300 shadow-md'
-                : 'bg-neutral-950 text-amber-200 border-amber-300/30'
-            }`}
-          >
-            👑 Efsane (İsmail, Gölcür, Cevdet)
-          </button>
-          <button
-            onClick={() => setThemeFilter('bidon')}
-            className={`px-2.5 py-1.5 rounded-xl border font-bold flex items-center gap-1 transition-all ${
-              themeFilter === 'bidon'
-                ? 'bg-amber-800 text-white border-amber-700 shadow-md'
-                : 'bg-neutral-950 text-amber-600 border-amber-700/30'
-            }`}
-          >
-            🛢️ Haftanın Bidonu
-          </button>
         </div>
       </div>
 

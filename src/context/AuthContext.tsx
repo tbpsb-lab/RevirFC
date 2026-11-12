@@ -178,8 +178,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (isFirebaseConfigured && auth) {
       signOut(auth).catch(console.error);
     }
-    // Switch to pending user to demonstrate locked door
-    switchMockRole('pending');
+    setCurrentUser(null);
+    localStorage.removeItem(LOCAL_STORAGE_CURRENT_KEY);
   };
 
   return (

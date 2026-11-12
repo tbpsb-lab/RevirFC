@@ -231,6 +231,13 @@ function MainApp() {
     } catch {}
   }, []);
 
+  // Open auth modal when user logs out (currentUser becomes null)
+  useEffect(() => {
+    if (!currentUser) {
+      setShowAuthModal(true);
+    }
+  }, [currentUser]);
+
   const handleQuickCheckInForPlayer = (playerId: string) => {
     handleSaveCheckIn({
       playerId,
