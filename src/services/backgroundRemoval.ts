@@ -1,5 +1,3 @@
-import { removeBackground } from '@imgly/background-removal';
-
 export interface BackgroundRemovalOptions {
   onProgress?: (step: string, percent: number) => void;
 }
@@ -142,6 +140,8 @@ export async function removeImageBackground(
   options?: BackgroundRemovalOptions
 ): Promise<string> {
   try {
+    options?.onProgress?.('AI modeli yükleniyor', 5);
+    const { removeBackground } = await import('@imgly/background-removal');
     const blob = await removeBackground(imageSource, {
       progress: (key: string, current: number, total: number) => {
         if (options?.onProgress && total > 0) {
