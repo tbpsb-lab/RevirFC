@@ -1295,7 +1295,7 @@ export const FCCard: React.FC<Props> = React.memo(({
             handleDownloadCard();
           }}
           disabled={isDownloading}
-          className="absolute -bottom-7 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-neutral-900/90 hover:bg-neutral-800 text-amber-400 border border-amber-400/40 text-[10px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-lg cursor-pointer whitespace-nowrap z-30"
+          className="absolute bottom-1.5 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-neutral-950/95 hover:bg-neutral-800 text-amber-400 border border-amber-400/50 text-[10px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-xl cursor-pointer whitespace-nowrap z-30"
           title="WhatsApp ve Instagram için HD PNG İndir"
         >
           <Download className="w-3 h-3" />
