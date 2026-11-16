@@ -14,6 +14,11 @@ import { getPlayerPositions } from '../../services/positions';
 
 // Fotoğraf IndexedDB'den yüklenene kadar (idb: referansı) gösterilen şeffaf 1x1 görsel
 const TRANSPARENT_PIXEL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+
+// Mini arma beyaz yıldırım / elektrik paleti (Efsane kart stili - tüm temalarda ortak tek tip)
+const CREST_ELECTRIC_CORE = '#FFFFFF';
+const CREST_GLOW_PRIMARY = 'rgba(255, 255, 255, 0.98)';
+const CREST_GLOW_SECONDARY = 'rgba(203, 213, 225, 0.78)';
 import { Download } from 'lucide-react';
 
 interface Props {
@@ -848,20 +853,27 @@ export const FCCard: React.FC<Props> = React.memo(({
         }}
         className={`relative ${sizeConfig.height} w-full bg-transparent cursor-pointer`}
       >
-        {/* ÖZEL EFEKT: MVP (TOTW) HAFİFLETİLMİŞ TEK KATMAN ALTIN HALE */}
+        {/* ÖZEL EFEKT: MVP (TOTW) KART KONTURUNA SIKI OTURAN HAFİF ALTIN HALE */}
         {theme === 'totw' && (
           <div
-            className="absolute -inset-2 sm:-inset-2.5 rounded-[2.2rem] pointer-events-none -z-10 flex items-center justify-center overflow-visible opacity-80"
-            style={{ transform: 'translateZ(-8px)', backfaceVisibility: 'hidden' }}
+            className="absolute inset-0 pointer-events-none -z-10 blur-[5px] animate-mvp-cosmic-aura"
+            style={{ transform: 'translateZ(-4px)', backfaceVisibility: 'hidden' }}
           >
             <div
-              className="absolute inset-0 rounded-[2.2rem] opacity-70 blur-md animate-mvp-spin-aurora"
+              className="w-full h-full"
               style={{
                 background:
-                  'conic-gradient(from 0deg at 50% 50%, rgba(245, 158, 11, 0.8) 0deg, rgba(217, 119, 6, 0.45) 60deg, rgba(79, 70, 229, 0.22) 120deg, rgba(251, 191, 36, 0.85) 180deg, rgba(234, 88, 12, 0.4) 240deg, rgba(245, 158, 11, 0.8) 360deg)',
+                  'linear-gradient(135deg, rgba(253, 224, 71, 0.95) 0%, rgba(245, 158, 11, 0.85) 50%, rgba(251, 191, 36, 0.95) 100%)',
+                WebkitMaskImage: "url('/cards/card_totw.png')",
+                maskImage: "url('/cards/card_totw.png')",
+                WebkitMaskSize: 'contain',
+                maskSize: 'contain',
+                WebkitMaskRepeat: 'no-repeat',
+                maskRepeat: 'no-repeat',
+                WebkitMaskPosition: 'center',
+                maskPosition: 'center',
               }}
             />
-            <div className="absolute inset-0.5 rounded-[1.8rem] border border-amber-400/45" />
           </div>
         )}
 
@@ -875,7 +887,7 @@ export const FCCard: React.FC<Props> = React.memo(({
           style={{ transform: 'translateZ(0px)', backfaceVisibility: 'hidden' }}
           className={`absolute inset-0 w-full h-full object-contain pointer-events-none select-none z-0 transition-[filter] duration-200 ${
             theme === 'totw'
-              ? 'drop-shadow-[0_12px_26px_rgba(245,158,11,0.28)] group-hover:drop-shadow-[0_20px_35px_rgba(245,158,11,0.45)]'
+              ? 'drop-shadow-[0_0_7px_rgba(251,191,36,0.38)] group-hover:drop-shadow-[0_0_11px_rgba(251,191,36,0.55)]'
               : theme === 'wall'
               ? 'drop-shadow-[0_12px_24px_rgba(56,189,248,0.22)] group-hover:drop-shadow-[0_18px_32px_rgba(56,189,248,0.38)]'
               : theme === 'nostalgia'
@@ -1039,7 +1051,7 @@ export const FCCard: React.FC<Props> = React.memo(({
           </div>
         </div>
 
-        {/* Sağ Üst Tema Kalkanı (3D Parallax: translateZ(6px) - MVP dahil tüm 9 kartta renk uyumlu Voltaj & Elektrik Akımı) */}
+        {/* Sağ Üst Tema Kalkanı (3D Parallax: translateZ(6px) - Tüm kartlarda tek tip Efsane beyaz yıldırım akımı; diğer kartlarda masaüstünde yalnızca hover'da, dokunmatikte ekrandayken aktif) */}
         <div
           className={`absolute ${
             theme === 'totw'
@@ -1049,34 +1061,33 @@ export const FCCard: React.FC<Props> = React.memo(({
           style={{
             transform: 'translateZ(6px)',
             backfaceVisibility: 'hidden',
-            ['--crest-electric-core' as string]: themeConfig.electricCore,
-            ['--crest-glow-primary' as string]: themeConfig.crestAuraPrimary,
-            ['--crest-glow-secondary' as string]: themeConfig.crestAuraSecondary,
+            ['--crest-electric-core' as string]: CREST_ELECTRIC_CORE,
+            ['--crest-glow-primary' as string]: CREST_GLOW_PRIMARY,
+            ['--crest-glow-secondary' as string]: CREST_GLOW_SECONDARY,
           }}
         >
-          {theme !== 'nostalgia' && (
-            <>
-              {/* İnce arka parlama halkası: sadece MVP & Alev Atıyo! kartlarında hareketli nabız, diğerlerinde sakin statik parlama */}
-              <div
-                className={`absolute ${
-                  theme === 'totw' ? 'inset-1' : '-inset-1'
-                } rounded-full pointer-events-none -z-10 blur-[2px] ${
-                  theme === 'totw' || theme === 'inform' ? 'animate-crest-plasma' : 'opacity-65'
-                }`}
-                style={{
-                  background: `radial-gradient(circle, ${themeConfig.crestAuraPrimary} 10%, ${themeConfig.crestAuraSecondary} 48%, rgba(0, 0, 0, 0) 72%)`,
-                }}
-              />
+          {theme !== 'nostalgia' && (() => {
+            const crestHoverClass = theme === 'totw' || theme === 'inform' ? '' : ' crest-hover-only';
+            return (
+              <>
+                {/* İnce arka parlama halkası: tek tip beyaz Efsane parlama */}
+                <div
+                  className={`absolute ${
+                    theme === 'totw' ? 'inset-1' : '-inset-1'
+                  } rounded-full pointer-events-none -z-10 blur-[2px] animate-crest-plasma${crestHoverClass}`}
+                  style={{
+                    background: `radial-gradient(circle, ${CREST_GLOW_PRIMARY} 10%, ${CREST_GLOW_SECONDARY} 48%, rgba(0, 0, 0, 0) 72%)`,
+                  }}
+                />
 
-              {/* Elektrik arkı & kıvılcım animasyonları yalnızca MVP ve Alev Atıyo! kartlarında çalışır (FPS & göz konforu) */}
-              {(theme === 'totw' || theme === 'inform') && (
+                {/* Tek tip beyaz yıldırım / elektrik arkı: MVP ve Alev Atıyo!'da sürekli, diğer kartlarda masaüstünde hover'da, tablet/telefonda ekrandayken aktif */}
                 <svg
                   viewBox="0 0 100 100"
                   className={`absolute ${
                     theme === 'totw'
                       ? 'inset-1 w-[calc(100%-8px)] h-[calc(100%-8px)]'
                       : '-inset-2 w-[calc(100%+16px)] h-[calc(100%+16px)]'
-                  } pointer-events-none z-20 overflow-visible`}
+                  } pointer-events-none z-20 overflow-visible${crestHoverClass}`}
                   aria-hidden="true"
                 >
                   {/* Akım 1: Saat yönünde dolaşan kırıklı yüksek voltaj arkı (Dış plazma + parlak çekirdek) */}
@@ -1084,7 +1095,7 @@ export const FCCard: React.FC<Props> = React.memo(({
                     d="M 50 7 L 64 11 L 78 16 L 87 30 L 89 48 L 85 65 L 75 79 L 61 88 L 50 93 L 39 88 L 25 79 L 15 65 L 11 48 L 13 30 L 22 16 L 36 11 Z"
                     fill="none"
                     pathLength={280}
-                    stroke={themeConfig.crestAuraPrimary}
+                    stroke={CREST_GLOW_PRIMARY}
                     strokeWidth="4"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -1096,7 +1107,7 @@ export const FCCard: React.FC<Props> = React.memo(({
                     d="M 50 7 L 64 11 L 78 16 L 87 30 L 89 48 L 85 65 L 75 79 L 61 88 L 50 93 L 39 88 L 25 79 L 15 65 L 11 48 L 13 30 L 22 16 L 36 11 Z"
                     fill="none"
                     pathLength={280}
-                    stroke={themeConfig.electricCore}
+                    stroke={CREST_ELECTRIC_CORE}
                     strokeWidth="1.6"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -1109,7 +1120,7 @@ export const FCCard: React.FC<Props> = React.memo(({
                     d="M 50 10 L 70 14 L 83 25 L 86 43 L 82 62 L 69 78 L 50 90 L 31 78 L 18 62 L 14 43 L 17 25 L 30 14 Z"
                     fill="none"
                     pathLength={280}
-                    stroke={themeConfig.crestAuraSecondary}
+                    stroke={CREST_GLOW_SECONDARY}
                     strokeWidth="3.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -1121,7 +1132,7 @@ export const FCCard: React.FC<Props> = React.memo(({
                     d="M 50 10 L 70 14 L 83 25 L 86 43 L 82 62 L 69 78 L 50 90 L 31 78 L 18 62 L 14 43 L 17 25 L 30 14 Z"
                     fill="none"
                     pathLength={280}
-                    stroke={themeConfig.electricCore}
+                    stroke={CREST_ELECTRIC_CORE}
                     strokeWidth="1.3"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -1134,7 +1145,7 @@ export const FCCard: React.FC<Props> = React.memo(({
                     <path
                       d="M 76 17 L 85 11 L 82 19 L 92 14"
                       fill="none"
-                      stroke={themeConfig.electricCore}
+                      stroke={CREST_ELECTRIC_CORE}
                       strokeWidth="1.8"
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -1142,7 +1153,7 @@ export const FCCard: React.FC<Props> = React.memo(({
                     <path
                       d="M 21 75 L 12 81 L 16 86 L 8 90"
                       fill="none"
-                      stroke={themeConfig.crestAuraPrimary}
+                      stroke={CREST_GLOW_PRIMARY}
                       strokeWidth="1.8"
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -1154,7 +1165,7 @@ export const FCCard: React.FC<Props> = React.memo(({
                     <path
                       d="M 22 18 L 13 13 L 17 22 L 8 24"
                       fill="none"
-                      stroke={themeConfig.crestAuraPrimary}
+                      stroke={CREST_GLOW_PRIMARY}
                       strokeWidth="1.8"
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -1162,16 +1173,16 @@ export const FCCard: React.FC<Props> = React.memo(({
                     <path
                       d="M 79 73 L 88 79 L 83 84 L 92 88"
                       fill="none"
-                      stroke={themeConfig.electricCore}
+                      stroke={CREST_ELECTRIC_CORE}
                       strokeWidth="1.8"
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     />
                   </g>
                 </svg>
-              )}
-            </>
-          )}
+              </>
+            );
+          })()}
 
           <img
             src={THEME_SHIELDS[theme]}

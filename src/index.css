@@ -133,12 +133,12 @@
 
 @keyframes mvp-cosmic-breathe {
   0%, 100% {
-    opacity: 0.50;
-    transform: scale(0.97);
+    opacity: 0.60;
+    transform: scale(1.015);
   }
   50% {
-    opacity: 0.85;
-    transform: scale(1.04);
+    opacity: 0.92;
+    transform: scale(1.032);
   }
 }
 
@@ -270,11 +270,38 @@
   animation: crest-plasma-pulse 2.2s ease-in-out infinite;
 }
 
+/* Masaüstünde özel kartlar dışındaki mini arma yıldırımını yalnızca hover'da çalıştır; tablet/mobilde ekrandayken aktif kalsın */
+@media (hover: hover) and (pointer: fine) {
+  .crest-hover-only {
+    opacity: 0;
+    transition: opacity 0.2s ease-out;
+  }
+
+  .crest-hover-only.animate-crest-plasma,
+  .crest-hover-only .animate-electric-arc-1,
+  .crest-hover-only .animate-electric-arc-2,
+  .crest-hover-only .animate-electric-spark {
+    animation-play-state: paused;
+  }
+
+  .group:hover .crest-hover-only {
+    opacity: 1;
+  }
+
+  .group:hover .crest-hover-only.animate-crest-plasma,
+  .group:hover .crest-hover-only .animate-electric-arc-1,
+  .group:hover .crest-hover-only .animate-electric-arc-2,
+  .group:hover .crest-hover-only .animate-electric-spark {
+    animation-play-state: running;
+  }
+}
+
 .card-offscreen svg *,
 .card-offscreen .animate-electric-arc-1,
 .card-offscreen .animate-electric-arc-2,
 .card-offscreen .animate-electric-spark,
-.card-offscreen .animate-crest-plasma {
+.card-offscreen .animate-crest-plasma,
+.card-offscreen .animate-mvp-cosmic-aura {
   animation-play-state: paused !important;
 }
 
