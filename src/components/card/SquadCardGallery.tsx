@@ -10,7 +10,7 @@ interface Props {
   onSelectPlayer: (player: Player) => void;
 }
 
-export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) => {
+export const SquadCardGallery: React.FC<Props> = React.memo(({ players, onSelectPlayer }) => {
   const { currentUser } = useAuth();
 
   const isAdminOrCaptain = getAccess(currentUser, players).isCommittee;
@@ -109,7 +109,7 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
     <div className="space-y-6 w-full max-w-full overflow-x-clip py-2">
       {/* Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-5 justify-items-center">
-        {filtered.map((player) => {
+        {filtered.map((player, idx) => {
           const isMyCard = player.id === myPlayerId;
           const isMvp = player.theme === 'totw';
           const rank = rankMap.get(player.id) || 1;
@@ -207,6 +207,7 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
                   player={player}
                   size="md"
                   interactive={true}
+                  priority={idx < 4}
                   onClick={() => onSelectPlayer(player)}
                 />
               </div>
@@ -258,4 +259,4 @@ export const SquadCardGallery: React.FC<Props> = ({ players, onSelectPlayer }) =
       )}
     </div>
   );
-};
+});

@@ -15,7 +15,6 @@ import { getPlayerPositions } from '../../services/positions';
 // Fotoğraf IndexedDB'den yüklenene kadar (idb: referansı) gösterilen şeffaf 1x1 görsel
 const TRANSPARENT_PIXEL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 import { Download } from 'lucide-react';
-import { toPng } from 'html-to-image';
 
 interface Props {
   player: Player;
@@ -30,6 +29,7 @@ interface Props {
   onPhotoTouchStart?: (e: React.TouchEvent) => void;
   onPhotoWheel?: (e: React.WheelEvent) => void;
   showDownloadButton?: boolean;
+  priority?: boolean;
 }
 
 const THEME_SHIELDS: Record<CardTheme, string> = {
@@ -324,7 +324,7 @@ const PlayStyleMarqueeLabel: React.FC<{
   );
 };
 
-export const FCCard: React.FC<Props> = ({
+export const FCCard: React.FC<Props> = React.memo(({
   player,
   overrideStats,
   overrideOVR,
@@ -337,6 +337,7 @@ export const FCCard: React.FC<Props> = ({
   onPhotoTouchStart,
   onPhotoWheel,
   showDownloadButton = true,
+  priority = false,
 }) => {
   const [isDownloading, setIsDownloading] = useState(false);
   const outerContainerRef = useRef<HTMLDivElement>(null);
@@ -434,6 +435,9 @@ export const FCCard: React.FC<Props> = ({
   const handleMouseEnter = () => {
     if (!interactive || photoInteractive || !isFinePointerDevice()) return;
     isHoveredRef.current = true;
+    if (cardElementRef.current) {
+      cardElementRef.current.style.willChange = 'transform';
+    }
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -454,6 +458,9 @@ export const FCCard: React.FC<Props> = ({
   const handleMouseLeave = () => {
     if (!isFinePointerDevice()) return;
     isHoveredRef.current = false;
+    if (cardElementRef.current) {
+      cardElementRef.current.style.willChange = 'auto';
+    }
     applyCardTransform(0, 0, true);
   };
 
@@ -461,6 +468,7 @@ export const FCCard: React.FC<Props> = ({
     if (!cardElementRef.current) return;
     try {
       setIsDownloading(true);
+      const { toPng } = await import('html-to-image');
       const dataUrl = await toPng(cardElementRef.current, {
         quality: 1.0,
         pixelRatio: 3,
@@ -822,7 +830,6 @@ export const FCCard: React.FC<Props> = ({
         ref={cardElementRef}
         style={{
           transformStyle: 'preserve-3d',
-          willChange: interactive && !photoInteractive ? 'transform' : undefined,
         }}
         className={`relative ${sizeConfig.height} w-full bg-transparent cursor-pointer`}
       >
@@ -852,6 +859,8 @@ export const FCCard: React.FC<Props> = ({
         <img
           src={themeConfig.template}
           alt={themeConfig.label}
+          loading={priority || size === 'lg' ? 'eager' : 'lazy'}
+          fetchPriority={priority ? 'high' : undefined}
           decoding="async"
           style={{ transform: 'translateZ(0px)', backfaceVisibility: 'hidden' }}
           className={`absolute inset-0 w-full h-full object-contain pointer-events-none select-none z-0 transition-[filter] duration-200 ${
@@ -930,6 +939,8 @@ export const FCCard: React.FC<Props> = ({
                   : player.photoUrl
               }
               alt={player.name}
+              loading={priority || size === 'lg' ? 'eager' : 'lazy'}
+              fetchPriority={priority ? 'high' : undefined}
               decoding="async"
               style={{
                 transform: player.photoAdjustments
@@ -989,6 +1000,7 @@ export const FCCard: React.FC<Props> = ({
               src={player.flagUrl || getNationFlagUrl(player.nationality)}
               alt={player.nationName || player.nationality || 'TR'}
               title={player.nationName || 'Türkiye'}
+              loading={priority || size === 'lg' ? 'eager' : 'lazy'}
               decoding="async"
               className="w-full h-full object-cover flag-wave-on-hover"
               onError={(e) => {
@@ -1004,6 +1016,7 @@ export const FCCard: React.FC<Props> = ({
               src={player.clubLogoUrl || getClubLogoUrl(player.clubId)}
               alt={player.clubName || 'Revir FC'}
               title={player.clubName || 'Revir FC'}
+              loading={priority || size === 'lg' ? 'eager' : 'lazy'}
               decoding="async"
               className="w-full h-full object-contain rounded-full"
               onError={(e) => {
@@ -1146,6 +1159,7 @@ export const FCCard: React.FC<Props> = ({
           <img
             src={THEME_SHIELDS[theme]}
             alt={`${theme} Crest`}
+            loading={priority || size === 'lg' ? 'eager' : 'lazy'}
             decoding="async"
             className={`w-full h-full object-contain ${
               theme === 'nostalgia'
@@ -1290,4 +1304,4 @@ export const FCCard: React.FC<Props> = ({
       )}
     </div>
   );
-};
+});

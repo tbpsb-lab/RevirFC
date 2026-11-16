@@ -495,6 +495,9 @@ export interface Match {
   };
 }
 
+export const LOCKER_EDIT_WINDOW_MS = 15 * 60 * 1000; // WhatsApp gibi 15 dakika düzenleme süresi
+export const LOCKER_DELETE_WINDOW_MS = 48 * 60 * 60 * 1000; // 48 saat içinde Herkesten Sil
+
 export interface LockerComment {
   id: string;
   authorPlayerId: string;

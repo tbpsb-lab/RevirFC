@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import {
   Player,
@@ -16,6 +16,8 @@ import {
   PlayerScoutingEntry,
   PollAttendanceChoice,
   LockerComment,
+  LOCKER_EDIT_WINDOW_MS,
+  LOCKER_DELETE_WINDOW_MS,
   CURRENT_STATS_SYNC_VERSION,
   CURRENT_RECORD_SYNC_VERSION,
   isClubLegendPlayer,
@@ -85,35 +87,73 @@ import {
 } from './services/sandboxService';
 
 import { Navbar, NavTab } from './components/layout/Navbar';
-import { PendingApprovalGate } from './components/layout/PendingApprovalGate';
-import { FirebaseSetupModal } from './components/layout/FirebaseSetupModal';
-
 import { SquadCardGallery } from './components/card/SquadCardGallery';
-import { CardCustomizer } from './components/card/CardCustomizer';
-import { SquadList, PollConfigPayload } from './components/checkin/SquadList';
-import { CheckInModal } from './components/checkin/CheckInModal';
-import { TacticalPitch } from './components/match/TacticalPitch';
-import { MatchRatingModal } from './components/rating/MatchRatingModal';
-import { CommitteeDecisionModal } from './components/rating/CommitteeDecisionModal';
-import {
-  LockerRoomFeed,
-  LOCKER_EDIT_WINDOW_MS,
-  LOCKER_DELETE_WINDOW_MS,
-} from './components/locker/LockerRoomFeed';
-import { ChemistryMatrix } from './components/stats/ChemistryMatrix';
-import { EgoIndexCard } from './components/stats/EgoIndexCard';
-import { DessertLedger } from './components/stats/DessertLedger';
-import { AdminApprovalPanel } from './components/admin/AdminApprovalPanel';
-import { InviteManagerModal } from './components/admin/InviteManagerModal';
 import { TestModeControlBar } from './components/admin/TestModeControlBar';
-import { SeniorityManagerPanel } from './components/admin/SeniorityManagerPanel';
-import { AuthModal } from './components/auth/AuthModal';
 import { findInviteById, getSavedInvites, saveInvites, isExcludedAdminInvite, clearSandboxInvites } from './services/inviteService';
 import { InviteToken } from './types';
-import { ScoutingWizard } from './components/scouting/ScoutingWizard';
-import { ScoutingAdminDashboard } from './components/scouting/ScoutingAdminDashboard';
-import { ReminderHubModal } from './components/reminder/ReminderHubModal';
+import type { PollConfigPayload } from './components/checkin/SquadList';
 import { Lock, Clock, Vote, FlaskConical, Trophy, ShieldCheck, CheckCircle2 } from 'lucide-react';
+
+const FirebaseSetupModal = lazy(() =>
+  import('./components/layout/FirebaseSetupModal').then((m) => ({ default: m.FirebaseSetupModal }))
+);
+const CardCustomizer = lazy(() =>
+  import('./components/card/CardCustomizer').then((m) => ({ default: m.CardCustomizer }))
+);
+const SquadList = lazy(() =>
+  import('./components/checkin/SquadList').then((m) => ({ default: m.SquadList }))
+);
+const CheckInModal = lazy(() =>
+  import('./components/checkin/CheckInModal').then((m) => ({ default: m.CheckInModal }))
+);
+const TacticalPitch = lazy(() =>
+  import('./components/match/TacticalPitch').then((m) => ({ default: m.TacticalPitch }))
+);
+const MatchRatingModal = lazy(() =>
+  import('./components/rating/MatchRatingModal').then((m) => ({ default: m.MatchRatingModal }))
+);
+const CommitteeDecisionModal = lazy(() =>
+  import('./components/rating/CommitteeDecisionModal').then((m) => ({ default: m.CommitteeDecisionModal }))
+);
+const LockerRoomFeed = lazy(() =>
+  import('./components/locker/LockerRoomFeed').then((m) => ({ default: m.LockerRoomFeed }))
+);
+const ChemistryMatrix = lazy(() =>
+  import('./components/stats/ChemistryMatrix').then((m) => ({ default: m.ChemistryMatrix }))
+);
+const EgoIndexCard = lazy(() =>
+  import('./components/stats/EgoIndexCard').then((m) => ({ default: m.EgoIndexCard }))
+);
+const DessertLedger = lazy(() =>
+  import('./components/stats/DessertLedger').then((m) => ({ default: m.DessertLedger }))
+);
+const AdminApprovalPanel = lazy(() =>
+  import('./components/admin/AdminApprovalPanel').then((m) => ({ default: m.AdminApprovalPanel }))
+);
+const InviteManagerModal = lazy(() =>
+  import('./components/admin/InviteManagerModal').then((m) => ({ default: m.InviteManagerModal }))
+);
+const SeniorityManagerPanel = lazy(() =>
+  import('./components/admin/SeniorityManagerPanel').then((m) => ({ default: m.SeniorityManagerPanel }))
+);
+const AuthModal = lazy(() =>
+  import('./components/auth/AuthModal').then((m) => ({ default: m.AuthModal }))
+);
+const ScoutingWizard = lazy(() =>
+  import('./components/scouting/ScoutingWizard').then((m) => ({ default: m.ScoutingWizard }))
+);
+const ScoutingAdminDashboard = lazy(() =>
+  import('./components/scouting/ScoutingAdminDashboard').then((m) => ({ default: m.ScoutingAdminDashboard }))
+);
+const ReminderHubModal = lazy(() =>
+  import('./components/reminder/ReminderHubModal').then((m) => ({ default: m.ReminderHubModal }))
+);
+
+const TabLoadingFallback = () => (
+  <div className="bg-neutral-900/70 border border-neutral-800 rounded-3xl p-10 text-center text-xs text-neutral-400">
+    Yükleniyor...
+  </div>
+);
 
 function MainApp() {
   const {
@@ -1307,13 +1347,23 @@ function MainApp() {
     : (isAdminOrCaptain ? players[0] : undefined);
   const isStarterInMatch = !isPendingUser && !isFormerUser && Boolean(claimedPlayer && match.starters.includes(claimedPlayer.id));
 
-  // Zamansal aşama kontrolleri için canlı saat (her 30 sn güncellenir)
-  const [nowMs, setNowMs] = useState<number>(() => Date.now());
+  // Zamansal aşama kontrolleri: yalnızca faz/yetki gerçekten değiştiğinde yeniden render tetikler
+  const [lifecycleTick, setLifecycleTick] = useState<number>(() => Date.now());
+  const lifecycleFlags = getMatchLifecycleFlags(match, lifecycleTick);
+  const lifecycleSigRef = useRef('');
+  lifecycleSigRef.current = `${match.id}|${lifecycleFlags.phase}|${lifecycleFlags.canPlayersEditPoll}|${lifecycleFlags.canCommitteeManagePoll}|${lifecycleFlags.canEditTactics}|${lifecycleFlags.canOpenRatingManually}|${lifecycleFlags.canVote360}|${lifecycleFlags.canSealAwards}`;
+
   useEffect(() => {
-    const id = window.setInterval(() => setNowMs(Date.now()), 30_000);
+    const id = window.setInterval(() => {
+      const now = Date.now();
+      const next = getMatchLifecycleFlags(match, now);
+      const nextSig = `${match.id}|${next.phase}|${next.canPlayersEditPoll}|${next.canCommitteeManagePoll}|${next.canEditTactics}|${next.canOpenRatingManually}|${next.canVote360}|${next.canSealAwards}`;
+      if (nextSig !== lifecycleSigRef.current) {
+        setLifecycleTick(now);
+      }
+    }, 30_000);
     return () => window.clearInterval(id);
-  }, []);
-  const lifecycleFlags = getMatchLifecycleFlags(match, nowMs);
+  }, [match]);
 
   // Seyirci / Bekleyen veya yetkisi değişen kullanıcıda yasaklı sekmeyi kapatıp Kadro vitrinine yönlendir
   useEffect(() => {
@@ -3349,6 +3399,7 @@ function MainApp() {
           )
         )}
 
+        <Suspense fallback={<TabLoadingFallback />}>
         {activeTab === 'scouting' && (
           isAdminOrCaptain ? (
             <div className="space-y-4">
@@ -3846,10 +3897,12 @@ function MainApp() {
             <InviteManagerModal players={players} />
           </div>
         )}
+        </Suspense>
       </main>
       </div>
 
       {/* Modals */}
+      <Suspense fallback={null}>
       {editingPlayer && (
         <CardCustomizer
           player={editingPlayer}
@@ -3932,6 +3985,7 @@ function MainApp() {
           }}
         />
       )}
+      </Suspense>
     </div>
   );
 }

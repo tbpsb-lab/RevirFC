@@ -1,6 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import imageCompression from 'browser-image-compression';
-import { LockerComment, LockerPost, PhotoArchiveItem, Player } from '../../types';
+import {
+  LockerComment,
+  LockerPost,
+  PhotoArchiveItem,
+  Player,
+  LOCKER_EDIT_WINDOW_MS,
+  LOCKER_DELETE_WINDOW_MS,
+} from '../../types';
 import {
   Camera,
   Check,
@@ -18,8 +25,7 @@ import {
   X,
 } from 'lucide-react';
 
-export const LOCKER_EDIT_WINDOW_MS = 15 * 60 * 1000; // WhatsApp gibi 15 dakika düzenleme süresi
-export const LOCKER_DELETE_WINDOW_MS = 48 * 60 * 60 * 1000; // 48 saat içinde Herkesten Sil
+export { LOCKER_EDIT_WINDOW_MS, LOCKER_DELETE_WINDOW_MS };
 const HIDDEN_LOCKER_STORAGE_KEY = 'revirfc_hidden_locker_v1';
 
 interface Props {

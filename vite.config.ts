@@ -9,5 +9,27 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
-})
+  build: {
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            {
+              name: 'react-vendor',
+              test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/,
+            },
+            {
+              name: 'firebase-vendor',
+              test: /[\\/]node_modules[\\/](firebase|@firebase)[\\/]/,
+            },
+            {
+              name: 'icons-vendor',
+              test: /[\\/]node_modules[\\/]lucide-react[\\/]/,
+            },
+          ],
+        },
+      },
+    },
+  },
+});
 
