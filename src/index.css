@@ -485,7 +485,6 @@
 }
 .animate-revir-heartbeat {
   animation: revir-critical-heartbeat 1.8s cubic-bezier(0.21, 0.61, 0.35, 1) infinite;
-  will-change: opacity, transform;
 }
 
 /* Pause card animation loops when offscreen */
@@ -501,5 +500,32 @@
 /* Hide interactive photo framing ring when exporting card PNG */
 [data-exporting="true"] .photo-drag-ring {
   box-shadow: none !important;
+}
+
+/* Respect OS reduced-motion / battery-saver preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animate-card-float,
+  .animate-card-spin-slow,
+  .animate-card-aura,
+  .animate-card-ripple,
+  .animate-mvp-crest-glow,
+  .animate-crest-aura-glow,
+  .animate-crest-spin-slow,
+  .animate-mvp-cosmic-aura,
+  .animate-mvp-spin-aurora,
+  .animate-mvp-ripple,
+  .animate-electric-arc-1,
+  .animate-electric-arc-2,
+  .animate-electric-spark,
+  .animate-crest-plasma,
+  .animate-flame-bottom-glow,
+  .animate-ember-rise-1,
+  .animate-ember-rise-2,
+  .animate-ember-rise-3,
+  .animate-revir-heartbeat,
+  .animate-nostalgia-crest-aura,
+  .playstyle-marquee-track {
+    animation: none !important;
+  }
 }
 

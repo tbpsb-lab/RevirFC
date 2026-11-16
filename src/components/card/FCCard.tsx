@@ -848,25 +848,20 @@ export const FCCard: React.FC<Props> = React.memo(({
         }}
         className={`relative ${sizeConfig.height} w-full bg-transparent cursor-pointer`}
       >
-        {/* ÖZEL EFEKT: MVP (TOTW) BÜYÜK ARKA AURA */}
-        {/* ÖZEL EFEKT: MVP (TOTW) DAR VE KART ŞEKLİNE TAM OTURAN ALTIN IŞIN HALKASI */}
+        {/* ÖZEL EFEKT: MVP (TOTW) HAFİFLETİLMİŞ TEK KATMAN ALTIN HALE */}
         {theme === 'totw' && (
           <div
-            className="absolute -inset-2 sm:-inset-3.5 rounded-[2.2rem] pointer-events-none -z-10 flex items-center justify-center overflow-visible opacity-85"
+            className="absolute -inset-2 sm:-inset-2.5 rounded-[2.2rem] pointer-events-none -z-10 flex items-center justify-center overflow-visible opacity-80"
             style={{ transform: 'translateZ(-8px)', backfaceVisibility: 'hidden' }}
           >
-            {/* Kompakt Altın Kozmik Parıltı Halkası */}
             <div
-              className="absolute inset-0 rounded-[2.2rem] opacity-75 blur-lg animate-mvp-spin-aurora will-change-transform"
+              className="absolute inset-0 rounded-[2.2rem] opacity-70 blur-md animate-mvp-spin-aurora"
               style={{
                 background:
-                  'conic-gradient(from 0deg at 50% 50%, rgba(245, 158, 11, 0.8) 0deg, rgba(217, 119, 6, 0.5) 45deg, rgba(79, 70, 229, 0.25) 110deg, rgba(251, 191, 36, 0.9) 180deg, rgba(234, 88, 12, 0.45) 240deg, rgba(124, 58, 237, 0.2) 300deg, rgba(245, 158, 11, 0.8) 360deg)',
+                  'conic-gradient(from 0deg at 50% 50%, rgba(245, 158, 11, 0.8) 0deg, rgba(217, 119, 6, 0.45) 60deg, rgba(79, 70, 229, 0.22) 120deg, rgba(251, 191, 36, 0.85) 180deg, rgba(234, 88, 12, 0.4) 240deg, rgba(245, 158, 11, 0.8) 360deg)',
               }}
             />
-            {/* Nefes Alan Sıcak Altın Parlaması */}
-            <div className="absolute -inset-1 rounded-[2rem] bg-gradient-to-tr from-amber-500/35 via-yellow-400/30 to-amber-600/35 blur-md animate-mvp-cosmic-aura will-change-transform" />
-            {/* Kartın hemen dışını saran kompakt halka dalgası */}
-            <div className="absolute inset-0.5 rounded-[1.8rem] border border-amber-400/50 animate-mvp-ripple will-change-transform" />
+            <div className="absolute inset-0.5 rounded-[1.8rem] border border-amber-400/45" />
           </div>
         )}
 
@@ -1061,116 +1056,120 @@ export const FCCard: React.FC<Props> = React.memo(({
         >
           {theme !== 'nostalgia' && (
             <>
-              {/* İnce arka plazma enerji halkası (GPU compositor opacity + scale nabzı) */}
+              {/* İnce arka parlama halkası: sadece MVP & Alev Atıyo! kartlarında hareketli nabız, diğerlerinde sakin statik parlama */}
               <div
                 className={`absolute ${
                   theme === 'totw' ? 'inset-1' : '-inset-1'
-                } rounded-full pointer-events-none -z-10 blur-[3px] animate-crest-plasma`}
+                } rounded-full pointer-events-none -z-10 blur-[2px] ${
+                  theme === 'totw' || theme === 'inform' ? 'animate-crest-plasma' : 'opacity-65'
+                }`}
                 style={{
                   background: `radial-gradient(circle, ${themeConfig.crestAuraPrimary} 10%, ${themeConfig.crestAuraSecondary} 48%, rgba(0, 0, 0, 0) 72%)`,
                 }}
               />
 
-              {/* Logonun dış konturunu kesintisiz saran çift yönlü elektrik arkları + mikro kıvılcımlar */}
-              <svg
-                viewBox="0 0 100 100"
-                className={`absolute ${
-                  theme === 'totw'
-                    ? 'inset-1 w-[calc(100%-8px)] h-[calc(100%-8px)]'
-                    : '-inset-2 w-[calc(100%+16px)] h-[calc(100%+16px)]'
-                } pointer-events-none z-20 overflow-visible`}
-                aria-hidden="true"
-              >
-                {/* Akım 1: Saat yönünde dolaşan kırıklı yüksek voltaj arkı (Dış plazma + parlak çekirdek) */}
-                <path
-                  d="M 50 7 L 64 11 L 78 16 L 87 30 L 89 48 L 85 65 L 75 79 L 61 88 L 50 93 L 39 88 L 25 79 L 15 65 L 11 48 L 13 30 L 22 16 L 36 11 Z"
-                  fill="none"
-                  pathLength={280}
-                  stroke={themeConfig.crestAuraPrimary}
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeDasharray="52 38 22 168"
-                  className="animate-electric-arc-1"
-                  opacity="0.85"
-                />
-                <path
-                  d="M 50 7 L 64 11 L 78 16 L 87 30 L 89 48 L 85 65 L 75 79 L 61 88 L 50 93 L 39 88 L 25 79 L 15 65 L 11 48 L 13 30 L 22 16 L 36 11 Z"
-                  fill="none"
-                  pathLength={280}
-                  stroke={themeConfig.electricCore}
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeDasharray="52 38 22 168"
-                  className="animate-electric-arc-1"
-                />
-
-                {/* Akım 2: Ters yönde akan kırıklı ikincil yıldırım halkası */}
-                <path
-                  d="M 50 10 L 70 14 L 83 25 L 86 43 L 82 62 L 69 78 L 50 90 L 31 78 L 18 62 L 14 43 L 17 25 L 30 14 Z"
-                  fill="none"
-                  pathLength={280}
-                  stroke={themeConfig.crestAuraSecondary}
-                  strokeWidth="3.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeDasharray="36 54 18 172"
-                  className="animate-electric-arc-2"
-                  opacity="0.8"
-                />
-                <path
-                  d="M 50 10 L 70 14 L 83 25 L 86 43 L 82 62 L 69 78 L 50 90 L 31 78 L 18 62 L 14 43 L 17 25 L 30 14 Z"
-                  fill="none"
-                  pathLength={280}
-                  stroke={themeConfig.electricCore}
-                  strokeWidth="1.3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeDasharray="36 54 18 172"
-                  className="animate-electric-arc-2"
-                />
-
-                {/* Kıvılcım Çatalları 1: Sağ üst & sol alt yüksek voltaj sıçramaları */}
-                <g className="animate-electric-spark">
+              {/* Elektrik arkı & kıvılcım animasyonları yalnızca MVP ve Alev Atıyo! kartlarında çalışır (FPS & göz konforu) */}
+              {(theme === 'totw' || theme === 'inform') && (
+                <svg
+                  viewBox="0 0 100 100"
+                  className={`absolute ${
+                    theme === 'totw'
+                      ? 'inset-1 w-[calc(100%-8px)] h-[calc(100%-8px)]'
+                      : '-inset-2 w-[calc(100%+16px)] h-[calc(100%+16px)]'
+                  } pointer-events-none z-20 overflow-visible`}
+                  aria-hidden="true"
+                >
+                  {/* Akım 1: Saat yönünde dolaşan kırıklı yüksek voltaj arkı (Dış plazma + parlak çekirdek) */}
                   <path
-                    d="M 76 17 L 85 11 L 82 19 L 92 14"
+                    d="M 50 7 L 64 11 L 78 16 L 87 30 L 89 48 L 85 65 L 75 79 L 61 88 L 50 93 L 39 88 L 25 79 L 15 65 L 11 48 L 13 30 L 22 16 L 36 11 Z"
                     fill="none"
-                    stroke={themeConfig.electricCore}
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M 21 75 L 12 81 L 16 86 L 8 90"
-                    fill="none"
+                    pathLength={280}
                     stroke={themeConfig.crestAuraPrimary}
-                    strokeWidth="1.8"
+                    strokeWidth="4"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                  />
-                </g>
-
-                {/* Kıvılcım Çatalları 2: Sol üst & sağ alt faz kaydırmalı çakmalar */}
-                <g className="animate-electric-spark" style={{ animationDelay: '0.65s' }}>
-                  <path
-                    d="M 22 18 L 13 13 L 17 22 L 8 24"
-                    fill="none"
-                    stroke={themeConfig.crestAuraPrimary}
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                    strokeDasharray="52 38 22 168"
+                    className="animate-electric-arc-1"
+                    opacity="0.85"
                   />
                   <path
-                    d="M 79 73 L 88 79 L 83 84 L 92 88"
+                    d="M 50 7 L 64 11 L 78 16 L 87 30 L 89 48 L 85 65 L 75 79 L 61 88 L 50 93 L 39 88 L 25 79 L 15 65 L 11 48 L 13 30 L 22 16 L 36 11 Z"
                     fill="none"
+                    pathLength={280}
                     stroke={themeConfig.electricCore}
-                    strokeWidth="1.8"
+                    strokeWidth="1.6"
                     strokeLinecap="round"
                     strokeLinejoin="round"
+                    strokeDasharray="52 38 22 168"
+                    className="animate-electric-arc-1"
                   />
-                </g>
-              </svg>
+
+                  {/* Akım 2: Ters yönde akan kırıklı ikincil yıldırım halkası */}
+                  <path
+                    d="M 50 10 L 70 14 L 83 25 L 86 43 L 82 62 L 69 78 L 50 90 L 31 78 L 18 62 L 14 43 L 17 25 L 30 14 Z"
+                    fill="none"
+                    pathLength={280}
+                    stroke={themeConfig.crestAuraSecondary}
+                    strokeWidth="3.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeDasharray="36 54 18 172"
+                    className="animate-electric-arc-2"
+                    opacity="0.8"
+                  />
+                  <path
+                    d="M 50 10 L 70 14 L 83 25 L 86 43 L 82 62 L 69 78 L 50 90 L 31 78 L 18 62 L 14 43 L 17 25 L 30 14 Z"
+                    fill="none"
+                    pathLength={280}
+                    stroke={themeConfig.electricCore}
+                    strokeWidth="1.3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeDasharray="36 54 18 172"
+                    className="animate-electric-arc-2"
+                  />
+
+                  {/* Kıvılcım Çatalları 1: Sağ üst & sol alt yüksek voltaj sıçramaları */}
+                  <g className="animate-electric-spark">
+                    <path
+                      d="M 76 17 L 85 11 L 82 19 L 92 14"
+                      fill="none"
+                      stroke={themeConfig.electricCore}
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M 21 75 L 12 81 L 16 86 L 8 90"
+                      fill="none"
+                      stroke={themeConfig.crestAuraPrimary}
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </g>
+
+                  {/* Kıvılcım Çatalları 2: Sol üst & sağ alt faz kaydırmalı çakmalar */}
+                  <g className="animate-electric-spark" style={{ animationDelay: '0.65s' }}>
+                    <path
+                      d="M 22 18 L 13 13 L 17 22 L 8 24"
+                      fill="none"
+                      stroke={themeConfig.crestAuraPrimary}
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M 79 73 L 88 79 L 83 84 L 92 88"
+                      fill="none"
+                      stroke={themeConfig.electricCore}
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </g>
+                </svg>
+              )}
             </>
           )}
 

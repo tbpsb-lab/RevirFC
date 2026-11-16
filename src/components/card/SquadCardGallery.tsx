@@ -123,18 +123,15 @@ export const SquadCardGallery: React.FC<Props> = React.memo(({ players, onSelect
             >
               {/* Top Badge: "Senin Kartın", "MVP", "Alev Atıyo!", "Etten Duvar", "Haftanın Bidonu", or Score Rank */}
               {isMyCard ? (
-                <div className="flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/30 to-amber-500/20 border border-amber-400/70 shadow-lg shadow-amber-500/25 text-amber-300 text-[11px] font-black tracking-wide uppercase mb-2.5 animate-pulse">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-spin-slow" />
+                <div className="flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/25 to-amber-500/20 border border-amber-400/70 shadow-md shadow-amber-500/20 text-amber-300 text-[11px] font-black tracking-wide uppercase mb-2.5">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                   <span>Senin Kartın</span>
                   {player.theme === 'totw' && <span className="text-yellow-300 font-extrabold">• MVP</span>}
                   {player.theme === 'inform' && <span className="text-orange-400 font-extrabold">• ALEV ATIYO!</span>}
                   {player.theme === 'wall' && <span className="text-sky-300 font-extrabold">• ETTEN DUVAR</span>}
                   {player.theme === 'bidon' && <span className="text-rose-400 font-extrabold">• HAFTANIN BİDONU</span>}
                   <span className="text-amber-200/70 font-mono text-[10px] font-normal">#{rank}</span>
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-                  </span>
+                  <span className="inline-flex rounded-full h-2 w-2 bg-amber-400" />
                 </div>
               ) : player.theme === 'totw' ? (
                 <div className="flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-neutral-900 via-amber-950/60 to-neutral-900 border border-amber-400/70 shadow-lg shadow-amber-500/20 text-amber-300 text-[11px] font-black tracking-wide uppercase mb-2.5">
@@ -144,7 +141,7 @@ export const SquadCardGallery: React.FC<Props> = React.memo(({ players, onSelect
                 </div>
               ) : player.theme === 'inform' ? (
                 <div className="flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-neutral-900 via-orange-950/60 to-neutral-900 border border-orange-500/70 shadow-lg shadow-orange-500/20 text-orange-300 text-[11px] font-black tracking-wide uppercase mb-2.5">
-                  <Flame className="w-3.5 h-3.5 text-orange-400 animate-pulse" />
+                  <Flame className="w-3.5 h-3.5 text-orange-400" />
                   <span>Alev Atıyo!</span>
                   <span className="text-orange-200/70 font-mono text-[10px]">#{rank}</span>
                 </div>
@@ -173,35 +170,11 @@ export const SquadCardGallery: React.FC<Props> = React.memo(({ players, onSelect
                 </div>
               )}
 
-              {/* Card Wrapper with Looping Background Animation for User's Own Card or MVP Card */}
-              <div className={`relative ${isMvp ? 'animate-card-float will-change-transform' : ''}`}>
-                {/* 1. MVP Kartı (Kullanıcının kendisi veya bir başkası) - Çarpıcı Kozmik Altın & Yıldız Tozu Aurası */}
-                {isMvp ? (
-                  <div className="absolute -inset-3 sm:-inset-4 pointer-events-none -z-10 flex items-center justify-center">
-                    {/* Layer 1: Cosmic Starlight & Gold Conic Beam (Obsidian Black, Deep Cosmic Violet, Radiant Gold, Starburst Amber) */}
-                    <div
-                      className="absolute inset-0 rounded-[2.6rem] opacity-75 blur-2xl animate-mvp-spin-aurora will-change-transform"
-                      style={{
-                        background:
-                          'conic-gradient(from 0deg at 50% 50%, rgba(245, 158, 11, 0.85) 0deg, rgba(217, 119, 6, 0.55) 45deg, rgba(79, 70, 229, 0.4) 110deg, rgba(251, 191, 36, 0.95) 180deg, rgba(234, 88, 12, 0.5) 240deg, rgba(124, 58, 237, 0.35) 300deg, rgba(245, 158, 11, 0.85) 360deg)',
-                      }}
-                    />
-
-                    {/* Layer 2: Radiant Breathing Gold & Cosmic Starlight Pulse */}
-                    <div className="absolute -inset-1.5 rounded-[2.3rem] bg-gradient-to-tr from-amber-500/40 via-yellow-400/35 to-amber-600/40 blur-xl animate-mvp-cosmic-aura will-change-transform" />
-
-                    {/* Layer 3: Expanding Starburst Ripple Wave */}
-                    <div className="absolute inset-0 rounded-[2rem] border-2 border-amber-400/60 animate-mvp-ripple will-change-transform" />
-                  </div>
-                ) : isMyCard ? (
-                  /* 2. Kullanıcının Kendi Kartı (MVP değilken) - MVP parlamasını bastırmayan minimalist ve zarif aura */
-                  <div className="absolute -inset-3 sm:-inset-4 pointer-events-none -z-10 flex items-center justify-center">
-                    {/* Yumuşak nefes alan sıcak kehribar parıltısı */}
-                    <div className="absolute inset-0 rounded-[2.2rem] bg-amber-500/10 blur-xl opacity-60 animate-pulse will-change-transform" />
-                    {/* Sade ve şık kart çerçevesi aydınlatması */}
-                    <div className="absolute inset-0 rounded-[1.8rem] border border-amber-400/25 shadow-sm shadow-amber-500/10" />
-                  </div>
-                ) : null}
+              {/* Card Wrapper: MVP'de tek hafif hale FCCard içinde, Kullanıcının Kendi Kartında zarif statik çerçeve */}
+              <div className="relative">
+                {!isMvp && isMyCard && (
+                  <div className="absolute -inset-2 pointer-events-none -z-10 rounded-[1.8rem] border border-amber-400/25 bg-amber-500/5" />
+                )}
 
                 <FCCard
                   player={player}
