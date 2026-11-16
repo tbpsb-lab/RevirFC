@@ -30,6 +30,27 @@ interface Props {
   onPhotoWheel?: (e: React.WheelEvent) => void;
   showDownloadButton?: boolean;
   priority?: boolean;
+  onCardNodeReady?: (node: HTMLDivElement | null) => void;
+}
+
+export async function downloadCardNodeAsPng(el: HTMLElement, fileName: string): Promise<void> {
+  const { toPng } = await import('html-to-image');
+  el.dataset.exporting = 'true';
+  try {
+    const dataUrl = await toPng(el, {
+      quality: 1.0,
+      pixelRatio: 3,
+      cacheBust: true,
+      backgroundColor: 'transparent',
+      filter: (node) => !(node instanceof HTMLElement && node.dataset?.exportIgnore === 'true'),
+    });
+    const link = document.createElement('a');
+    link.download = fileName;
+    link.href = dataUrl;
+    link.click();
+  } finally {
+    delete el.dataset.exporting;
+  }
 }
 
 const THEME_SHIELDS: Record<CardTheme, string> = {
@@ -338,6 +359,7 @@ export const FCCard: React.FC<Props> = React.memo(({
   onPhotoWheel,
   showDownloadButton = true,
   priority = false,
+  onCardNodeReady,
 }) => {
   const [isDownloading, setIsDownloading] = useState(false);
   const outerContainerRef = useRef<HTMLDivElement>(null);
@@ -468,17 +490,7 @@ export const FCCard: React.FC<Props> = React.memo(({
     if (!cardElementRef.current) return;
     try {
       setIsDownloading(true);
-      const { toPng } = await import('html-to-image');
-      const dataUrl = await toPng(cardElementRef.current, {
-        quality: 1.0,
-        pixelRatio: 3,
-        cacheBust: true,
-        backgroundColor: 'transparent',
-      });
-      const link = document.createElement('a');
-      link.download = `RevirFC_${player.name}_${theme}.png`;
-      link.href = dataUrl;
-      link.click();
+      await downloadCardNodeAsPng(cardElementRef.current, `RevirFC_${player.name}_${theme}.png`);
     } catch (err) {
       console.error('Card export failed:', err);
     } finally {
@@ -827,7 +839,10 @@ export const FCCard: React.FC<Props> = React.memo(({
     >
       {/* 3D Tilting Card Container - GPU preserve-3d'yi bozmamak için bu kapsayıcıda ASLA filter/drop-shadow kullanılmaz */}
       <div
-        ref={cardElementRef}
+        ref={(node) => {
+          cardElementRef.current = node;
+          onCardNodeReady?.(node);
+        }}
         style={{
           transformStyle: 'preserve-3d',
         }}
@@ -926,7 +941,7 @@ export const FCCard: React.FC<Props> = React.memo(({
             onTouchStart={photoInteractive ? onPhotoTouchStart : undefined}
             onWheel={photoInteractive ? onPhotoWheel : undefined}
             className={`w-full h-full flex items-center justify-center ${
-              photoInteractive ? 'cursor-grab active:cursor-grabbing touch-none ring-2 ring-amber-400 rounded-xl' : ''
+              photoInteractive ? 'cursor-grab active:cursor-grabbing touch-none ring-2 ring-amber-400 rounded-xl photo-drag-ring' : ''
             }`}
             title={photoInteractive ? 'Fotoğrafı sürükleyin veya fare tekerleğiyle yakınlaştırın' : undefined}
           >
@@ -957,7 +972,10 @@ export const FCCard: React.FC<Props> = React.memo(({
 
             {/* Interactive Mode Guide Indicator */}
             {photoInteractive && (
-              <span className="absolute bottom-1 bg-black/85 text-[8px] text-amber-300 font-bold px-1.5 py-0.5 rounded border border-amber-400/40 pointer-events-none">
+              <span
+                data-export-ignore="true"
+                className="absolute bottom-1 bg-black/85 text-[8px] text-amber-300 font-bold px-1.5 py-0.5 rounded border border-amber-400/40 pointer-events-none"
+              >
                 ✋ Sürükle / Zoom
               </span>
             )}
@@ -1295,7 +1313,7 @@ export const FCCard: React.FC<Props> = React.memo(({
             handleDownloadCard();
           }}
           disabled={isDownloading}
-          className="absolute bottom-1.5 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-neutral-950/95 hover:bg-neutral-800 text-amber-400 border border-amber-400/50 text-[10px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-xl cursor-pointer whitespace-nowrap z-30"
+          className="absolute -bottom-3 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-neutral-950/95 hover:bg-neutral-800 text-amber-400 border border-amber-400/50 text-[10px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-xl cursor-pointer whitespace-nowrap z-30"
           title="WhatsApp ve Instagram için HD PNG İndir"
         >
           <Download className="w-3 h-3" />

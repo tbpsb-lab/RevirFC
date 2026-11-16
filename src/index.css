@@ -498,3 +498,8 @@
   animation-play-state: paused !important;
 }
 
+/* Hide interactive photo framing ring when exporting card PNG */
+[data-exporting="true"] .photo-drag-ring {
+  box-shadow: none !important;
+}
+

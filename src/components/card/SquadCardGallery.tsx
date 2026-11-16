@@ -108,7 +108,7 @@ export const SquadCardGallery: React.FC<Props> = React.memo(({ players, onSelect
   return (
     <div className="space-y-6 w-full max-w-full overflow-x-clip py-2">
       {/* Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-5 justify-items-center">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-6 justify-items-center">
         {filtered.map((player, idx) => {
           const isMyCard = player.id === myPlayerId;
           const isMvp = player.theme === 'totw';

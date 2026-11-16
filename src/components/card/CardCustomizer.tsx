@@ -18,7 +18,7 @@ import {
   shiftPlayerStatsByDelta,
 } from '../../types';
 import { COMMITTEE_MEMBERS } from '../../services/mockData';
-import { FCCard } from './FCCard';
+import { FCCard, downloadCardNodeAsPng } from './FCCard';
 import { PLAYSTYLE_CONFIG, PLAYSTYLE_CATEGORIES } from './PlayStyleBadge';
 import {
   NATIONS,
@@ -52,6 +52,7 @@ import {
   Clock,
   Eye,
   BarChart3,
+  Download,
 } from 'lucide-react';
 
 interface Props {
@@ -204,6 +205,8 @@ export const CardCustomizer: React.FC<Props> = ({
   const [isCompressing, setIsCompressing] = useState(false);
   const [isRemovingBg, setIsRemovingBg] = useState(false);
   const [removalProgress, setRemovalProgress] = useState(0);
+  const [isExportingPng, setIsExportingPng] = useState(false);
+  const cardExportElRef = useRef<HTMLDivElement | null>(null);
 
   const [adjustments, setAdjustments] = useState({
     x: player.photoAdjustments?.x ?? 0,
@@ -717,10 +720,39 @@ export const CardCustomizer: React.FC<Props> = ({
               size="md"
               interactive={!canEdit}
               photoInteractive={canEdit}
+              showDownloadButton={false}
+              onCardNodeReady={(node) => {
+                cardExportElRef.current = node;
+              }}
               onPhotoMouseDown={canEdit ? handleMouseDown : undefined}
               onPhotoTouchStart={canEdit ? handleTouchStart : undefined}
               onPhotoWheel={canEdit ? handleWheel : undefined}
             />
+
+            {/* Mobil, Tablet & Masaüstü için her zaman erişilebilir Kart PNG İndirme Butonu */}
+            <button
+              type="button"
+              disabled={isExportingPng}
+              onClick={async () => {
+                if (!cardExportElRef.current) return;
+                try {
+                  setIsExportingPng(true);
+                  await downloadCardNodeAsPng(
+                    cardExportElRef.current,
+                    `RevirFC_${editedPlayer.name}_${editedPlayer.theme}.png`
+                  );
+                } catch (err) {
+                  console.error('Card export failed:', err);
+                } finally {
+                  setIsExportingPng(false);
+                }
+              }}
+              className="mt-2.5 w-72 py-2 px-3 rounded-xl bg-neutral-950 hover:bg-neutral-800 border border-amber-500/40 text-amber-300 text-xs font-black flex items-center justify-center gap-2 shadow-lg cursor-pointer transition-colors disabled:opacity-50"
+              title="WhatsApp ve Instagram için şeffaf HD PNG indir"
+            >
+              <Download className="w-3.5 h-3.5" />
+              {isExportingPng ? 'PNG Hazırlanıyor...' : 'Kartı İndir (PNG)'}
+            </button>
 
             {/* If Edit Mode: Framing & Upload controls right below the card */}
             {canEdit ? (
