@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { Player, PlayerScoutingEntry, CommitteeConsensus, PlayStyle } from '../../types';
+import {
+  Player,
+  PlayerScoutingEntry,
+  CommitteeConsensus,
+  PlayStyle,
+  CURRENT_STATS_SYNC_VERSION,
+  isStandardCardTheme,
+  getDefaultCardThemeForPlayer,
+  shiftPlayerStatsByDelta,
+} from '../../types';
 import { COMMITTEE_MEMBERS } from '../../services/mockData';
 import { PLAYSTYLE_CONFIG } from '../card/PlayStyleBadge';
 import {
@@ -22,7 +31,12 @@ interface Props {
   onApplyConsensusToPlayers: (updatedPlayers: Player[]) => void;
   onBackToWizard: () => void;
   isReadOnly?: boolean;
+  canApplyConsensus?: boolean;
+  canSwitchToAdminMode?: boolean;
+  onSwitchToAdminMode?: () => void;
 }
+
+const to100 = (val: number) => (val <= 10 ? Math.round(val * 10) : Math.round(val));
 
 export const ScoutingAdminDashboard: React.FC<Props> = ({
   players,
@@ -30,28 +44,35 @@ export const ScoutingAdminDashboard: React.FC<Props> = ({
   onApplyConsensusToPlayers,
   onBackToWizard,
   isReadOnly = false,
+  canApplyConsensus = true,
+  canSwitchToAdminMode = false,
+  onSwitchToAdminMode,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Designated 4 Committee Members + any other voters
+  // Designated Committee Members + any other voters
   const allEvaluators = Array.from(
     new Set([...COMMITTEE_MEMBERS, ...savedEntries.map((e) => e.evaluatorName)])
   ).filter(Boolean);
 
-  // Compute consensus for each player
+  // Compute consensus for each player (strictly from designated COMMITTEE_MEMBERS, 100'lük sistem)
   const consensusList: CommitteeConsensus[] = players.map((player) => {
-    const entries = savedEntries.filter((e) => e.playerId === player.id);
+    const entries = savedEntries.filter(
+      (e) =>
+        e.playerId === player.id &&
+        (COMMITTEE_MEMBERS as readonly string[]).includes(e.evaluatorName)
+    );
 
     if (entries.length === 0) {
       // Default fallback to player's current stats if no votes yet
       return {
         playerId: player.id,
-        avgPac: Math.round(player.stats.pac / 10),
-        avgSho: Math.round(player.stats.sho / 10),
-        avgPas: Math.round(player.stats.pas / 10),
-        avgDri: Math.round(player.stats.dri / 10),
-        avgDef: Math.round(player.stats.def / 10),
-        avgPhy: Math.round(player.stats.phy / 10),
+        avgPac: player.stats.pac,
+        avgSho: player.stats.sho,
+        avgPas: player.stats.pas,
+        avgDri: player.stats.dri,
+        avgDef: player.stats.def,
+        avgPhy: player.stats.phy,
         calculatedOVR: player.currentOVR,
         votesCount: 0,
         gkScore: { yes: player.position === 'GK' ? 1 : 0, emergency: 0, never: 0 },
@@ -60,15 +81,15 @@ export const ScoutingAdminDashboard: React.FC<Props> = ({
       };
     }
 
-    const avgPac = Math.round((entries.reduce((sum, e) => sum + e.pac, 0) / entries.length) * 10) / 10;
-    const avgSho = Math.round((entries.reduce((sum, e) => sum + e.sho, 0) / entries.length) * 10) / 10;
-    const avgPas = Math.round((entries.reduce((sum, e) => sum + e.pas, 0) / entries.length) * 10) / 10;
-    const avgDri = Math.round((entries.reduce((sum, e) => sum + e.dri, 0) / entries.length) * 10) / 10;
-    const avgDef = Math.round((entries.reduce((sum, e) => sum + e.def, 0) / entries.length) * 10) / 10;
-    const avgPhy = Math.round((entries.reduce((sum, e) => sum + e.phy, 0) / entries.length) * 10) / 10;
+    const avgPac = Math.round((entries.reduce((sum, e) => sum + to100(e.pac), 0) / entries.length) * 10) / 10;
+    const avgSho = Math.round((entries.reduce((sum, e) => sum + to100(e.sho), 0) / entries.length) * 10) / 10;
+    const avgPas = Math.round((entries.reduce((sum, e) => sum + to100(e.pas), 0) / entries.length) * 10) / 10;
+    const avgDri = Math.round((entries.reduce((sum, e) => sum + to100(e.dri), 0) / entries.length) * 10) / 10;
+    const avgDef = Math.round((entries.reduce((sum, e) => sum + to100(e.def), 0) / entries.length) * 10) / 10;
+    const avgPhy = Math.round((entries.reduce((sum, e) => sum + to100(e.phy), 0) / entries.length) * 10) / 10;
 
-    // Calculate OVR: Average * 10
-    const calculatedOVR = Math.round(((avgPac + avgSho + avgPas + avgDri + avgDef + avgPhy) / 6) * 10);
+    // Calculate OVR directly on 100 scale
+    const calculatedOVR = Math.round((avgPac + avgSho + avgPas + avgDri + avgDef + avgPhy) / 6);
 
     // GK willingness
     const gkScore = {
@@ -110,35 +131,76 @@ export const ScoutingAdminDashboard: React.FC<Props> = ({
     };
   });
 
-  // Handle applying consensus to all 20 players in the system
+  // Handle applying consensus to all players in the system
+  // Not: Kök Kurul Puanı güncellenirken oyuncunun önceki haftalık 360° maç performansından
+  // birikmiş matchDelta (currentOVR - baseOVR) değeri ve 6 istatistik farkı korunur.
   const handleApplyConsensus = () => {
     const updated = players.map((p) => {
+      // Seçenek A: Yönetici Modu ile stat/OVR manuel sabitlenen oyuncular kurul senkronuyla ezilmez
+      if (p.adminStatOverride) return p;
+
       const c = consensusList.find((item) => item.playerId === p.id);
       if (!c || c.votesCount === 0) return p;
 
+      const currentExact = p.exactOVR ?? p.currentOVR ?? p.baseOVR;
+      const exactDelta = currentExact - p.baseOVR;
+      const nextBaseOVR = c.calculatedOVR;
+      const nextExactOVR = Math.max(40, Math.min(97, Math.round((nextBaseOVR + exactDelta) * 1000) / 1000));
+      const nextCurrentOVR = Math.max(40, Math.min(97, Math.round(nextExactOVR)));
+
+      const rootStats = {
+        pac: Math.min(99, Math.round(c.avgPac)),
+        sho: Math.min(99, Math.round(c.avgSho)),
+        pas: Math.min(99, Math.round(c.avgPas)),
+        dri: Math.min(99, Math.round(c.avgDri)),
+        def: Math.min(99, Math.round(c.avgDef)),
+        phy: Math.min(99, Math.round(c.avgPhy)),
+      };
+      const shiftedStats = shiftPlayerStatsByDelta(rootStats, nextCurrentOVR - nextBaseOVR);
+
+      const nextCommitteePlaystyle = c.popularPlaystyles[0] || p.committeePlaystyle;
+      const existingOwn =
+        p.ownPlaystyle ||
+        (p.playstyles?.[0] && p.playstyles[0] !== p.committeePlaystyle ? p.playstyles[0] : undefined);
+      const nextOwnPlaystyle =
+        existingOwn && existingOwn !== nextCommitteePlaystyle ? existingOwn : undefined;
+
+      const mergedPlaystyles: PlayStyle[] = [];
+      if (nextOwnPlaystyle) mergedPlaystyles.push(nextOwnPlaystyle);
+      if (nextCommitteePlaystyle && nextCommitteePlaystyle !== nextOwnPlaystyle) {
+        mergedPlaystyles.push(nextCommitteePlaystyle);
+      }
+
       return {
         ...p,
-        baseOVR: c.calculatedOVR,
-        currentOVR: c.calculatedOVR,
-        stats: {
-          pac: Math.min(99, Math.round(c.avgPac * 10)),
-          sho: Math.min(99, Math.round(c.avgSho * 10)),
-          pas: Math.min(99, Math.round(c.avgPas * 10)),
-          dri: Math.min(99, Math.round(c.avgDri * 10)),
-          def: Math.min(99, Math.round(c.avgDef * 10)),
-          phy: Math.min(99, Math.round(c.avgPhy * 10)),
-        },
-        playstyles: c.popularPlaystyles,
+        baseOVR: nextBaseOVR,
+        exactOVR: nextExactOVR,
+        currentOVR: nextCurrentOVR,
+        baseStats: rootStats,
+        statsSyncVersion: CURRENT_STATS_SYNC_VERSION,
+        theme: isStandardCardTheme(p.theme)
+          ? getDefaultCardThemeForPlayer(p, nextCurrentOVR)
+          : p.theme,
+        stats: shiftedStats,
+        ownPlaystyle: nextOwnPlaystyle,
+        committeePlaystyle: nextCommitteePlaystyle,
+        playstyles: mergedPlaystyles,
       };
     });
 
     confetti({ particleCount: 120, spread: 90, origin: { y: 0.5 } });
     onApplyConsensusToPlayers(updated);
-    alert('🎉 Kurul konsensüsü başarıyla sisteme uygulandı! 20 oyuncu kartının baz puanları güncellendi.');
+    const overriddenCount = players.filter((p) => p.adminStatOverride).length;
+    alert(
+      overriddenCount > 0
+        ? `🎉 Kurul konsensüsü uygulandı! (${overriddenCount} yönetici sabitlemeli oyuncu korundu)`
+        : `🎉 Kurul konsensüsü başarıyla sisteme uygulandı! ${players.length} oyuncu kartının baz puanları güncellendi.`
+    );
   };
 
-  // Export to CSV / Google Sheets format
+  // Export to CSV / Google Sheets format (Kurul / Yönetici yetkisi gerektirir)
   const handleExportCSV = () => {
+    if (isReadOnly) return;
     const headers = [
       'Oyuncu Adı',
       'Ana Mevki',
@@ -173,12 +235,12 @@ export const ScoutingAdminDashboard: React.FC<Props> = ({
         `"${p.name}"`,
         p.position,
         gkText,
-        c?.avgPac || Math.round(p.stats.pac / 10),
-        c?.avgSho || Math.round(p.stats.sho / 10),
-        c?.avgPas || Math.round(p.stats.pas / 10),
-        c?.avgDri || Math.round(p.stats.dri / 10),
-        c?.avgDef || Math.round(p.stats.def / 10),
-        c?.avgPhy || Math.round(p.stats.phy / 10),
+        c?.avgPac || p.stats.pac,
+        c?.avgSho || p.stats.sho,
+        c?.avgPas || p.stats.pas,
+        c?.avgDri || p.stats.dri,
+        c?.avgDef || p.stats.def,
+        c?.avgPhy || p.stats.phy,
         c?.calculatedOVR || p.currentOVR,
         badge1,
         badge2,
@@ -214,11 +276,22 @@ export const ScoutingAdminDashboard: React.FC<Props> = ({
             Canlı Kurul Sonuçları & Baz Reyting Kalibrasyonu
           </h2>
           <p className="text-xs text-neutral-400 mt-0.5">
-            Kurul üyelerinin verdiği puanların ağırlıklı ortalaması, kalecilik istekleri ve gizli kimya notları.
+            {isReadOnly
+              ? 'Kurul üyelerinin verdiği puanların ağırlıklı ortalaması ve oyuncu baz reyting özetleri.'
+              : 'Kurul üyelerinin verdiği puanların ağırlıklı ortalaması, kalecilik istekleri ve gizli kimya notları.'}
           </p>
         </div>
 
         <div className="flex items-center gap-2">
+          {!isReadOnly && (
+            <button
+              onClick={handleExportCSV}
+              className="flex items-center gap-1.5 text-xs bg-neutral-800 hover:bg-neutral-700 text-amber-300 font-bold px-3.5 py-2.5 rounded-xl border border-amber-500/30 cursor-pointer"
+            >
+              <Download className="w-3.5 h-3.5" /> E-Tablolar (CSV) İndir
+            </button>
+          )}
+
           {!isReadOnly && (
             <button
               onClick={onBackToWizard}
@@ -228,20 +301,28 @@ export const ScoutingAdminDashboard: React.FC<Props> = ({
             </button>
           )}
 
-          <button
-            onClick={handleExportCSV}
-            className="flex items-center gap-1.5 text-xs bg-neutral-800 hover:bg-neutral-700 text-amber-300 font-bold px-3.5 py-2.5 rounded-xl border border-amber-500/30 cursor-pointer"
-          >
-            <Download className="w-3.5 h-3.5" /> E-Tablolar (CSV) İndir
-          </button>
-
-          {!isReadOnly && (
+          {!isReadOnly && canApplyConsensus && (
             <button
               onClick={handleApplyConsensus}
               className="flex items-center gap-2 text-xs bg-amber-500 hover:bg-amber-400 text-black font-black px-4 py-2.5 rounded-xl shadow-lg shadow-amber-500/20 active:scale-95 transition-transform cursor-pointer"
             >
               <Lock className="w-4 h-4" /> Reytingleri Kilitle ve Sisteme Uygula
             </button>
+          )}
+
+          {!isReadOnly && !canApplyConsensus && (
+            <div className="flex flex-wrap items-center gap-2 bg-sky-500/10 border border-sky-500/30 rounded-xl px-3 py-2 text-[11px] text-sky-200">
+              <span>⭐ Kurul Modu Ön İzlemesi (Kilitleme yalnızca Yönetici Modunda)</span>
+              {canSwitchToAdminMode && onSwitchToAdminMode && (
+                <button
+                  type="button"
+                  onClick={onSwitchToAdminMode}
+                  className="bg-amber-500 hover:bg-amber-400 text-black font-black px-2.5 py-1 rounded-lg text-[10px] transition-colors cursor-pointer"
+                >
+                  👑 Sentezi Uygulamak İçin Yönetici Moduna Geç
+                </button>
+              )}
+            </div>
           )}
         </div>
       </div>
@@ -315,7 +396,7 @@ export const ScoutingAdminDashboard: React.FC<Props> = ({
                 <th className="p-3.5 text-center text-amber-400">PHY</th>
                 <th className="p-3.5 text-center font-black text-amber-300">OVR</th>
                 <th className="p-3.5">Karakteristik Rozetler</th>
-                <th className="p-3.5">Kurul Kimya & Gizli Notları</th>
+                {!isReadOnly && <th className="p-3.5">Kurul Kimya & Gizli Notları</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-800/60">
@@ -343,6 +424,11 @@ export const ScoutingAdminDashboard: React.FC<Props> = ({
                         <span className="text-[10px] text-neutral-500 block font-mono">
                           #{player.number} • "{player.nickname}"
                         </span>
+                        {player.adminStatOverride && (
+                          <span className="inline-flex items-center gap-1 mt-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/35">
+                            🔒 Yönetici Sabit (Kart: {player.currentOVR} OVR)
+                          </span>
+                        )}
                       </div>
                     </td>
 
@@ -398,17 +484,19 @@ export const ScoutingAdminDashboard: React.FC<Props> = ({
                       </div>
                     </td>
 
-                    <td className="p-3.5 max-w-[200px] truncate text-[11px] text-neutral-400 italic">
-                      {item.notes.length > 0 ? (
-                        item.notes.map((n, i) => (
-                          <span key={i} title={`${n.evaluator}: ${n.note}`}>
-                            "{n.note}"{i < item.notes.length - 1 ? ', ' : ''}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="text-neutral-600">—</span>
-                      )}
-                    </td>
+                    {!isReadOnly && (
+                      <td className="p-3.5 max-w-[200px] truncate text-[11px] text-neutral-400 italic">
+                        {item.notes.length > 0 ? (
+                          item.notes.map((n, i) => (
+                            <span key={i} title={`${n.evaluator}: ${n.note}`}>
+                              &quot;{n.note}&quot;{i < item.notes.length - 1 ? ', ' : ''}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-neutral-600">—</span>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 );
               })}

@@ -4,7 +4,16 @@
   :root {
     color-scheme: dark;
   }
-  
+
+  html,
+  body,
+  #root {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+    overscroll-behavior-x: none;
+  }
+
   body {
     background-color: #000000;
     color: #f3f4f6;
@@ -101,19 +110,25 @@
 
 @keyframes mvp-crest-breathe {
   0%, 100% {
-    opacity: 0.50;
-    transform: scale(0.93);
-    filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.6));
+    opacity: 0.55;
+    transform: scale(0.86);
+    filter: drop-shadow(0 0 3px var(--crest-glow-secondary, rgba(245, 158, 11, 0.55)));
   }
   50% {
     opacity: 0.90;
-    transform: scale(1.10);
-    filter: drop-shadow(0 0 16px rgba(251, 191, 36, 0.95)) drop-shadow(0 0 24px rgba(245, 158, 11, 0.5));
+    transform: scale(0.96);
+    filter: drop-shadow(0 0 6px var(--crest-glow-primary, rgba(251, 191, 36, 0.85)))
+      drop-shadow(0 0 10px var(--crest-glow-secondary, rgba(245, 158, 11, 0.45)));
   }
 }
 
-.animate-mvp-crest-glow {
+.animate-mvp-crest-glow,
+.animate-crest-aura-glow {
   animation: mvp-crest-breathe 3s ease-in-out infinite;
+}
+
+.animate-crest-spin-slow {
+  animation: card-spin-slow 9s linear infinite;
 }
 
 @keyframes mvp-cosmic-breathe {
@@ -164,6 +179,106 @@
 }
 
 /* ==========================================================================
+   Mini Crest Electric Current / Plasma Arc Animations (All cards except MVP)
+   ========================================================================== */
+
+@keyframes electric-arc-flow-1 {
+  0% {
+    stroke-dashoffset: 0;
+    opacity: 0.78;
+  }
+  25% {
+    opacity: 1;
+  }
+  45% {
+    opacity: 0.58;
+  }
+  70% {
+    opacity: 0.96;
+  }
+  100% {
+    stroke-dashoffset: -280;
+    opacity: 0.78;
+  }
+}
+
+@keyframes electric-arc-flow-2 {
+  0% {
+    stroke-dashoffset: 0;
+    opacity: 0.65;
+  }
+  30% {
+    opacity: 0.95;
+  }
+  55% {
+    opacity: 0.45;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 280;
+    opacity: 0.65;
+  }
+}
+
+@keyframes electric-spark-flicker {
+  0%, 14%, 38%, 62%, 100% {
+    opacity: 0.14;
+    transform: scale(0.95);
+  }
+  18%, 22%, 66% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+  42%, 82% {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+}
+
+@keyframes crest-plasma-pulse {
+  0%, 100% {
+    opacity: 0.62;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 0.92;
+    transform: scale(1.06);
+  }
+}
+
+.animate-electric-arc-1 {
+  animation: electric-arc-flow-1 1.6s linear infinite;
+}
+
+.animate-electric-arc-2 {
+  animation: electric-arc-flow-2 2.1s linear infinite;
+}
+
+.animate-electric-spark {
+  transform-origin: center center;
+  animation: electric-spark-flicker 1.35s steps(2, end) infinite;
+}
+
+.animate-electric-rim {
+  filter: drop-shadow(0 0 3px var(--crest-glow-primary, rgba(250, 204, 21, 0.9)));
+}
+
+.animate-crest-plasma {
+  will-change: transform, opacity;
+  animation: crest-plasma-pulse 2.2s ease-in-out infinite;
+}
+
+.card-offscreen svg *,
+.card-offscreen .animate-electric-arc-1,
+.card-offscreen .animate-electric-arc-2,
+.card-offscreen .animate-electric-spark,
+.card-offscreen .animate-crest-plasma {
+  animation-play-state: paused !important;
+}
+
+/* ==========================================================================
    Flag Elegant Silk Wave Animation on Card Hover
    ========================================================================== */
 
@@ -211,5 +326,175 @@
   );
   background-size: 200% 100%;
   animation: flag-silk-sheen 2.4s ease-in-out infinite;
+}
+
+/* ==========================================================================
+   PlayStyle Long Label Seamless Marquee inside Card Oval
+   ========================================================================== */
+
+@keyframes playstyle-marquee-scroll {
+  0%, 16% {
+    transform: translateX(0%);
+  }
+  84%, 100% {
+    transform: translateX(-50%);
+  }
+}
+
+.playstyle-marquee-track {
+  display: inline-flex;
+  align-items: center;
+  width: max-content;
+  will-change: transform;
+  animation: playstyle-marquee-scroll 7s linear infinite;
+}
+
+.card-offscreen .playstyle-marquee-track {
+  animation-play-state: paused !important;
+}
+
+/* ==========================================================================
+   Card Visual Effects: In-Form Flames, Wall Rubble, Bidon Splash, Revir Heartbeat & Nostalgia Aura
+   ========================================================================== */
+
+/* 1. Nostalgia Mini Shield Warm Sepia Halo */
+@keyframes nostalgia-crest-breathe {
+  0%, 100% {
+    opacity: 0.60;
+    transform: scale(0.92);
+    filter: drop-shadow(0 0 4px rgba(217, 119, 6, 0.55));
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.85)) drop-shadow(0 0 14px rgba(180, 83, 9, 0.55));
+  }
+}
+.animate-nostalgia-crest-aura {
+  animation: nostalgia-crest-breathe 3.5s ease-in-out infinite;
+}
+
+/* 2. Alev Atıyor (In-Form) Közden Yükselen Hafif Parçacıklar & Alt Aydınlık */
+@keyframes flame-bottom-glow {
+  0%, 100% {
+    opacity: 0.55;
+    transform: scaleY(0.94);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scaleY(1.10);
+  }
+}
+.animate-flame-bottom-glow {
+  transform-origin: bottom center;
+  animation: flame-bottom-glow 2.0s ease-in-out infinite;
+}
+
+@keyframes ember-rise-1 {
+  0% {
+    transform: translateY(0) translateX(0) scale(0.6);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.95;
+    transform: translateY(-8px) translateX(2px) scale(1);
+  }
+  60% {
+    opacity: 0.8;
+    transform: translateY(-24px) translateX(-3px) scale(0.85);
+  }
+  100% {
+    transform: translateY(-44px) translateX(4px) scale(0.3);
+    opacity: 0;
+  }
+}
+.animate-ember-rise-1 {
+  animation: ember-rise-1 2.2s ease-out infinite;
+}
+
+@keyframes ember-rise-2 {
+  0% {
+    transform: translateY(0) translateX(0) scale(0.5);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+    transform: translateY(-10px) translateX(-3px) scale(1.1);
+  }
+  70% {
+    opacity: 0.7;
+    transform: translateY(-28px) translateX(3px) scale(0.8);
+  }
+  100% {
+    transform: translateY(-50px) translateX(-2px) scale(0.2);
+    opacity: 0;
+  }
+}
+.animate-ember-rise-2 {
+  animation: ember-rise-2 2.6s ease-out 0.4s infinite;
+}
+
+@keyframes ember-rise-3 {
+  0% {
+    transform: translateY(0) translateX(0) scale(0.7);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.9;
+    transform: translateY(-7px) translateX(3px) scale(1);
+  }
+  65% {
+    opacity: 0.6;
+    transform: translateY(-20px) translateX(-2px) scale(0.75);
+  }
+  100% {
+    transform: translateY(-38px) translateX(2px) scale(0.3);
+    opacity: 0;
+  }
+}
+.animate-ember-rise-3 {
+  animation: ember-rise-3 2.0s ease-out 0.9s infinite;
+}
+
+/* 3. Revir Low-HP Intense Crimson Heartbeat Pulse */
+@keyframes revir-critical-heartbeat {
+  0% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  14% {
+    opacity: 0.98;
+    transform: scale(1.018);
+  }
+  28% {
+    opacity: 0.52;
+    transform: scale(1.004);
+  }
+  42% {
+    opacity: 1;
+    transform: scale(1.026);
+  }
+  65% {
+    opacity: 0.48;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+}
+.animate-revir-heartbeat {
+  animation: revir-critical-heartbeat 1.8s cubic-bezier(0.21, 0.61, 0.35, 1) infinite;
+  will-change: opacity, transform;
+}
+
+/* Pause card animation loops when offscreen */
+.card-offscreen .animate-flame-bottom-glow,
+.card-offscreen .animate-ember-rise-1,
+.card-offscreen .animate-ember-rise-2,
+.card-offscreen .animate-ember-rise-3,
+.card-offscreen .animate-revir-heartbeat,
+.card-offscreen .animate-nostalgia-crest-aura {
+  animation-play-state: paused !important;
 }
 

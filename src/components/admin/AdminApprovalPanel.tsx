@@ -21,6 +21,7 @@ export const AdminApprovalPanel: React.FC<Props> = ({
 }) => {
   const pendingUsers = allUsers.filter((u) => u.status === 'pending');
   const approvedUsers = allUsers.filter((u) => u.status === 'approved');
+  const rejectedUsers = allUsers.filter((u) => u.status === 'rejected');
   const pendingNicknamePlayers = players.filter((p) => Boolean(p.pendingNickname));
 
   const [selectedPlayerForUser, setSelectedPlayerForUser] = useState<Record<string, string>>({});
@@ -116,7 +117,7 @@ export const AdminApprovalPanel: React.FC<Props> = ({
                         className="bg-neutral-900 border border-neutral-700 text-xs text-white rounded-lg px-2.5 py-1.5 focus:border-amber-400"
                       >
                         <option value="player">Oyuncu (Üye)</option>
-                        <option value="captain">Kaptan (Organizatör)</option>
+                        <option value="captain">Kurul Üyesi</option>
                         <option value="admin">Yönetici (Admin)</option>
                       </select>
                     </div>
@@ -242,6 +243,37 @@ export const AdminApprovalPanel: React.FC<Props> = ({
           })}
         </div>
       </div>
+
+      {/* Rejected / Former members */}
+      {rejectedUsers.length > 0 && (
+        <div className="pt-4 border-t border-neutral-800">
+          <h4 className="text-xs font-bold uppercase tracking-wider text-rose-400/80 mb-3 flex items-center gap-2">
+            <X className="w-3.5 h-3.5 text-rose-400" />
+            Kulüpten Çıkarılan / Ayrılan Eski Üyeler ({rejectedUsers.length})
+          </h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+            {rejectedUsers.map((u) => {
+              const linkedPlayer = players.find((p) => p.id === u.claimedPlayerId);
+              return (
+                <div
+                  key={u.uid}
+                  className="p-3 bg-neutral-950/50 rounded-xl border border-rose-900/30 flex items-center justify-between text-xs opacity-80"
+                >
+                  <div>
+                    <span className="font-bold text-neutral-300 block truncate">{u.displayName}</span>
+                    <span className="text-[10px] text-neutral-500">
+                      Kart: {linkedPlayer ? linkedPlayer.name : 'Eşleşmemiş'} • Durum: Kulüpten Çıkarıldı
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-mono uppercase bg-rose-950/60 text-rose-400 px-2 py-0.5 rounded border border-rose-800/40">
+                    Ayrıldı
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -33,10 +33,11 @@ export const PhotoGallery: React.FC<Props> = ({
 
     try {
       setIsUploading(true);
-      // Client-side WebP compression (< 200 KB)
+      // 2 sütunlu galeri (~640px) için keskin Retina netlik (960px WebP) ve sunucuda minimum boyut (~60-115 KB)
       const options = {
-        maxSizeMB: 0.25,
-        maxWidthOrHeight: 1200,
+        maxSizeMB: 0.11,
+        maxWidthOrHeight: 960,
+        initialQuality: 0.82,
         useWebWorker: true,
         fileType: 'image/webp',
       };
@@ -87,7 +88,7 @@ export const PhotoGallery: React.FC<Props> = ({
             <Camera className="w-5 h-5 text-amber-400" /> Halı Saha Görsel Anı Arşivi & Fotoğraf Galerisi
           </h3>
           <p className="text-xs text-neutral-400 mt-0.5">
-            Otomatik WebP sıkıştırma sayesinde telefonunuzdaki 10 MB fotoğraflar anında ~180 KB'a düşer ve arşivlenir.
+            Akıllı WebP optimizasyonu sayesinde 10 MB fotoğraflar netliğini koruyarak ~90-115 KB seviyesinde sunucuya güvenle arşivlenir.
           </p>
         </div>
         {isReadOnly || !currentPlayer ? (
@@ -172,21 +173,22 @@ export const PhotoGallery: React.FC<Props> = ({
 
       {/* Upload Modal */}
       {showUploadModal && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-neutral-900 border border-neutral-800 rounded-3xl max-w-lg w-full p-6 text-white shadow-2xl relative">
-            <div className="flex items-center justify-between pb-3 border-b border-neutral-800 mb-4">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto">
+          <div className="bg-neutral-900 border border-neutral-800 rounded-3xl max-w-lg w-full max-h-[calc(100dvh-1.25rem)] sm:max-h-[88dvh] flex flex-col p-4 sm:p-5 text-white shadow-2xl relative overflow-hidden">
+            <div className="shrink-0 flex items-center justify-between pb-3 border-b border-neutral-800 mb-3">
               <h3 className="font-black text-amber-400 text-base flex items-center gap-2">
                 <Camera className="w-5 h-5" /> Arşive Yeni Fotoğraf Ekle
               </h3>
               <button
+                type="button"
                 onClick={() => setShowUploadModal(false)}
-                className="text-neutral-400 hover:text-white text-sm"
+                className="text-neutral-400 hover:text-white bg-neutral-800 hover:bg-neutral-700 px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain pr-1 space-y-3.5">
               {/* Image Picker */}
               <div>
                 <label className="block text-xs font-bold text-neutral-300 mb-2 uppercase">
@@ -239,7 +241,7 @@ export const PhotoGallery: React.FC<Props> = ({
                         key={p.id}
                         type="button"
                         onClick={() => toggleTagPlayer(p.id)}
-                        className={`text-xs px-2.5 py-1 rounded-lg border font-semibold transition-all ${
+                        className={`text-xs px-2.5 py-1 rounded-lg border font-semibold transition-all cursor-pointer ${
                           isTagged
                             ? 'bg-amber-500 text-black border-amber-400'
                             : 'bg-neutral-900 text-neutral-400 border-neutral-800 hover:border-neutral-600'
@@ -251,25 +253,25 @@ export const PhotoGallery: React.FC<Props> = ({
                   })}
                 </div>
               </div>
+            </div>
 
-              {/* Submit */}
-              <div className="flex justify-end gap-2 pt-3 border-t border-neutral-800">
-                <button
-                  type="button"
-                  onClick={() => setShowUploadModal(false)}
-                  className="px-4 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs font-bold"
-                >
-                  İptal
-                </button>
-                <button
-                  type="button"
-                  disabled={!selectedImage}
-                  onClick={handleUploadSubmit}
-                  className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black text-xs font-black shadow-lg shadow-amber-500/20"
-                >
-                  Arşive Kaydet
-                </button>
-              </div>
+            {/* Submit */}
+            <div className="shrink-0 flex justify-end gap-2 pt-3 mt-3 border-t border-neutral-800">
+              <button
+                type="button"
+                onClick={() => setShowUploadModal(false)}
+                className="px-4 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs font-bold cursor-pointer"
+              >
+                İptal
+              </button>
+              <button
+                type="button"
+                disabled={!selectedImage}
+                onClick={handleUploadSubmit}
+                className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black text-xs font-black shadow-lg shadow-amber-500/20 cursor-pointer"
+              >
+                Arşive Kaydet
+              </button>
             </div>
           </div>
         </div>

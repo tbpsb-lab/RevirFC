@@ -26,7 +26,10 @@ interface Props {
   onSaveEntry: (entry: PlayerScoutingEntry) => void;
   onFinishAll: () => void;
   onSwitchToDashboard: () => void;
+  canSwitchEvaluator?: boolean;
 }
+
+const to100 = (val: number) => (val <= 10 ? Math.round(val * 10) : Math.round(val));
 
 export const ScoutingWizard: React.FC<Props> = ({
   players,
@@ -36,6 +39,7 @@ export const ScoutingWizard: React.FC<Props> = ({
   onSaveEntry,
   onFinishAll,
   onSwitchToDashboard,
+  canSwitchEvaluator = false,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -47,13 +51,13 @@ export const ScoutingWizard: React.FC<Props> = ({
     (e) => e.playerId === currentPlayer.id && e.evaluatorName === evaluatorName
   );
 
-  // Form state
-  const [pac, setPac] = useState<number>(existingEntry?.pac ?? Math.round(currentPlayer.stats.pac / 10));
-  const [sho, setSho] = useState<number>(existingEntry?.sho ?? Math.round(currentPlayer.stats.sho / 10));
-  const [pas, setPas] = useState<number>(existingEntry?.pas ?? Math.round(currentPlayer.stats.pas / 10));
-  const [dri, setDri] = useState<number>(existingEntry?.dri ?? Math.round(currentPlayer.stats.dri / 10));
-  const [def, setDef] = useState<number>(existingEntry?.def ?? Math.round(currentPlayer.stats.def / 10));
-  const [phy, setPhy] = useState<number>(existingEntry?.phy ?? Math.round(currentPlayer.stats.phy / 10));
+  // Form state (100'lük Sistem: 1 - 100)
+  const [pac, setPac] = useState<number>(existingEntry ? to100(existingEntry.pac) : Math.max(30, Math.min(99, currentPlayer.stats.pac)));
+  const [sho, setSho] = useState<number>(existingEntry ? to100(existingEntry.sho) : Math.max(30, Math.min(99, currentPlayer.stats.sho)));
+  const [pas, setPas] = useState<number>(existingEntry ? to100(existingEntry.pas) : Math.max(30, Math.min(99, currentPlayer.stats.pas)));
+  const [dri, setDri] = useState<number>(existingEntry ? to100(existingEntry.dri) : Math.max(30, Math.min(99, currentPlayer.stats.dri)));
+  const [def, setDef] = useState<number>(existingEntry ? to100(existingEntry.def) : Math.max(30, Math.min(99, currentPlayer.stats.def)));
+  const [phy, setPhy] = useState<number>(existingEntry ? to100(existingEntry.phy) : Math.max(30, Math.min(99, currentPlayer.stats.phy)));
   const [gkRole, setGkRole] = useState<GoalkeeperWillingness>(existingEntry?.gkRole ?? (currentPlayer.position === 'GK' ? 'yes' : 'emergency_only'));
   const [selectedPlaystyles, setSelectedPlaystyles] = useState<PlayStyle[]>(existingEntry?.playstyles ?? currentPlayer.playstyles.slice(0, 2));
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'tactical' | 'status' | 'humor'>('all');
@@ -65,36 +69,36 @@ export const ScoutingWizard: React.FC<Props> = ({
       (e) => e.playerId === currentPlayer.id && e.evaluatorName === evaluatorName
     );
     if (entry) {
-      setPac(entry.pac);
-      setSho(entry.sho);
-      setPas(entry.pas);
-      setDri(entry.dri);
-      setDef(entry.def);
-      setPhy(entry.phy);
+      setPac(to100(entry.pac));
+      setSho(to100(entry.sho));
+      setPas(to100(entry.pas));
+      setDri(to100(entry.dri));
+      setDef(to100(entry.def));
+      setPhy(to100(entry.phy));
       setGkRole(entry.gkRole);
       setSelectedPlaystyles(entry.playstyles);
       setSecretNote(entry.secretNote || '');
     } else {
-      setPac(Math.max(3, Math.min(10, Math.round(currentPlayer.stats.pac / 10))));
-      setSho(Math.max(3, Math.min(10, Math.round(currentPlayer.stats.sho / 10))));
-      setPas(Math.max(3, Math.min(10, Math.round(currentPlayer.stats.pas / 10))));
-      setDri(Math.max(3, Math.min(10, Math.round(currentPlayer.stats.dri / 10))));
-      setDef(Math.max(3, Math.min(10, Math.round(currentPlayer.stats.def / 10))));
-      setPhy(Math.max(3, Math.min(10, Math.round(currentPlayer.stats.phy / 10))));
+      setPac(Math.max(30, Math.min(99, currentPlayer.stats.pac)));
+      setSho(Math.max(30, Math.min(99, currentPlayer.stats.sho)));
+      setPas(Math.max(30, Math.min(99, currentPlayer.stats.pas)));
+      setDri(Math.max(30, Math.min(99, currentPlayer.stats.dri)));
+      setDef(Math.max(30, Math.min(99, currentPlayer.stats.def)));
+      setPhy(Math.max(30, Math.min(99, currentPlayer.stats.phy)));
       setGkRole(currentPlayer.position === 'GK' ? 'yes' : 'emergency_only');
       setSelectedPlaystyles(currentPlayer.playstyles.slice(0, 2));
       setSecretNote('');
     }
   }, [currentIndex, evaluatorName, currentPlayer.id, savedEntries]);
 
-  // Live calculated preview stats
+  // Live calculated preview stats (100'lük sistem)
   const previewStats = {
-    pac: pac * 10,
-    sho: sho * 10,
-    pas: pas * 10,
-    dri: dri * 10,
-    def: def * 10,
-    phy: phy * 10,
+    pac,
+    sho,
+    pas,
+    dri,
+    def,
+    phy,
   };
   const previewOVR = Math.round((previewStats.pac + previewStats.sho + previewStats.pas + previewStats.dri + previewStats.def + previewStats.phy) / 6);
 
@@ -170,24 +174,30 @@ export const ScoutingWizard: React.FC<Props> = ({
 
         {/* Evaluator Selector & Link Share */}
         <div className="flex flex-wrap items-center gap-2">
-          {/* 3 Committee Members Fast Switcher */}
-          <div className="flex items-center gap-1 bg-neutral-950 p-1 rounded-2xl border border-neutral-800">
-            <span className="text-[10px] text-neutral-400 font-bold px-2">Kurul:</span>
-            {['Alper', 'Akif', 'Yüksel'].map((name) => (
-              <button
-                key={name}
-                type="button"
-                onClick={() => onEvaluatorChange(name)}
-                className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all ${
-                  evaluatorName === name
-                    ? 'bg-amber-500 text-black shadow-md'
-                    : 'text-neutral-400 hover:text-white hover:bg-neutral-850'
-                }`}
-              >
-                {name}
-              </button>
-            ))}
-          </div>
+          {canSwitchEvaluator ? (
+            <div className="flex items-center gap-1 bg-neutral-950 p-1 rounded-2xl border border-amber-500/30">
+              <span className="text-[10px] text-amber-300 font-bold px-2">👑 Yönetici Denetimi:</span>
+              {['Alper', 'Akif', 'Yüksel'].map((name) => (
+                <button
+                  key={name}
+                  type="button"
+                  onClick={() => onEvaluatorChange(name)}
+                  className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all ${
+                    evaluatorName === name
+                      ? 'bg-amber-500 text-black shadow-md'
+                      : 'text-neutral-400 hover:text-white hover:bg-neutral-850'
+                  }`}
+                >
+                  {name}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 bg-sky-500/10 px-3 py-1.5 rounded-2xl border border-sky-500/30 text-xs font-bold text-sky-300">
+              <UserCheck className="w-3.5 h-3.5 text-sky-400" />
+              <span>⭐ Değerlendiren: {evaluatorName}</span>
+            </div>
+          )}
 
           <button
             onClick={handleCopyLink}
@@ -293,7 +303,7 @@ export const ScoutingWizard: React.FC<Props> = ({
           {/* 6 Core Sliders */}
           <div className="space-y-4">
             <h4 className="text-xs font-bold uppercase tracking-wider text-neutral-400 flex items-center gap-1.5">
-              <Sliders className="w-3.5 h-3.5 text-amber-400" /> 6 Temel Halı Saha Metriği (1 - 10 Kaydırıcı)
+              <Sliders className="w-3.5 h-3.5 text-amber-400" /> 6 Temel Halı Saha Metriği (100'lük Sistem: 1 - 100 Kaydırıcı)
             </h4>
 
             {/* PAC */}
@@ -301,16 +311,16 @@ export const ScoutingWizard: React.FC<Props> = ({
               <div className="flex justify-between items-center text-xs">
                 <span className="font-bold text-white">PAC • Tempo & Kondisyon</span>
                 <span className="font-mono font-black text-amber-400 text-sm bg-neutral-900 px-2.5 py-0.5 rounded-lg border border-neutral-700">
-                  {pac} / 10
+                  {pac} / 100
                 </span>
               </div>
               <input
                 type="range"
                 min="1"
-                max="10"
+                max="100"
                 step="1"
                 value={pac}
-                onChange={(e) => setPac(parseInt(e.target.value))}
+                onChange={(e) => setPac(parseInt(e.target.value, 10))}
                 className="w-full accent-amber-500 h-2 bg-neutral-800 rounded-lg cursor-pointer"
               />
               <span className="text-[10px] text-neutral-500 block">Maç boyu depar atabilme ve koşu temposu</span>
@@ -321,16 +331,16 @@ export const ScoutingWizard: React.FC<Props> = ({
               <div className="flex justify-between items-center text-xs">
                 <span className="font-bold text-white">SHO • Şut & Bitiricilik</span>
                 <span className="font-mono font-black text-amber-400 text-sm bg-neutral-900 px-2.5 py-0.5 rounded-lg border border-neutral-700">
-                  {sho} / 10
+                  {sho} / 100
                 </span>
               </div>
               <input
                 type="range"
                 min="1"
-                max="10"
+                max="100"
                 step="1"
                 value={sho}
-                onChange={(e) => setSho(parseInt(e.target.value))}
+                onChange={(e) => setSho(parseInt(e.target.value, 10))}
                 className="w-full accent-amber-500 h-2 bg-neutral-800 rounded-lg cursor-pointer"
               />
               <span className="text-[10px] text-neutral-500 block">Son vuruş kalitesi, uzaktan sert şut ve gol koklama</span>
@@ -341,16 +351,16 @@ export const ScoutingWizard: React.FC<Props> = ({
               <div className="flex justify-between items-center text-xs">
                 <span className="font-bold text-white">PAS • Vizyon & Oyun Kurma</span>
                 <span className="font-mono font-black text-amber-400 text-sm bg-neutral-900 px-2.5 py-0.5 rounded-lg border border-neutral-700">
-                  {pas} / 10
+                  {pas} / 100
                 </span>
               </div>
               <input
                 type="range"
                 min="1"
-                max="10"
+                max="100"
                 step="1"
                 value={pas}
-                onChange={(e) => setPas(parseInt(e.target.value))}
+                onChange={(e) => setPas(parseInt(e.target.value, 10))}
                 className="w-full accent-amber-500 h-2 bg-neutral-800 rounded-lg cursor-pointer"
               />
               <span className="text-[10px] text-neutral-500 block">Ara pası, top dağıtma ve isabetli pas yüzdesi</span>
@@ -361,16 +371,16 @@ export const ScoutingWizard: React.FC<Props> = ({
               <div className="flex justify-between items-center text-xs">
                 <span className="font-bold text-white">DRI • Dar Alan & Dribbling</span>
                 <span className="font-mono font-black text-amber-400 text-sm bg-neutral-900 px-2.5 py-0.5 rounded-lg border border-neutral-700">
-                  {dri} / 10
+                  {dri} / 100
                 </span>
               </div>
               <input
                 type="range"
                 min="1"
-                max="10"
+                max="100"
                 step="1"
                 value={dri}
-                onChange={(e) => setDri(parseInt(e.target.value))}
+                onChange={(e) => setDri(parseInt(e.target.value, 10))}
                 className="w-full accent-amber-500 h-2 bg-neutral-800 rounded-lg cursor-pointer"
               />
               <span className="text-[10px] text-neutral-500 block">Bilek hareketleri, top saklama ve adam eksiltme</span>
@@ -381,16 +391,16 @@ export const ScoutingWizard: React.FC<Props> = ({
               <div className="flex justify-between items-center text-xs">
                 <span className="font-bold text-white">DEF • Kademe & Savunma</span>
                 <span className="font-mono font-black text-amber-400 text-sm bg-neutral-900 px-2.5 py-0.5 rounded-lg border border-neutral-700">
-                  {def} / 10
+                  {def} / 100
                 </span>
               </div>
               <input
                 type="range"
                 min="1"
-                max="10"
+                max="100"
                 step="1"
                 value={def}
-                onChange={(e) => setDef(parseInt(e.target.value))}
+                onChange={(e) => setDef(parseInt(e.target.value, 10))}
                 className="w-full accent-amber-500 h-2 bg-neutral-800 rounded-lg cursor-pointer"
               />
               <span className="text-[10px] text-neutral-500 block">Top kapma, araya girme ve savunma disiplini</span>
@@ -401,16 +411,16 @@ export const ScoutingWizard: React.FC<Props> = ({
               <div className="flex justify-between items-center text-xs">
                 <span className="font-bold text-white">PHY • Fizik & İkili Mücadele</span>
                 <span className="font-mono font-black text-amber-400 text-sm bg-neutral-900 px-2.5 py-0.5 rounded-lg border border-neutral-700">
-                  {phy} / 10
+                  {phy} / 100
                 </span>
               </div>
               <input
                 type="range"
                 min="1"
-                max="10"
+                max="100"
                 step="1"
                 value={phy}
-                onChange={(e) => setPhy(parseInt(e.target.value))}
+                onChange={(e) => setPhy(parseInt(e.target.value, 10))}
                 className="w-full accent-amber-500 h-2 bg-neutral-800 rounded-lg cursor-pointer"
               />
               <span className="text-[10px] text-neutral-500 block">Omuz omuza direnç, yıkılmama ve ayakta kalma</span>

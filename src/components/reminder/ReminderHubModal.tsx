@@ -19,6 +19,7 @@ interface Props {
   players: Player[];
   savedScoutingEntries: PlayerScoutingEntry[];
   onQuickCheckInForPlayer: (playerId: string) => void;
+  onQuickCheckInAllMissing?: () => void;
   onClose: () => void;
 }
 
@@ -27,6 +28,7 @@ export const ReminderHubModal: React.FC<Props> = ({
   players,
   savedScoutingEntries,
   onQuickCheckInForPlayer,
+  onQuickCheckInAllMissing,
   onClose,
 }) => {
   const [activeTab, setActiveTab] = useState<'checkin' | 'rating' | 'scouting'>('checkin');
@@ -56,17 +58,33 @@ export const ReminderHubModal: React.FC<Props> = ({
   // Current Site URL
   const siteUrl = window.location.origin;
 
+  const absenteeSet = new Set(match.absentees || []);
+  const notRespondedPlayers = players.filter(
+    (p) => !match.starters.includes(p.id) && !match.waitlist.includes(p.id) && !absenteeSet.has(p.id)
+  );
+  const feePayer = match.pitchFeePayerId ? players.find((p) => p.id === match.pitchFeePayerId) : undefined;
+  const formattedMatchDay = new Date(match.date).toLocaleDateString('tr-TR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  });
+
   // Generate polite, friendly halı saha reminder messages
   const getWhatsAppMessage = () => {
     if (activeTab === 'checkin') {
-      const names = missingCheckInPlayers.map((p) => p.name).join(', ');
-      return `⚽ *RevirFC 27 • Maç Öncesi Check-In Hatırlatması*\n\nBeyler selam! ${match.title} için kadro dengeleme algoritması çalıştırılacak.\nHenüz sağlık/revir durumu bildirmeyen arkadaşlar:\n👉 ${names || 'Herkes bildirdi!'}\n\n3 saniyede durumunuzu seçip onaylayın:\n🔗 ${siteUrl}`;
+      const names = (notRespondedPlayers.length > 0 ? notRespondedPlayers : missingCheckInPlayers)
+        .map((p) => p.name)
+        .join(', ');
+      const payerLine = feePayer
+        ? `\n💳 Saha Ücreti Ödeyicisi: ${feePayer.name}${match.pitchFee ? ` (${match.pitchFee})` : ''}`
+        : `\n💳 Saha Ücreti Gönüllüsü: Henüz seçilmedi ("Ben ödeyebilirim" bekliyor)`;
+      return `⚽ *RevirFC 27 • Haftalık Maç Anketi & Check-In*\n\n🏆 ${match.title}\n📅 ${formattedMatchDay} • ⏰ ${match.matchTime || '21:00 - 22:00'}\n📍 ${match.pitchName}${payerLine}\n\n📊 Mevcut Kadro: ${match.starters.length}/12 Asil • ${match.waitlist.length} Yedek\nHenüz oy vermeyen / check-in yapmayan arkadaşlar:\n👉 ${names || 'Herkes yanıtladı!'}\n\n3 saniyede katılım, form durumu ve ödeme seçeneğini işaretle:\n🔗 ${siteUrl}`;
     } else if (activeTab === 'rating') {
       const names = missingRatingPlayers.map((p) => p.name).join(', ');
-      return `🏆 *RevirFC 27 • Maç Sonu 360° Puanlama*\n\nMaç bitti! Haftanın MVP'si (Most Valuable Player) ve Haftanın Bidonu'nu belirlemek için karneler 24 saat açık.\nPuanlamasını yapmayanlar:\n👉 ${names || 'Herkes tamamladı!'}\n\nOylarınızı gönderin, kartlar güncellensin:\n🔗 ${siteUrl}`;
+      return `🏆 *RevirFC 27 • Maç Sonu 360° Puanlama*\n\nMaç bitti! Haftanın MVP'si (Most Valuable Player) ve Haftanın Bidonu'nu belirlemek için oylama penceresi yarın saat 14:00'a kadar açık! Süre dolduğunda katılmayanlar beklenmeden mevcut oylar ve Kurul Mührü ile haftalık kartlar kesinleşecektir.\nPuanlamasını yapmayanlar:\n👉 ${names || 'Herkes tamamladı!'}\n\nOylarınızı gönderin, kartlar güncellensin:\n🔗 ${siteUrl}`;
     } else {
       const pendingCommittee = committeeStatus.filter((c) => !c.isDone).map((c) => `${c.name} (${c.scoredCount}/${c.total})`).join(', ');
-      return `⭐ *RevirFC 27 • Kurul Kalibrasyon Hatırlatması*\n\nKurul üyelerimiz (${pendingCommittee || 'Tümü tamamlandı!'}), 20 kişilik kadronun baz reyting konsensüsünü tamamlamak için linke tıklayıp kaydırıcılarla puanları kaydedebilirsiniz:\n🔗 ${siteUrl}/?tab=scouting`;
+      return `⭐ *RevirFC 27 • Kurul Kalibrasyon Hatırlatması*\n\nKurul üyelerimiz (${pendingCommittee || 'Tümü tamamlandı!'}), ${players.length} kişilik kadronun baz reyting konsensüsünü tamamlamak için linke tıklayıp kaydırıcılarla puanları kaydedebilirsiniz:\n🔗 ${siteUrl}/?tab=scouting`;
     }
   };
 
@@ -94,65 +112,74 @@ export const ReminderHubModal: React.FC<Props> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-neutral-900 border border-neutral-800 rounded-3xl max-w-2xl w-full p-6 text-white shadow-2xl relative my-6">
+    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto">
+      <div className="bg-neutral-900 border border-neutral-800 rounded-3xl max-w-2xl w-full max-h-[calc(100dvh-1.25rem)] sm:max-h-[88dvh] flex flex-col p-4 sm:p-5 text-white shadow-2xl relative overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-neutral-800 mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+        <div className="shrink-0 flex items-center justify-between gap-2 pb-3 border-b border-neutral-800 mb-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
               <Bell className="w-5 h-5" />
             </div>
-            <div>
-              <h2 className="text-lg font-black text-white">Hatırlatıcı & Bildirim Merkezi</h2>
+            <div className="min-w-0">
+              <h2 className="text-base sm:text-lg font-black text-white">Hatırlatıcı & Bildirim Merkezi</h2>
               <p className="text-xs text-neutral-400">
                 Girmeyi unutan üyeleri rahatsız etmeden, kibar e-posta veya WhatsApp mesajıyla haberdar edin.
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="text-neutral-400 hover:text-white text-sm">
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-neutral-400 hover:text-white bg-neutral-800 hover:bg-neutral-700 px-2.5 py-1 rounded-lg text-xs font-bold shrink-0 cursor-pointer"
+          >
             ✕
           </button>
         </div>
 
         {/* Tab switchers */}
-        <div className="grid grid-cols-3 gap-2 bg-neutral-950 p-1.5 rounded-2xl border border-neutral-800 mb-5 text-xs">
+        <div className="shrink-0 grid grid-cols-3 gap-1.5 sm:gap-2 bg-neutral-950 p-1.5 rounded-2xl border border-neutral-800 mb-3 text-[11px] sm:text-xs">
           <button
+            type="button"
             onClick={() => setActiveTab('checkin')}
-            className={`py-2 px-3 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 ${
+            className={`py-2 px-2 sm:px-3 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
               activeTab === 'checkin'
                 ? 'bg-amber-500 text-black shadow-md'
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
-            <Clock className="w-3.5 h-3.5" />
-            <span>Maç Check-In ({missingCheckInPlayers.length})</span>
+            <Clock className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">Check-In ({missingCheckInPlayers.length})</span>
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab('rating')}
-            className={`py-2 px-3 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 ${
+            className={`py-2 px-2 sm:px-3 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
               activeTab === 'rating'
                 ? 'bg-amber-500 text-black shadow-md'
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Maç Puanlama ({missingRatingPlayers.length})</span>
+            <Sparkles className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">Puanlama ({missingRatingPlayers.length})</span>
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab('scouting')}
-            className={`py-2 px-3 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 ${
+            className={`py-2 px-2 sm:px-3 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
               activeTab === 'scouting'
                 ? 'bg-amber-500 text-black shadow-md'
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
-            <Users className="w-3.5 h-3.5" />
-            <span>Kurul Puanlama</span>
+            <Users className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">Kurul</span>
           </button>
         </div>
 
+        {/* Scrollable Middle Content */}
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain pr-1 space-y-4">
         {/* Status Snapshot of Missing Members */}
-        <div className="bg-neutral-950 p-4 rounded-2xl border border-neutral-800/80 mb-5">
+        <div className="bg-neutral-950 p-3.5 sm:p-4 rounded-2xl border border-neutral-800/80">
           {activeTab === 'checkin' && (
             <div>
               <div className="flex items-center justify-between mb-2">
@@ -160,7 +187,7 @@ export const ReminderHubModal: React.FC<Props> = ({
                   Henüz Check-In Yapmayan Oyuncular ({missingCheckInPlayers.length} Kişi)
                 </span>
                 <span className="text-[10px] text-amber-400 font-mono">
-                  Sistem Hata Vermez: Kaptan tek tıkla onaylayabilir
+                  Sistem Hata Vermez: Kurul Üyesi tek tıkla onaylayabilir
                 </span>
               </div>
               {missingCheckInPlayers.length === 0 ? (
@@ -168,22 +195,33 @@ export const ReminderHubModal: React.FC<Props> = ({
                   <Check className="w-4 h-4" /> 12 kişilik kadronun tamamı durum bildirdi!
                 </p>
               ) : (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {missingCheckInPlayers.map((p) => (
-                    <div
-                      key={p.id}
-                      className="flex items-center gap-2 bg-neutral-900 border border-neutral-800 px-2.5 py-1 rounded-xl text-xs"
+                <div className="space-y-2.5 mt-2">
+                  {onQuickCheckInAllMissing && (
+                    <button
+                      type="button"
+                      onClick={onQuickCheckInAllMissing}
+                      className="w-full py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs transition-all cursor-pointer shadow-md"
                     >
-                      <span className="font-bold text-white">{p.name}</span>
-                      <button
-                        onClick={() => onQuickCheckInForPlayer(p.id)}
-                        className="text-[10px] text-amber-400 hover:text-amber-300 font-semibold bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20"
-                        title="Oyuncu adına %100 Hazır check-in'i yap"
+                      ⚡ Tüm Eksikleri ({missingCheckInPlayers.length} Kişi) %100 Hazır Onayla
+                    </button>
+                  )}
+                  <div className="flex flex-wrap gap-2">
+                    {missingCheckInPlayers.map((p) => (
+                      <div
+                        key={p.id}
+                        className="flex items-center gap-2 bg-neutral-900 border border-neutral-800 px-2.5 py-1 rounded-xl text-xs"
                       >
-                        Kaptan Adına Onayla ✓
-                      </button>
-                    </div>
-                  ))}
+                        <span className="font-bold text-white">{p.name}</span>
+                        <button
+                          onClick={() => onQuickCheckInForPlayer(p.id)}
+                          className="text-[10px] text-amber-400 hover:text-amber-300 font-semibold bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20 cursor-pointer"
+                          title="Oyuncu adına %100 Hazır check-in'i yap"
+                        >
+                          Kurul Adına Onayla ✓
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -245,7 +283,7 @@ export const ReminderHubModal: React.FC<Props> = ({
         </div>
 
         {/* Message Preview */}
-        <div className="mb-5">
+        <div>
           <label className="text-xs font-bold text-neutral-300 block mb-1.5 uppercase tracking-wider">
             Otomatik Üretilen Kibar Hatırlatma Metni
           </label>
@@ -253,29 +291,33 @@ export const ReminderHubModal: React.FC<Props> = ({
             {getWhatsAppMessage()}
           </pre>
         </div>
+        </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-neutral-800">
-          <div className="flex items-center gap-2">
+        <div className="shrink-0 flex flex-wrap items-center justify-between gap-2.5 pt-3 mt-3 border-t border-neutral-800">
+          <div className="flex flex-wrap items-center gap-2">
             <button
+              type="button"
               onClick={handleCopyWhatsApp}
-              className="flex items-center gap-1.5 bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-bold px-3.5 py-2.5 rounded-xl border border-neutral-700 transition-colors"
+              className="flex items-center gap-1.5 bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl border border-neutral-700 transition-colors cursor-pointer"
             >
               {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
               {copied ? 'Kopyalandı!' : 'Metni Kopyala'}
             </button>
 
             <button
+              type="button"
               onClick={handleOpenWhatsAppWeb}
-              className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black px-4 py-2.5 rounded-xl shadow-lg shadow-emerald-600/30 transition-transform active:scale-95"
+              className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black px-3.5 py-2 rounded-xl shadow-lg shadow-emerald-600/30 transition-transform active:scale-95 cursor-pointer"
             >
               <MessageCircle className="w-4 h-4" /> WhatsApp Grubuna Gönder
             </button>
           </div>
 
           <button
+            type="button"
             onClick={handleOpenEmailClient}
-            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black text-xs font-black px-4 py-2.5 rounded-xl shadow-lg shadow-amber-500/20"
+            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black text-xs font-black px-3.5 py-2 rounded-xl shadow-lg shadow-amber-500/20 cursor-pointer"
           >
             <Mail className="w-4 h-4" /> E-Posta Taslağı Aç
           </button>

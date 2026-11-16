@@ -94,6 +94,12 @@ export async function externalizeImages<T>(items: T[], acc: Accessor<T>): Promis
   );
 }
 
+/** "idb:" referansını varsa IndexedDB'den gerçek Data URL olarak çözer. */
+export async function resolveIdbUrl(url?: string): Promise<string | undefined> {
+  if (!isIdbRef(url)) return url;
+  return getImage(url.slice(IDB_PREFIX.length));
+}
+
 /** "idb:" referanslarını gerçek Data URL'lerle değiştirir. Bulunamayanlar için fallback kullanılabilir. */
 export async function hydrateImages<T>(
   items: T[],

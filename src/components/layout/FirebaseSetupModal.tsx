@@ -24,24 +24,30 @@ VITE_FIREBASE_APP_ID=1:1234567890:web:abcdef`;
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-neutral-900 border border-neutral-800 rounded-3xl max-w-2xl w-full p-6 text-white shadow-2xl relative my-6">
-        <div className="flex items-center justify-between pb-4 border-b border-neutral-800 mb-4">
+    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto">
+      <div className="bg-neutral-900 border border-neutral-800 rounded-3xl max-w-2xl w-full max-h-[calc(100dvh-1.25rem)] sm:max-h-[88dvh] flex flex-col p-4 sm:p-5 text-white shadow-2xl relative overflow-hidden">
+        <div className="shrink-0 flex items-center justify-between pb-3 border-b border-neutral-800 mb-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
               <Flame className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-lg font-black text-white">Firebase Altyapı Bağlantısı</h2>
+              <h2 className="text-base sm:text-lg font-black text-white">Firebase Altyapı Bağlantısı</h2>
               <p className="text-xs text-neutral-400">
                 Oluşturduğunuz Firebase projesini RevirFC ekosistemine bağlama rehberi.
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="text-neutral-400 hover:text-white text-sm">
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-neutral-400 hover:text-white bg-neutral-800 hover:bg-neutral-700 px-2.5 py-1 rounded-lg text-xs font-bold shrink-0 cursor-pointer"
+          >
             ✕
           </button>
         </div>
+
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain pr-1">
 
         {/* Current status */}
         <div
@@ -104,11 +110,13 @@ VITE_FIREBASE_APP_ID=1:1234567890:web:abcdef`;
             </p>
           </div>
         </div>
+        </div>
 
-        <div className="flex justify-end gap-2 pt-4 mt-6 border-t border-neutral-800">
+        <div className="shrink-0 flex justify-end gap-2 pt-3 mt-3 border-t border-neutral-800">
           <button
+            type="button"
             onClick={onClose}
-            className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-black"
+            className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-black cursor-pointer"
           >
             Tamam, Anladım
           </button>

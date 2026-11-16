@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
+import React, { useState, useEffect } from 'react';
+import { useAuth, PENDING_INVITE_SESSION_KEY } from '../../context/AuthContext';
 import {
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
 } from 'firebase/auth';
@@ -17,7 +18,14 @@ interface Props {
 }
 
 export const AuthModal: React.FC<Props> = ({ inviteToken, onClose, onSuccess }) => {
-  const { loginWithCredentials, registerWithInvite, allUsers } = useAuth();
+  const {
+    currentUser,
+    loginWithCredentials,
+    registerWithInvite,
+    allUsers,
+    authRedirectError,
+    clearAuthRedirectError,
+  } = useAuth();
   const [isLoginMode, setIsLoginMode] = useState(!inviteToken);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,24 +33,124 @@ export const AuthModal: React.FC<Props> = ({ inviteToken, onClose, onSuccess }) 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Google Sign-In
+  const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
+  const isEmbeddedInAppBrowser = /WhatsApp|FBAN|FBAV|Instagram|Line\/|Twitter|Snapchat|; wv\)/i.test(ua);
+  const isMobileOrSafari =
+    /iPhone|iPad|iPod|Android|Mobile/i.test(ua) ||
+    (/Safari/i.test(ua) && !/Chrome|CriOS|Edg/i.test(ua));
+
+  useEffect(() => {
+    if (authRedirectError) {
+      setError(authRedirectError);
+      clearAuthRedirectError();
+    }
+  }, [authRedirectError, clearAuthRedirectError]);
+
+  // Davet linki açıldığında token'ı hem sessionStorage hem localStorage'a yaz (yönlendirme ve iOS Safari durumları için)
+  useEffect(() => {
+    if (inviteToken) {
+      try {
+        sessionStorage.setItem(PENDING_INVITE_SESSION_KEY, inviteToken.id);
+        localStorage.setItem(PENDING_INVITE_SESSION_KEY, inviteToken.id);
+      } catch {}
+      setIsLoginMode(false);
+      if (inviteToken.name) {
+        setName((prev) => prev || inviteToken.name);
+      }
+    }
+  }, [inviteToken]);
+
+  const handleActivateExistingPendingWithInvite = () => {
+    if (!inviteToken || !currentUser) return;
+    registerWithInvite({
+      uid: currentUser.uid,
+      email: currentUser.email,
+      displayName: currentUser.displayName || name || inviteToken.name,
+      photoURL: currentUser.photoURL,
+      token: inviteToken,
+    });
+    onSuccess?.();
+    onClose?.();
+  };
+
+  // Google Sign-In (iOS Safari / mobile cross-origin storage partitioning korumalı)
   const handleGoogleSignIn = async () => {
     setError(null);
     setLoading(true);
     try {
+      if (inviteToken) {
+        try {
+          sessionStorage.setItem(PENDING_INVITE_SESSION_KEY, inviteToken.id);
+          localStorage.setItem(PENDING_INVITE_SESSION_KEY, inviteToken.id);
+        } catch {}
+      }
       if (isFirebaseConfigured && auth) {
         const provider = new GoogleAuthProvider();
-        const res = await signInWithPopup(auth, provider);
-        const fbUser = res.user;
+        provider.setCustomParameters({ prompt: 'select_account' });
 
-        if (inviteToken) {
-          registerWithInvite({
-            uid: fbUser.uid,
-            email: fbUser.email || '',
-            displayName: fbUser.displayName || name || inviteToken.name,
-            photoURL: fbUser.photoURL || undefined,
-            token: inviteToken,
-          });
+        const authDomainHost = (import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || '').trim();
+        const isOnWebAppCrossOrigin =
+          typeof window !== 'undefined' &&
+          authDomainHost &&
+          window.location.hostname !== authDomainHost &&
+          window.location.hostname.endsWith('.web.app');
+
+        // iOS Safari & mobil tarayıcılarda web.app -> firebaseapp.com geçişi sessionStorage'ı bölümlediği için
+        // doğrudan aynı kökenli authDomain (revirfc.firebaseapp.com) üzerine yönlendirerek hatayı engelle.
+        if (isOnWebAppCrossOrigin && isMobileOrSafari) {
+          const targetUrl = new URL(window.location.href);
+          targetUrl.hostname = authDomainHost;
+          targetUrl.searchParams.set('auth', '1');
+          if (inviteToken && !targetUrl.searchParams.has('invite')) {
+            targetUrl.searchParams.set('invite', inviteToken.id);
+          }
+          window.location.replace(targetUrl.toString());
+          return;
+        }
+
+        // Aynı kökendeyken (ör. revirfc.firebaseapp.com) mobilde tam sayfa redirect kullan (popup engeli yok)
+        if (isMobileOrSafari && !isOnWebAppCrossOrigin) {
+          await signInWithRedirect(auth, provider);
+          return;
+        }
+
+        try {
+          const res = await signInWithPopup(auth, provider);
+          const fbUser = res.user;
+
+          if (inviteToken) {
+            registerWithInvite({
+              uid: fbUser.uid,
+              email: fbUser.email || '',
+              displayName: fbUser.displayName || name || inviteToken.name,
+              photoURL: fbUser.photoURL || undefined,
+              token: inviteToken,
+            });
+          }
+        } catch (popupErr: any) {
+          const code = popupErr?.code || '';
+          const msg = String(popupErr?.message || '');
+          const isPopupOrStorageIssue =
+            code === 'auth/popup-blocked' ||
+            code === 'auth/operation-not-supported-in-this-environment' ||
+            msg.includes('missing initial state') ||
+            msg.includes('sessionStorage');
+
+          if (isPopupOrStorageIssue) {
+            if (isOnWebAppCrossOrigin && authDomainHost) {
+              const targetUrl = new URL(window.location.href);
+              targetUrl.hostname = authDomainHost;
+              targetUrl.searchParams.set('auth', '1');
+              if (inviteToken && !targetUrl.searchParams.has('invite')) {
+                targetUrl.searchParams.set('invite', inviteToken.id);
+              }
+              window.location.replace(targetUrl.toString());
+              return;
+            }
+            await signInWithRedirect(auth, provider);
+            return;
+          }
+          throw popupErr;
         }
       } else {
         // Fallback / Demo simulation if popup is cancelled or offline
@@ -59,8 +167,14 @@ export const AuthModal: React.FC<Props> = ({ inviteToken, onClose, onSuccess }) 
       onClose?.();
     } catch (err: any) {
       console.error('Google sign in error:', err);
-      // If popup closed or Firebase auth domain not yet authorized in Firebase console
-      setError(err?.message || 'Google ile giriş başarısız oldu.');
+      const code = err?.code || '';
+      if (code === 'auth/popup-closed-by-user') {
+        setError('Google giriş penceresi kapatıldı. Tekrar deneyebilir veya aşağıdaki e-posta/şifre ile kayıt olabilirsiniz.');
+      } else if (code === 'auth/unauthorized-domain') {
+        setError('Bu alan adı Firebase Authentication için yetkili değil.');
+      } else {
+        setError(err?.message || 'Google ile giriş başarısız oldu.');
+      }
     } finally {
       setLoading(false);
     }
@@ -77,9 +191,24 @@ export const AuthModal: React.FC<Props> = ({ inviteToken, onClose, onSuccess }) 
 
     setLoading(true);
     try {
+      if (inviteToken) {
+        try {
+          sessionStorage.setItem(PENDING_INVITE_SESSION_KEY, inviteToken.id);
+          localStorage.setItem(PENDING_INVITE_SESSION_KEY, inviteToken.id);
+        } catch {}
+      }
       if (isFirebaseConfigured && auth) {
         if (isLoginMode) {
-          await signInWithEmailAndPassword(auth, email, password);
+          const res = await signInWithEmailAndPassword(auth, email, password);
+          if (inviteToken) {
+            registerWithInvite({
+              uid: res.user.uid,
+              email: res.user.email || email,
+              displayName: res.user.displayName || name || inviteToken.name,
+              photoURL: res.user.photoURL || undefined,
+              token: inviteToken,
+            });
+          }
         } else {
           const res = await createUserWithEmailAndPassword(auth, email, password);
           if (inviteToken) {
@@ -96,7 +225,17 @@ export const AuthModal: React.FC<Props> = ({ inviteToken, onClose, onSuccess }) 
         if (isLoginMode) {
           const existing = allUsers.find((u) => u.email.toLowerCase() === email.toLowerCase());
           if (existing) {
-            loginWithCredentials(existing);
+            if (inviteToken) {
+              registerWithInvite({
+                uid: existing.uid,
+                email: existing.email,
+                displayName: existing.displayName || name || inviteToken.name,
+                photoURL: existing.photoURL,
+                token: inviteToken,
+              });
+            } else {
+              loginWithCredentials(existing);
+            }
           } else {
             setError('Bu e-posta adresiyle kayıtlı bir hesap bulunamadı.');
             setLoading(false);
@@ -120,7 +259,12 @@ export const AuthModal: React.FC<Props> = ({ inviteToken, onClose, onSuccess }) 
       if (err?.code === 'auth/wrong-password' || err?.code === 'auth/invalid-credential') {
         setError('Hatalı şifre veya e-posta.');
       } else if (err?.code === 'auth/email-already-in-use') {
-        setError('Bu e-posta adresi zaten kullanımda. Giriş yapmayı deneyin.');
+        if (inviteToken) {
+          setIsLoginMode(true);
+          setError('Bu e-posta zaten kayıtlı! Şifrenizi girip "Giriş Yap & Daveti Aktifleştir" butonuna basın.');
+        } else {
+          setError('Bu e-posta adresi zaten kullanımda. Giriş yapmayı deneyin.');
+        }
       } else if (err?.code === 'auth/weak-password') {
         setError('Şifreniz en az 6 karakter olmalıdır.');
       } else {
@@ -132,19 +276,19 @@ export const AuthModal: React.FC<Props> = ({ inviteToken, onClose, onSuccess }) 
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="bg-neutral-900 border border-neutral-800 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto">
+      <div className="bg-neutral-900 border border-neutral-800 rounded-3xl max-w-md w-full max-h-[calc(100dvh-1.25rem)] sm:max-h-[88dvh] overflow-y-auto overscroll-contain p-5 sm:p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
         {onClose && (
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-neutral-400 hover:text-white p-2 rounded-xl hover:bg-neutral-800 transition-colors cursor-pointer"
+            className="absolute top-3.5 right-3.5 text-neutral-400 hover:text-white p-2 rounded-xl hover:bg-neutral-800 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         )}
 
-        <div className="text-center mb-6">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 p-0.5 mx-auto mb-3 shadow-xl shadow-amber-500/20 flex items-center justify-center">
+        <div className="text-center mb-4">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 p-0.5 mx-auto mb-2.5 shadow-xl shadow-amber-500/20 flex items-center justify-center">
             <img src="/logo.jpg" alt="Revir FC" className="w-full h-full object-cover rounded-2xl" />
           </div>
 
@@ -154,7 +298,7 @@ export const AuthModal: React.FC<Props> = ({ inviteToken, onClose, onSuccess }) 
           <p className="text-xs text-neutral-400 mt-1">
             {inviteToken
               ? `${inviteToken.name} için tanımlı özel davet yetkilendirmesi`
-              : '22 kişilik kapalı devre kulüp sistemi'}
+              : 'Kapalı devre halı saha kulüp sistemi'}
           </p>
 
           {inviteToken && (
@@ -166,6 +310,29 @@ export const AuthModal: React.FC<Props> = ({ inviteToken, onClose, onSuccess }) 
             </div>
           )}
         </div>
+
+        {inviteToken && currentUser?.status === 'pending' && (
+          <div className="mb-4 p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-2">
+            <p className="text-[11px] text-emerald-200 leading-relaxed">
+              Mevcut oturumun (<strong>{currentUser.email}</strong>) şu an onay bekliyor. Bu davet bağlantısını mevcut hesabına hemen tanımlayabilirsin.
+            </p>
+            <button
+              type="button"
+              onClick={handleActivateExistingPendingWithInvite}
+              className="w-full py-2 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs transition-all cursor-pointer"
+            >
+              ⚡ Daveti Hemen Aktifleştir ({inviteToken.name})
+            </button>
+          </div>
+        )}
+
+        {isEmbeddedInAppBrowser && (
+          <div className="mb-4 p-3 rounded-2xl bg-amber-500/15 border border-amber-500/40 text-amber-200 text-[11px] leading-relaxed">
+            <strong className="text-amber-300 block mb-0.5">📱 WhatsApp / Uygulama İçi Tarayıcı Algılandı</strong>
+            Google güvenliği uygulama içi pencerelerde girişi kısıtlayabilir. Google ile devam etmek için sağ köşeden{' '}
+            <strong>&quot;Safari&apos;de / Tarayıcıda Aç&quot;</strong> yapın veya hemen aşağıdaki <strong>E-posta &amp; Şifre</strong> ile anında kayıt olun.
+          </div>
+        )}
 
         {error && (
           <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-2">
@@ -264,23 +431,38 @@ export const AuthModal: React.FC<Props> = ({ inviteToken, onClose, onSuccess }) 
             ) : (
               <>
                 <KeyRound className="w-4 h-4" />
-                <span>{inviteToken ? 'Yetkiyi Tanımla & Başla' : isLoginMode ? 'Giriş Yap' : 'Kayıt Ol'}</span>
+                <span>
+                  {inviteToken
+                    ? isLoginMode
+                      ? 'Giriş Yap & Yetkiyi Tanımla'
+                      : 'Yetkiyi Tanımla & Başla'
+                    : isLoginMode
+                    ? 'Giriş Yap'
+                    : 'Kayıt Ol'}
+                </span>
               </>
             )}
           </button>
         </form>
 
-        {!inviteToken && (
-          <div className="mt-4 text-center">
-            <button
-              type="button"
-              onClick={() => setIsLoginMode(!isLoginMode)}
-              className="text-xs text-neutral-400 hover:text-amber-400 transition-colors"
-            >
-              {isLoginMode ? 'Hesabınız yok mu? Davet linki ile kayıt olun' : 'Zaten hesabınız var mı? Giriş yapın'}
-            </button>
-          </div>
-        )}
+        <div className="mt-4 text-center">
+          <button
+            type="button"
+            onClick={() => {
+              setError(null);
+              setIsLoginMode(!isLoginMode);
+            }}
+            className="text-xs text-neutral-400 hover:text-amber-400 transition-colors cursor-pointer"
+          >
+            {inviteToken
+              ? isLoginMode
+                ? 'Yeni bir hesap oluşturarak daveti kullan'
+                : 'Zaten hesabınız var mı? Giriş yapıp daveti aktifleştirin'
+              : isLoginMode
+              ? 'Hesabınız yok mu? Davet linki ile kayıt olun'
+              : 'Zaten hesabınız var mı? Giriş yapın'}
+          </button>
+        </div>
       </div>
     </div>
   );
