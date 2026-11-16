@@ -19,6 +19,7 @@ import {
   CURRENT_STATS_SYNC_VERSION,
   CURRENT_RECORD_SYNC_VERSION,
   isClubLegendPlayer,
+  isFormerPlayer,
   getDefaultCardThemeForPlayer,
   normalizePlayerThemeAndLegend,
   shiftPlayerStatsByDelta,
@@ -1292,6 +1293,7 @@ function MainApp() {
 
   const access = getAccess(currentUser, players, adminMode);
   const isPendingUser = access.isPending;
+  const isFormerUser = access.isFormer;
   const isAdminAccount = access.isAdminAccount;
   const isSuperAdmin = access.isSuperAdmin;
   // Kurul + Yönetici: kart/unvan/mevki yönetimi (ayrıntılı yetki matrisi: services/permissions.ts)
@@ -1303,7 +1305,7 @@ function MainApp() {
   const claimedPlayer = currentUser?.claimedPlayerId
     ? players.find((p) => p.id === currentUser.claimedPlayerId)
     : (isAdminOrCaptain ? players[0] : undefined);
-  const isStarterInMatch = Boolean(claimedPlayer && match.starters.includes(claimedPlayer.id));
+  const isStarterInMatch = !isPendingUser && !isFormerUser && Boolean(claimedPlayer && match.starters.includes(claimedPlayer.id));
 
   // Zamansal aşama kontrolleri için canlı saat (her 30 sn güncellenir)
   const [nowMs, setNowMs] = useState<number>(() => Date.now());
@@ -1338,6 +1340,9 @@ function MainApp() {
 
   // Handle Check-in Save (preserves & syncs pitch fee + tea volunteer status)
   const handleSaveCheckIn = (checkIn: CheckInEntry) => {
+    if (isFormerUser) return;
+    const targetPlayer = players.find((p) => p.id === checkIn.playerId);
+    if (isFormerPlayer(targetPlayer)) return;
     const allowedNow = isAdminOrCaptain
       ? lifecycleFlags.canCommitteeManagePoll
       : lifecycleFlags.canPlayersEditPoll;
@@ -1414,8 +1419,12 @@ function MainApp() {
   // 3. Etten Duvar ('wall') is strictly single (tekil). If updated is wall, any previous Duvar drops to base theme.
   // 4. Alev Atıyo! ('inform') is maximum 3. If a 4th is added, the oldest inform card automatically drops to base theme.
   const handleSavePlayerCard = (updated: Player) => {
+    if (isPendingUser || (isFormerUser && !isSuperAdmin)) return;
     const getBaseTheme = (p: Player): CardTheme => getDefaultCardThemeForPlayer(p);
     const existingPlayer = players.find((p) => p.id === updated.id);
+    if (existingPlayer && isFormerPlayer(existingPlayer) && !isSuperAdmin) {
+      return;
+    }
     const sanitizedPositions =
       !isAdminOrCaptain && existingPlayer
         ? {
@@ -1423,10 +1432,17 @@ function MainApp() {
             secondaryPositions: existingPlayer.secondaryPositions,
           }
         : {};
+    const sanitizedFormerFields = !isSuperAdmin && existingPlayer
+      ? {
+          isFormer: existingPlayer.isFormer,
+          theme: updated.theme === 'nostalgia' ? existingPlayer.theme : updated.theme,
+        }
+      : {};
 
     const savedUpdatedPlayer: Player = normalizePlayerThemeAndLegend({
       ...updated,
       ...sanitizedPositions,
+      ...sanitizedFormerFields,
       ...(isAdminOrCaptain ? { statsSyncVersion: CURRENT_STATS_SYNC_VERSION } : {}),
       inFormAwardedAt: updated.theme === 'inform' ? (updated.inFormAwardedAt || Date.now()) : undefined,
     });
@@ -1736,6 +1752,9 @@ function MainApp() {
 
   // Toggle starter participation (Sakatlandım / Çekiliyorum -> promote waitlist #1; or waitlist withdrawal)
   const handleToggleParticipation = (playerId: string) => {
+    if (isPendingUser || isFormerUser) return;
+    const targetPlayer = players.find((p) => p.id === playerId);
+    if (isFormerPlayer(targetPlayer)) return;
     const allowedNow = isAdminOrCaptain
       ? lifecycleFlags.canCommitteeManagePoll
       : lifecycleFlags.canPlayersEditPoll;
@@ -1830,6 +1849,9 @@ function MainApp() {
     canPayPitchFee: boolean = false,
     canBringTea: boolean = false
   ) => {
+    if (isPendingUser || isFormerUser) return;
+    const targetPlayer = players.find((p) => p.id === playerId);
+    if (isFormerPlayer(targetPlayer)) return;
     const allowedNow = isAdminOrCaptain
       ? lifecycleFlags.canCommitteeManagePoll
       : lifecycleFlags.canPlayersEditPoll;
@@ -2178,7 +2200,7 @@ function MainApp() {
 
   // Handle post-match 360 ratings and individual ballots (yalnızca maç bitince / 14:00 öncesi ve ilk 12'si)
   const handleSaveRatings = (votes: MatchRatingVote[], provisionalAwards: MatchAwards, ballot?: MatchBallot) => {
-    if (!lifecycleFlags.canVote360 || !claimedPlayer || !match.starters.includes(claimedPlayer.id)) {
+    if (isPendingUser || isFormerUser || !lifecycleFlags.canVote360 || !claimedPlayer || !match.starters.includes(claimedPlayer.id)) {
       return;
     }
 
@@ -2499,6 +2521,7 @@ function MainApp() {
     isAnonymous: boolean,
     media?: { imageUrl: string; matchTitle?: string; taggedPlayerIds?: string[] }
   ) => {
+    if (isPendingUser || isFormerUser) return;
     const authorId = isAnonymous ? 'anonymous' : (claimedPlayer?.id || 'guest');
     const authorName = isAnonymous ? 'Anonim Soyunma Odası Fısıltısı' : (claimedPlayer?.name || 'Misafir Oyuncu');
     const createdAt = new Date().toISOString();
@@ -2565,7 +2588,7 @@ function MainApp() {
     newMatchTitle?: string
   ) => {
     const cleanText = newText.trim();
-    if (!cleanText || isPendingUser || !claimedPlayer) return;
+    if (!cleanText || isPendingUser || isFormerUser || !claimedPlayer) return;
     const editedAt = new Date().toISOString();
 
     if (source === 'post') {
@@ -2622,7 +2645,7 @@ function MainApp() {
     source: 'post' | 'photo',
     mode: 'everyone' | 'purge'
   ) => {
-    if (isPendingUser || !claimedPlayer) return;
+    if (isPendingUser || isFormerUser || !claimedPlayer) return;
     if (mode === 'purge' && !isAdminOrCaptain) return;
     const deletedAt = new Date().toISOString();
 
@@ -2705,6 +2728,7 @@ function MainApp() {
 
   // React to locker room post (classic 5 reactions)
   const handleReactPost = (postId: string, reactionType: keyof LockerPost['reactions']) => {
+    if (isPendingUser || isFormerUser) return;
     const raterId = claimedPlayer?.id || 'guest';
     const mutator = (list: LockerPost[]) =>
       list.map((p) => {
@@ -2731,6 +2755,7 @@ function MainApp() {
 
   // WhatsApp-style emoji reactions for unified locker posts & archived photos
   const handleToggleEmojiReaction = (itemId: string, source: 'post' | 'photo', emoji: string) => {
+    if (isPendingUser || isFormerUser) return;
     const reactorId = claimedPlayer?.id || currentUser?.uid || 'guest';
     const toggleMap = (existing?: Record<string, string[]>) => {
       const nextMap: Record<string, string[]> = { ...(existing || {}) };
@@ -2768,7 +2793,7 @@ function MainApp() {
   // Comments on unified locker posts & archived photos
   const handleAddComment = (itemId: string, source: 'post' | 'photo', text: string) => {
     const cleanText = text.trim();
-    if (!cleanText || isPendingUser) return;
+    if (!cleanText || isPendingUser || isFormerUser) return;
     const newComment: LockerComment = {
       id: `cmt-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       authorPlayerId: claimedPlayer?.id || currentUser?.uid || 'member',
@@ -2822,7 +2847,7 @@ function MainApp() {
     newText: string
   ) => {
     const cleanText = newText.trim();
-    if (!cleanText || isPendingUser || !claimedPlayer) return;
+    if (!cleanText || isPendingUser || isFormerUser || !claimedPlayer) return;
     const editedAt = new Date().toISOString();
 
     const updateComments = (comments?: LockerComment[]) =>
@@ -2863,7 +2888,7 @@ function MainApp() {
     commentId: string,
     purge: boolean = false
   ) => {
-    if (isPendingUser || !claimedPlayer) return;
+    if (isPendingUser || isFormerUser || !claimedPlayer) return;
     if (purge && !isAdminOrCaptain) return;
     const deletedAt = new Date().toISOString();
 
@@ -2930,6 +2955,7 @@ function MainApp() {
 
   // Toggle debt status
   const handleToggleDebt = (debtId: string) => {
+    if (isPendingUser || isFormerUser) return;
     const nextDebts: DessertDebt[] = debts.map((d) =>
       d.id === debtId ? { ...d, status: d.status === 'pending' ? 'paid' : 'pending' } : d
     );
@@ -2939,6 +2965,7 @@ function MainApp() {
 
   // Add new debt
   const handleAddDebt = (debtorPlayerId: string, description: string, treatType: DessertDebt['treatType']) => {
+    if (isPendingUser || isFormerUser) return;
     const newDebt: DessertDebt = {
       id: `debt-${Date.now()}`,
       debtorPlayerId,
@@ -3409,6 +3436,7 @@ function MainApp() {
             onSwapStarterWithWaitlist={handleSwapStarterWithWaitlist}
             onOpenReminderHub={() => setShowReminderModal(true)}
             isPendingUser={isPendingUser}
+            isFormerUser={isFormerUser}
             isAdmin={isAdminOrCaptain}
           />
         )}
@@ -3416,7 +3444,7 @@ function MainApp() {
         {activeTab === 'rating' && isApprovedUser && (() => {
           const starterPlayers = players.filter((p) => match.starters.includes(p.id));
           const ballotCount = match.ballots?.length || 0;
-          const canVote360 = !isPendingUser && isStarterInMatch && lifecycleFlags.canVote360;
+          const canVote360 = !isPendingUser && !isFormerUser && isStarterInMatch && lifecycleFlags.canVote360;
           const myBallotExists = Boolean(
             claimedPlayer && (match.ballots || []).some((b) => b.raterId === claimedPlayer.id)
           );
@@ -3737,7 +3765,8 @@ function MainApp() {
             ownAnonPostIds={ownAnonPostIds}
             onToggleHeadline={handleToggleHeadline}
             canPinHeadline={isAdminOrCaptain}
-            isReadOnly={isPendingUser}
+            isReadOnly={isPendingUser || isFormerUser}
+            readOnlyReason={isPendingUser ? 'pending' : isFormerUser ? 'former' : undefined}
           />
         )}
 
@@ -3768,6 +3797,7 @@ function MainApp() {
                 players={players}
                 onToggleDebt={handleToggleDebt}
                 onAddDebt={handleAddDebt}
+                isReadOnly={isFormerUser}
               />
             )}
           </div>
@@ -3826,10 +3856,15 @@ function MainApp() {
           allPlayers={players}
           isAdmin={isAdminOrCaptain}
           isSuperAdmin={isSuperAdmin}
-          canEditPositions={isAdminOrCaptain}
+          canEditPositions={isSuperAdmin || (isAdminOrCaptain && !isFormerPlayer(editingPlayer))}
           isPendingUser={isPendingUser}
           isOwnCard={Boolean(currentUser?.claimedPlayerId && currentUser.claimedPlayerId === editingPlayer.id)}
-          canEdit={Boolean(isAdminOrCaptain || (isApprovedUser && currentUser?.claimedPlayerId === editingPlayer.id))}
+          canEdit={Boolean(
+            isSuperAdmin ||
+              (!isFormerUser &&
+                !isFormerPlayer(editingPlayer) &&
+                (isAdminOrCaptain || (isApprovedUser && currentUser?.claimedPlayerId === editingPlayer.id)))
+          )}
           evaluatorName={evaluatorName}
           currentMatch={match}
           scoutingEntries={savedScoutingEntries}
@@ -3847,7 +3882,7 @@ function MainApp() {
         />
       )}
 
-      {showRatingModal && !isPendingUser && isStarterInMatch && claimedPlayer && lifecycleFlags.canVote360 && (
+      {showRatingModal && !isPendingUser && !isFormerUser && isStarterInMatch && claimedPlayer && lifecycleFlags.canVote360 && (
         <MatchRatingModal
           match={match}
           currentRaterPlayer={claimedPlayer}

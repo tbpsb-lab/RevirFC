@@ -8,6 +8,7 @@ interface Props {
   players: Player[];
   onToggleDebt: (debtId: string) => void;
   onAddDebt: (debtorId: string, description: string, type: DessertDebt['treatType']) => void;
+  isReadOnly?: boolean;
 }
 
 export const DessertLedger: React.FC<Props> = ({
@@ -15,6 +16,7 @@ export const DessertLedger: React.FC<Props> = ({
   players,
   onToggleDebt,
   onAddDebt,
+  isReadOnly = false,
 }) => {
   const [showAdd, setShowAdd] = useState(false);
   const [debtorId, setDebtorId] = useState(players[0]?.id || '');
@@ -61,16 +63,22 @@ export const DessertLedger: React.FC<Props> = ({
             İddia kaybedenlerin veya Haftanın Bidonu seçilenlerin baklava/çay borçları unutulmaz!
           </p>
         </div>
-        <button
-          onClick={() => setShowAdd(!showAdd)}
-          className="bg-amber-500 hover:bg-amber-400 text-black text-xs font-black px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-md shadow-amber-500/20"
-        >
-          <PlusCircle className="w-4 h-4" /> Borç Ekle
-        </button>
+        {!isReadOnly ? (
+          <button
+            onClick={() => setShowAdd(!showAdd)}
+            className="bg-amber-500 hover:bg-amber-400 text-black text-xs font-black px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-md shadow-amber-500/20 cursor-pointer"
+          >
+            <PlusCircle className="w-4 h-4" /> Borç Ekle
+          </button>
+        ) : (
+          <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-neutral-800 text-neutral-300 border border-neutral-700">
+            Salt-Okunur
+          </span>
+        )}
       </div>
 
       {/* Add Form */}
-      {showAdd && (
+      {!isReadOnly && showAdd && (
         <form onSubmit={handleAddSubmit} className="mb-6 p-4 rounded-2xl bg-neutral-950 border border-neutral-800 space-y-3">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
@@ -161,17 +169,30 @@ export const DessertLedger: React.FC<Props> = ({
                 </div>
               </div>
 
-              <button
-                onClick={() => handleToggle(item.id, item.status)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all ${
-                  isPaid
-                    ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-500/40'
-                    : 'bg-amber-500 hover:bg-amber-400 text-black shadow-md shadow-amber-500/20'
-                }`}
-              >
-                <CheckCircle className="w-3.5 h-3.5" />
-                {isPaid ? 'Ödendi ✓' : 'Borcu Kapat'}
-              </button>
+              {isReadOnly ? (
+                <span
+                  className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 ${
+                    isPaid
+                      ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-500/40'
+                      : 'bg-neutral-900 text-neutral-400 border border-neutral-800'
+                  }`}
+                >
+                  <CheckCircle className="w-3.5 h-3.5" />
+                  {isPaid ? 'Ödendi ✓' : 'Bekliyor'}
+                </span>
+              ) : (
+                <button
+                  onClick={() => handleToggle(item.id, item.status)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer ${
+                    isPaid
+                      ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-500/40'
+                      : 'bg-amber-500 hover:bg-amber-400 text-black shadow-md shadow-amber-500/20'
+                  }`}
+                >
+                  <CheckCircle className="w-3.5 h-3.5" />
+                  {isPaid ? 'Ödendi ✓' : 'Borcu Kapat'}
+                </button>
+              )}
             </div>
           );
         })}

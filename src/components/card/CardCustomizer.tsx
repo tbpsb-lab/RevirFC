@@ -10,6 +10,7 @@ import {
   getStandardThemeByOVR,
   isStandardCardTheme,
   isClubLegendPlayer,
+  isFormerPlayer,
   getDefaultCardThemeForPlayer,
   normalizePlayerThemeAndLegend,
   resolvePlayerPlaystyleSlots,
@@ -639,7 +640,7 @@ export const CardCustomizer: React.FC<Props> = ({
       ...editedPlayer,
       currentStatus: nextStatus,
       theme: nextTheme,
-      isFormer: editedPlayer.id === 'p23' ? true : false,
+      isFormer: isSuperAdmin ? false : Boolean(editedPlayer.isFormer),
       isLegend: isLegendPlayer,
       inFormAwardedAt: undefined,
     });
@@ -1159,7 +1160,7 @@ export const CardCustomizer: React.FC<Props> = ({
                                 setEditedPlayer({
                                   ...editedPlayer,
                                   theme: item.id,
-                                  isFormer: item.id === 'nostalgia' ? true : (editedPlayer.id === 'p23' ? true : false),
+                                  isFormer: item.id === 'nostalgia' ? true : (isSuperAdmin ? false : Boolean(editedPlayer.isFormer)),
                                   isLegend: isLegendPlayer,
                                   inFormAwardedAt: item.id === 'inform' ? (editedPlayer.inFormAwardedAt || Date.now()) : undefined,
                                 });
@@ -1700,7 +1701,11 @@ export const CardCustomizer: React.FC<Props> = ({
             )}
             {!canEdit && !isPendingUser && (
               <span className="text-xs text-neutral-400">
-                {canEditPositions ? '🛡️ Kurul yetkisiyle yalnızca mevkileri düzenleyebilirsiniz.' : '🔒 Yalnızca kendi kartınızı düzenleyebilirsiniz.'}
+                {isFormerPlayer(editedPlayer)
+                  ? '📜 Mazide Kalanlar kartı — Yalnızca Yönetici düzenleyebilir.'
+                  : canEditPositions
+                  ? '🛡️ Kurul yetkisiyle yalnızca mevkileri düzenleyebilirsiniz.'
+                  : '🔒 Yalnızca kendi kartınızı düzenleyebilirsiniz.'}
               </span>
             )}
           </div>

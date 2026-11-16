@@ -43,6 +43,7 @@ interface Props {
   onToggleHeadline?: (itemId: string, source: 'post' | 'photo') => void;
   canPinHeadline?: boolean;
   isReadOnly?: boolean;
+  readOnlyReason?: 'pending' | 'former';
 }
 
 type FeedFilter = 'all' | 'headline' | 'photos' | 'text';
@@ -107,6 +108,7 @@ export const LockerRoomFeed: React.FC<Props> = ({
   onToggleHeadline,
   canPinHeadline = false,
   isReadOnly = false,
+  readOnlyReason = 'pending',
 }) => {
   const [newText, setNewText] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
@@ -434,15 +436,25 @@ export const LockerRoomFeed: React.FC<Props> = ({
 
       {/* Unified Composer (Message + Photo + Tags) */}
       {isReadOnly || !currentPlayer ? (
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 text-xs text-amber-300 flex items-center justify-between gap-3">
+        <div className={`rounded-2xl p-4 text-xs flex items-center justify-between gap-3 border ${
+          readOnlyReason === 'former'
+            ? 'bg-stone-900/80 border-stone-700/60 text-stone-300'
+            : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
+        }`}>
           <div className="flex items-center gap-2.5">
-            <Lock className="w-4 h-4 text-amber-400 shrink-0" />
+            <Lock className={`w-4 h-4 shrink-0 ${readOnlyReason === 'former' ? 'text-amber-400/80' : 'text-amber-400'}`} />
             <span>
-              Paylaşım, fotoğraf yükleme, emoji tepkisi ve yorum yapabilmek için onaylı üye girişi gereklidir. Akışı aşağıdan inceleyebilirsiniz.
+              {readOnlyReason === 'former'
+                ? 'Mazide Kalanlar (Onursal Üye) olarak eski arkadaşlarının paylaşımlarını ve maç anılarını okuyabilirsin. Paylaşım, yorum ve tepki yalnızca aktif kadroya açıktır.'
+                : 'Paylaşım, fotoğraf yükleme, emoji tepkisi ve yorum yapabilmek için onaylı üye girişi gereklidir. Akışı aşağıdan inceleyebilirsiniz.'}
             </span>
           </div>
-          <span className="text-[10px] bg-amber-500/20 text-amber-200 px-2.5 py-0.5 rounded-full font-bold shrink-0">
-            Seyirci Modu
+          <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold shrink-0 ${
+            readOnlyReason === 'former'
+              ? 'bg-stone-800 text-amber-200 border border-stone-700'
+              : 'bg-amber-500/20 text-amber-200'
+          }`}>
+            {readOnlyReason === 'former' ? '📜 Mazide Kalan' : 'Seyirci Modu'}
           </span>
         </div>
       ) : (

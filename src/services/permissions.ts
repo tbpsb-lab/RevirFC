@@ -1,4 +1,4 @@
-import type { AdminActiveMode, Player, UserProfile } from '../types';
+import { isFormerPlayer, type AdminActiveMode, type Player, type UserProfile } from '../types';
 import { COMMITTEE_MEMBERS } from './mockData';
 
 /**
@@ -30,10 +30,11 @@ import { COMMITTEE_MEMBERS } from './mockData';
 export interface Access {
   isApproved: boolean;
   isPending: boolean;
+  isFormer: boolean;
   isAdminAccount: boolean;
   isSuperAdmin: boolean;
   isCommittee: boolean;
-  activeMode: 'admin' | 'committee' | 'player' | 'pending';
+  activeMode: 'admin' | 'committee' | 'player' | 'pending' | 'former';
 }
 
 export function getAccess(
@@ -45,20 +46,24 @@ export function getAccess(
   const isApproved = user?.status === 'approved';
   const isPending = !user || user?.status === 'pending';
   const isAdminAccount = isApproved && !isForcedPlainPlayer && user?.role === 'admin';
-  const isSuperAdmin = isAdminAccount && adminMode === 'admin';
 
   const claimed = user?.claimedPlayerId ? players.find((p) => p.id === user.claimedPlayerId) : undefined;
+  const isFormer = isApproved && !isAdminAccount && isFormerPlayer(claimed);
+
+  const isSuperAdmin = isAdminAccount && !isFormer && adminMode === 'admin';
   const nameIsCommittee = !!claimed && (COMMITTEE_MEMBERS as readonly string[]).includes(claimed.name);
   const isCommittee =
-    isApproved && !isForcedPlainPlayer && (isAdminAccount || user?.role === 'captain' || nameIsCommittee);
+    isApproved && !isForcedPlainPlayer && !isFormer && (isAdminAccount || user?.role === 'captain' || nameIsCommittee);
 
   const activeMode: Access['activeMode'] = isPending
     ? 'pending'
+    : isFormer
+    ? 'former'
     : isAdminAccount
     ? adminMode
     : isCommittee
     ? 'committee'
     : 'player';
 
-  return { isApproved, isPending, isAdminAccount, isSuperAdmin, isCommittee, activeMode };
+  return { isApproved, isPending, isFormer, isAdminAccount, isSuperAdmin, isCommittee, activeMode };
 }

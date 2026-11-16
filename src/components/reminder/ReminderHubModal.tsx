@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Player, Match, PlayerScoutingEntry } from '../../types';
+import { Player, Match, PlayerScoutingEntry, isFormerPlayer } from '../../types';
 import { COMMITTEE_MEMBERS } from '../../services/mockData';
 import {
   Bell,
@@ -42,16 +42,17 @@ export const ReminderHubModal: React.FC<Props> = ({
   const votedRaterIds = new Set(match.ratings?.map((r) => r.raterPlayerId) || []);
   const missingRatingPlayers = starters.filter((p) => !votedRaterIds.has(p.id));
 
-  // 3. Missing Committee Members (from Alper, Akif, Yüksel)
+  // 3. Missing Committee Members (from Alper, Akif, Yüksel) — exclude retired/former players
+  const activeClubPlayers = players.filter((p) => !isFormerPlayer(p));
   const committeeStatus = COMMITTEE_MEMBERS.map((name) => {
-    const scoredCount = players.filter((p) =>
+    const scoredCount = activeClubPlayers.filter((p) =>
       savedScoutingEntries.some((e) => e.playerId === p.id && e.evaluatorName === name)
     ).length;
     return {
       name,
       scoredCount,
-      total: players.length,
-      isDone: scoredCount === players.length,
+      total: activeClubPlayers.length,
+      isDone: scoredCount === activeClubPlayers.length,
     };
   });
 
@@ -59,7 +60,7 @@ export const ReminderHubModal: React.FC<Props> = ({
   const siteUrl = window.location.origin;
 
   const absenteeSet = new Set(match.absentees || []);
-  const notRespondedPlayers = players.filter(
+  const notRespondedPlayers = activeClubPlayers.filter(
     (p) => !match.starters.includes(p.id) && !match.waitlist.includes(p.id) && !absenteeSet.has(p.id)
   );
   const feePayer = match.pitchFeePayerId ? players.find((p) => p.id === match.pitchFeePayerId) : undefined;

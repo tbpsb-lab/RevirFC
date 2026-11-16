@@ -65,8 +65,16 @@ export const getDefaultCardThemeForPlayer = (
   return getStandardThemeByOVR(ovrOverride ?? player.currentOVR);
 };
 
+export const isFormerPlayer = (
+  player?: Pick<Player, 'id' | 'isFormer' | 'theme'> | null
+): boolean => {
+  if (!player) return false;
+  if (player.isFormer === false && player.theme !== 'nostalgia') return false;
+  return Boolean(player.id === 'p23' || player.isFormer || player.theme === 'nostalgia');
+};
+
 export const normalizePlayerThemeAndLegend = <T extends Player>(player: T, ovrOverride?: number): T => {
-  if (player.id === 'p23' || player.isFormer) {
+  if (isFormerPlayer(player)) {
     return {
       ...player,
       isFormer: true,

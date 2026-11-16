@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Match, Player, CheckInEntry, PhysicalStatus, PollAttendanceChoice } from '../../types';
+import { Match, Player, CheckInEntry, PhysicalStatus, PollAttendanceChoice, isFormerPlayer } from '../../types';
 import { getMatchLifecycleFlags, MatchLifecycleFlags } from '../../services/matchLifecycle';
 import {
   Users,
@@ -71,6 +71,7 @@ interface Props {
   onOpenReminderHub?: () => void;
   lifecycleFlags?: MatchLifecycleFlags;
   isPendingUser?: boolean;
+  isFormerUser?: boolean;
   isAdmin?: boolean;
 }
 
@@ -137,6 +138,7 @@ export const SquadList: React.FC<Props> = ({
   onOpenReminderHub,
   lifecycleFlags,
   isPendingUser = false,
+  isFormerUser = false,
   isAdmin = false,
 }) => {
   // Katılım sırasını korumak için ID dizisi sırasına göre eşle (ilk 12 kişi anket sırası!)
@@ -154,6 +156,7 @@ export const SquadList: React.FC<Props> = ({
 
   const notRespondedPlayers = players.filter(
     (p) =>
+      !isFormerPlayer(p) &&
       !match.starters.includes(p.id) &&
       !match.waitlist.includes(p.id) &&
       !absenteeIds.includes(p.id)
@@ -540,7 +543,7 @@ export const SquadList: React.FC<Props> = ({
             )}
 
             {(() => {
-              const isStarterInMatch = !isPendingUser && Boolean(claimedPlayer && match.starters.includes(claimedPlayer.id));
+              const isStarterInMatch = !isPendingUser && !isFormerUser && Boolean(claimedPlayer && match.starters.includes(claimedPlayer.id));
               const canVoteNow = isStarterInMatch && flags.canVote360;
               const disabledReason = !isStarterInMatch
                 ? 'Sadece bu maçın ilk 12 asil kadrosunda oynayanlar 360° oylamaya katılabilir'
@@ -1031,6 +1034,13 @@ export const SquadList: React.FC<Props> = ({
         <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 text-amber-200 text-xs flex items-center gap-2.5">
           <Lock className="w-4 h-4 text-amber-400 shrink-0" />
           <span>Hesabınız seyirci / onay aşamasında. Giriş yapıp onaylandığınızda haftalık maç anketine oy verebilirsiniz.</span>
+        </div>
+      ) : isFormerUser ? (
+        <div className="bg-stone-900/90 border border-stone-700/60 rounded-2xl p-4 text-stone-300 text-xs flex items-center gap-2.5">
+          <Lock className="w-4 h-4 text-amber-400/80 shrink-0" />
+          <span>
+            <strong className="text-amber-200">📜 Mazide Kalanlar (Onursal Üye):</strong> Maç kadrolarını, taktik tahtasını ve kulüp geçmişini inceleyebilirsin; haftalık maç anketi ve saha içi oylamalar yalnızca aktif kadro üyelerine açıktır.
+          </span>
         </div>
       ) : claimedPlayer ? (
         <div className="bg-neutral-900/95 border border-amber-500/35 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
