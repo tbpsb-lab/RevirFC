@@ -460,6 +460,7 @@ export const FCCard: React.FC<Props> = React.memo(({
   const handlePointerEnter = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!interactive || photoInteractive || !isHoverPointer(e.pointerType)) return;
     isHoveredRef.current = true;
+    outerContainerRef.current?.classList.add('card-pointer-hover');
     if (cardElementRef.current) {
       cardElementRef.current.style.willChange = 'transform';
     }
@@ -483,6 +484,7 @@ export const FCCard: React.FC<Props> = React.memo(({
   const handlePointerLeave = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isHoverPointer(e.pointerType)) return;
     isHoveredRef.current = false;
+    outerContainerRef.current?.classList.remove('card-pointer-hover');
     if (cardElementRef.current) {
       cardElementRef.current.style.willChange = 'auto';
     }

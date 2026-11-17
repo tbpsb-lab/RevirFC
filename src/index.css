@@ -270,16 +270,6 @@
   animation: crest-plasma-pulse 2.2s ease-in-out infinite;
 }
 
-.rail-hover-tooltip {
-  display: none;
-}
-
-@media (any-hover: hover) {
-  .rail-hover-tooltip {
-    display: block;
-  }
-}
-
 /* Masaüstünde özel kartlar dışındaki mini arma yıldırımını yalnızca hover'da çalıştır; tablet/mobilde ekrandayken aktif kalsın */
 @media (hover: hover) and (pointer: fine) {
   .crest-hover-only {
@@ -346,12 +336,14 @@
   }
 }
 
-.group:hover .flag-wave-on-hover {
+.group:hover .flag-wave-on-hover,
+.card-pointer-hover .flag-wave-on-hover {
   transform-origin: left center;
   animation: flag-silk-wave 2.4s ease-in-out infinite;
 }
 
-.group:hover .flag-sheen-on-hover {
+.group:hover .flag-sheen-on-hover,
+.card-pointer-hover .flag-sheen-on-hover {
   opacity: 1;
   background: linear-gradient(
     110deg,
