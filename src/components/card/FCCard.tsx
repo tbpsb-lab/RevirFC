@@ -371,10 +371,8 @@ export const FCCard: React.FC<Props> = React.memo(({
   const cardElementRef = useRef<HTMLDivElement>(null);
   const isHoveredRef = useRef(false);
 
-  const isFinePointerDevice = () =>
-    typeof window !== 'undefined' &&
-    typeof window.matchMedia === 'function' &&
-    window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const isHoverPointer = (pointerType: string) =>
+    pointerType === 'mouse' || pointerType === 'pen';
 
   const applyCardTransform = (x: number, y: number, smoothTransition = false) => {
     const cardEl = cardElementRef.current;
@@ -459,16 +457,16 @@ export const FCCard: React.FC<Props> = React.memo(({
     ? getStandardThemeByOVR(ovr)
     : rawTheme;
 
-  const handleMouseEnter = () => {
-    if (!interactive || photoInteractive || !isFinePointerDevice()) return;
+  const handlePointerEnter = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!interactive || photoInteractive || !isHoverPointer(e.pointerType)) return;
     isHoveredRef.current = true;
     if (cardElementRef.current) {
       cardElementRef.current.style.willChange = 'transform';
     }
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!interactive || photoInteractive || !isFinePointerDevice()) return;
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!interactive || photoInteractive || !isHoverPointer(e.pointerType)) return;
     isHoveredRef.current = true;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -482,8 +480,8 @@ export const FCCard: React.FC<Props> = React.memo(({
     applyCardTransform(rotX, rotY, false);
   };
 
-  const handleMouseLeave = () => {
-    if (!isFinePointerDevice()) return;
+  const handlePointerLeave = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isHoverPointer(e.pointerType)) return;
     isHoveredRef.current = false;
     if (cardElementRef.current) {
       cardElementRef.current.style.willChange = 'auto';
@@ -837,9 +835,9 @@ export const FCCard: React.FC<Props> = React.memo(({
       ref={outerContainerRef}
       style={{ perspective: '850px' }}
       className={`relative inline-block ${sizeConfig.width} select-none group`}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      onPointerMove={handlePointerMove}
+      onPointerEnter={handlePointerEnter}
+      onPointerLeave={handlePointerLeave}
       onClick={onClick}
     >
       {/* 3D Tilting Card Container - GPU preserve-3d'yi bozmamak için bu kapsayıcıda ASLA filter/drop-shadow kullanılmaz */}

@@ -270,6 +270,16 @@
   animation: crest-plasma-pulse 2.2s ease-in-out infinite;
 }
 
+.rail-hover-tooltip {
+  display: none;
+}
+
+@media (any-hover: hover) {
+  .rail-hover-tooltip {
+    display: block;
+  }
+}
+
 /* Masaüstünde özel kartlar dışındaki mini arma yıldırımını yalnızca hover'da çalıştır; tablet/mobilde ekrandayken aktif kalsın */
 @media (hover: hover) and (pointer: fine) {
   .crest-hover-only {

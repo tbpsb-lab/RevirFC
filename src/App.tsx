@@ -3513,7 +3513,7 @@ function MainApp() {
                   <div className="space-y-1.5">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[11px] font-black">
                       <Trophy className="w-3.5 h-3.5" />
-                      3. Maç Sonu 360° Form Anketi &amp; Haftalık Karneler
+                      Maç Sonu 360° Form Anketi &amp; Haftalık Karneler
                     </div>
                     <h2 className="text-xl sm:text-2xl font-black text-white">
                       {match.title}

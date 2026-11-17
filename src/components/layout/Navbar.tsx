@@ -165,20 +165,20 @@ export const Navbar: React.FC<Props> = ({
         },
         {
           id: 'match',
-          label: '1. Maç Anketi & Check-In',
+          label: 'Maç Anketi & Check-In',
           desc: 'Saat, Yer, Katılım, Çay & Saha Ücreti',
           icon: Vote,
           approvedOnly: true,
         },
         {
           id: 'tactics',
-          label: '2. Taktik Tahtası',
+          label: 'Taktik Tahtası',
           desc: '462 Kadro Dengeleme & Yelekli / Yeleksiz',
           icon: PitchFieldIcon,
         },
         {
           id: 'rating',
-          label: '3. Maç Sonu 360° Form Anketi',
+          label: 'Maç Sonu 360° Form Anketi',
           desc: 'Sözel Değerlendirme, Ödül Kürsüsü & Son Karne',
           icon: ClipboardList,
           approvedOnly: true,
@@ -452,8 +452,8 @@ export const Navbar: React.FC<Props> = ({
                       </span>
                     )}
 
-                    {/* Floating Hover Tooltip (Desktop only) */}
-                    <div className="hidden lg:block pointer-events-none opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0 transition-all duration-150 fixed left-16 ml-2.5 px-3 py-2 rounded-xl bg-neutral-900/95 border border-neutral-700/90 shadow-2xl text-left whitespace-nowrap z-50">
+                    {/* Floating Hover Tooltip (Desktop mouse + Tablet stylus/Apple Pencil hover) */}
+                    <div className="rail-hover-tooltip pointer-events-none opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0 transition-all duration-150 fixed left-12 lg:left-16 ml-2.5 px-3 py-2 rounded-xl bg-neutral-900/95 border border-neutral-700/90 shadow-2xl text-left whitespace-nowrap z-50">
                       <p className="text-xs font-black text-white">{item.label}</p>
                       <p className="text-[10px] text-neutral-400 mt-0.5">{item.desc}</p>
                     </div>
@@ -474,7 +474,7 @@ export const Navbar: React.FC<Props> = ({
               className="group relative w-9 lg:w-11 h-10 rounded-xl flex items-center justify-center text-amber-400 hover:bg-amber-500/15 border border-transparent hover:border-amber-500/35 transition-all cursor-pointer"
             >
               <Edit3 className="w-4 h-4" />
-              <span className="hidden lg:block pointer-events-none opacity-0 group-hover:opacity-100 fixed left-16 ml-2.5 px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-700 shadow-2xl text-xs font-bold text-white whitespace-nowrap z-50">
+              <span className="rail-hover-tooltip pointer-events-none opacity-0 group-hover:opacity-100 fixed left-12 lg:left-16 ml-2.5 px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-700 shadow-2xl text-xs font-bold text-white whitespace-nowrap z-50">
                 Kartımı Düzenle
               </span>
             </button>
