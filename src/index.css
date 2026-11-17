@@ -19,6 +19,16 @@
     color: #f3f4f6;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
+
+  button,
+  [role="button"],
+  a,
+  select,
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"] {
+    cursor: pointer;
+  }
 }
 
 /* Custom scrollbars for dark theme */
@@ -270,8 +280,8 @@
   animation: crest-plasma-pulse 2.2s ease-in-out infinite;
 }
 
-/* Masaüstünde özel kartlar dışındaki mini arma yıldırımını yalnızca hover'da çalıştır; tablet/mobilde ekrandayken aktif kalsın */
-@media (hover: hover) and (pointer: fine) {
+/* Masaüstünde ve Apple Pencil / stylus destekli tabletlerde mini arma yıldırımını yalnızca hover'da çalıştır */
+@media (any-hover: hover) and (any-pointer: fine) {
   .crest-hover-only {
     opacity: 0;
     transition: opacity 0.2s ease-out;
@@ -284,14 +294,19 @@
     animation-play-state: paused;
   }
 
-  .group:hover .crest-hover-only {
+  .group:hover .crest-hover-only,
+  .card-pointer-hover .crest-hover-only {
     opacity: 1;
   }
 
   .group:hover .crest-hover-only.animate-crest-plasma,
+  .card-pointer-hover .crest-hover-only.animate-crest-plasma,
   .group:hover .crest-hover-only .animate-electric-arc-1,
+  .card-pointer-hover .crest-hover-only .animate-electric-arc-1,
   .group:hover .crest-hover-only .animate-electric-arc-2,
-  .group:hover .crest-hover-only .animate-electric-spark {
+  .card-pointer-hover .crest-hover-only .animate-electric-arc-2,
+  .group:hover .crest-hover-only .animate-electric-spark,
+  .card-pointer-hover .crest-hover-only .animate-electric-spark {
     animation-play-state: running;
   }
 }

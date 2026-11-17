@@ -469,6 +469,9 @@ export const FCCard: React.FC<Props> = React.memo(({
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!interactive || photoInteractive || !isHoverPointer(e.pointerType)) return;
     isHoveredRef.current = true;
+    if (!outerContainerRef.current?.classList.contains('card-pointer-hover')) {
+      outerContainerRef.current?.classList.add('card-pointer-hover');
+    }
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -481,8 +484,7 @@ export const FCCard: React.FC<Props> = React.memo(({
     applyCardTransform(rotX, rotY, false);
   };
 
-  const handlePointerLeave = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isHoverPointer(e.pointerType)) return;
+  const handlePointerLeave = () => {
     isHoveredRef.current = false;
     outerContainerRef.current?.classList.remove('card-pointer-hover');
     if (cardElementRef.current) {
@@ -887,12 +889,12 @@ export const FCCard: React.FC<Props> = React.memo(({
           style={{ transform: 'translateZ(0px)', backfaceVisibility: 'hidden' }}
           className={`absolute inset-0 w-full h-full object-contain pointer-events-none select-none z-0 transition-[filter] duration-200 ${
             theme === 'totw'
-              ? 'drop-shadow-[0_0_7px_rgba(251,191,36,0.38)] group-hover:drop-shadow-[0_0_11px_rgba(251,191,36,0.55)]'
+              ? 'drop-shadow-[0_0_7px_rgba(251,191,36,0.38)] group-hover:drop-shadow-[0_0_11px_rgba(251,191,36,0.55)] group-[.card-pointer-hover]:drop-shadow-[0_0_11px_rgba(251,191,36,0.55)]'
               : theme === 'wall'
-              ? 'drop-shadow-[0_12px_24px_rgba(56,189,248,0.22)] group-hover:drop-shadow-[0_18px_32px_rgba(56,189,248,0.38)]'
+              ? 'drop-shadow-[0_12px_24px_rgba(56,189,248,0.22)] group-hover:drop-shadow-[0_18px_32px_rgba(56,189,248,0.38)] group-[.card-pointer-hover]:drop-shadow-[0_18px_32px_rgba(56,189,248,0.38)]'
               : theme === 'nostalgia'
-              ? 'drop-shadow-[0_12px_24px_rgba(180,83,9,0.3)] group-hover:drop-shadow-[0_18px_32px_rgba(180,83,9,0.45)]'
-              : 'drop-shadow-xl group-hover:drop-shadow-[0_20px_30px_rgba(0,0,0,0.55)]'
+              ? 'drop-shadow-[0_12px_24px_rgba(180,83,9,0.3)] group-hover:drop-shadow-[0_18px_32px_rgba(180,83,9,0.45)] group-[.card-pointer-hover]:drop-shadow-[0_18px_32px_rgba(180,83,9,0.45)]'
+              : 'drop-shadow-xl group-hover:drop-shadow-[0_20px_30px_rgba(0,0,0,0.55)] group-[.card-pointer-hover]:drop-shadow-[0_20px_30px_rgba(0,0,0,0.55)]'
           }`}
         />
 

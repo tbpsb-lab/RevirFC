@@ -93,19 +93,7 @@ export const Navbar: React.FC<Props> = ({
   const { currentUser, logout, adminMode, setAdminMode } = useAuth();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [headerHidden, setHeaderHidden] = useState(false);
-  const [railTooltip, setRailTooltip] = useState<{ label: string; desc?: string; top: number } | null>(null);
   const lastScrollYRef = useRef(0);
-
-  const showRailTooltip = (e: React.PointerEvent<HTMLElement>, label: string, desc?: string) => {
-    if (drawerOpen || (e.pointerType !== 'mouse' && e.pointerType !== 'pen')) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    setRailTooltip({ label, desc, top: rect.top + rect.height / 2 });
-  };
-
-  const hideRailTooltip = (e: React.PointerEvent<HTMLElement>) => {
-    if (e.pointerType !== 'mouse' && e.pointerType !== 'pen') return;
-    setRailTooltip(null);
-  };
 
   // Sayfa aşağı kaydırıldığında üst barı gizle, yukarı kaydırınca veya sayfa başında göster
   useEffect(() => {
@@ -266,7 +254,6 @@ export const Navbar: React.FC<Props> = ({
   const handleSelectTab = (tab: NavTab) => {
     setActiveTab(tab);
     setDrawerOpen(false);
-    setRailTooltip(null);
   };
 
   const handleLogout = () => {
@@ -411,10 +398,10 @@ export const Navbar: React.FC<Props> = ({
           {/* Three-line Menu Icon (opens drawer, no extra label) */}
           <button
             type="button"
-            onClick={() => {
-              setRailTooltip(null);
-              setDrawerOpen(true);
-            }}
+            onClick={() => setDrawerOpen(true)}
+            data-tooltip="Menü"
+            data-tooltip-desc="Tüm sekmeleri ve panelleri aç"
+            data-tooltip-side="right"
             aria-label="Menüyü aç"
             className="relative w-9 lg:w-11 h-10 shrink-0 rounded-xl flex items-center justify-center text-neutral-300 hover:text-amber-300 hover:bg-neutral-900 border border-transparent hover:border-neutral-800 transition-all cursor-pointer"
           >
@@ -438,8 +425,9 @@ export const Navbar: React.FC<Props> = ({
                     key={item.id}
                     type="button"
                     onClick={() => handleSelectTab(item.id)}
-                    onPointerEnter={(e) => showRailTooltip(e, item.label, item.desc)}
-                    onPointerLeave={hideRailTooltip}
+                    data-tooltip={item.label}
+                    data-tooltip-desc={item.desc}
+                    data-tooltip-side="right"
                     aria-label={item.label}
                     className={`relative w-9 lg:w-11 h-11 shrink-0 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
                       isActive
@@ -482,11 +470,11 @@ export const Navbar: React.FC<Props> = ({
             <button
               type="button"
               onClick={() => {
-                setRailTooltip(null);
                 onOpenCardEdit?.();
               }}
-              onPointerEnter={(e) => showRailTooltip(e, 'Kartımı Düzenle')}
-              onPointerLeave={hideRailTooltip}
+              data-tooltip="Kartımı Düzenle"
+              data-tooltip-desc="Fotoğraf, tema ve istatistiklerini özelleştir"
+              data-tooltip-side="right"
               aria-label="Kartımı Düzenle"
               className="relative w-9 lg:w-11 h-10 rounded-xl flex items-center justify-center text-amber-400 hover:bg-amber-500/15 border border-transparent hover:border-amber-500/35 transition-all cursor-pointer"
             >
@@ -495,19 +483,6 @@ export const Navbar: React.FC<Props> = ({
           )}
         </div>
       </aside>
-
-      {/* Floating Rail Tooltip (rendered outside aside so backdrop-blur/z-30 never clips it; works on Desktop Mouse & Apple Pencil / Tablet Stylus) */}
-      {railTooltip && !drawerOpen && (
-        <div
-          style={{ top: railTooltip.top }}
-          className="pointer-events-none fixed left-12 lg:left-16 ml-2.5 -translate-y-1/2 px-3 py-2 rounded-xl bg-neutral-900/98 border border-neutral-700/90 shadow-2xl text-left whitespace-nowrap z-50"
-        >
-          <p className="text-xs font-black text-white">{railTooltip.label}</p>
-          {railTooltip.desc && (
-            <p className="text-[10px] text-neutral-400 mt-0.5">{railTooltip.desc}</p>
-          )}
-        </div>
-      )}
 
       {/* Left Navigation Drawer (Safari/iPad 60fps GPU-only transform + opacity; no width reflow or heavy backdrop blur) */}
       <div

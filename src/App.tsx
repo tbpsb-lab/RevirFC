@@ -87,6 +87,7 @@ import {
 } from './services/sandboxService';
 
 import { Navbar, NavTab } from './components/layout/Navbar';
+import { GlobalTooltip } from './components/common/GlobalTooltip';
 import { SquadCardGallery } from './components/card/SquadCardGallery';
 import { TestModeControlBar } from './components/admin/TestModeControlBar';
 import { findInviteById, getSavedInvites, saveInvites, isExcludedAdminInvite, clearSandboxInvites } from './services/inviteService';
@@ -3994,6 +3995,7 @@ export default function App() {
   return (
     <AuthProvider>
       <MainApp />
+      <GlobalTooltip />
     </AuthProvider>
   );
 }
