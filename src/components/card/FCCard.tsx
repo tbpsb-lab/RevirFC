@@ -851,7 +851,7 @@ export const FCCard: React.FC<Props> = React.memo(({
           onCardNodeReady?.(node);
         }}
         style={{
-          transformStyle: 'preserve-3d',
+          transformStyle: photoInteractive ? 'flat' : 'preserve-3d',
         }}
         className={`relative ${sizeConfig.height} w-full bg-transparent cursor-pointer`}
       >
@@ -941,7 +941,7 @@ export const FCCard: React.FC<Props> = React.memo(({
           style={{
             maskImage: 'linear-gradient(to bottom, black 72%, transparent 100%)',
             WebkitMaskImage: 'linear-gradient(to bottom, black 72%, transparent 100%)',
-            transform: 'translateZ(2px)',
+            transform: photoInteractive ? 'none' : 'translateZ(2px)',
             backfaceVisibility: 'hidden',
           }}
         >
@@ -963,8 +963,19 @@ export const FCCard: React.FC<Props> = React.memo(({
                   : player.photoUrl
               }
               alt={player.name}
-              loading={priority || size === 'lg' ? 'eager' : 'lazy'}
-              fetchPriority={priority ? 'high' : undefined}
+              loading={
+                priority ||
+                size === 'lg' ||
+                photoInteractive ||
+                player.photoUrl.startsWith('data:')
+                  ? 'eager'
+                  : 'lazy'
+              }
+              fetchPriority={
+                priority || photoInteractive || player.photoUrl.startsWith('data:')
+                  ? 'high'
+                  : undefined
+              }
               decoding="async"
               style={{
                 transform: player.photoAdjustments

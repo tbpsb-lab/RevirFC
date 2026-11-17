@@ -3906,7 +3906,7 @@ function MainApp() {
       <Suspense fallback={null}>
       {editingPlayer && (
         <CardCustomizer
-          player={editingPlayer}
+          player={players.find((p) => p.id === editingPlayer.id) || editingPlayer}
           allPlayers={players}
           isAdmin={isAdminOrCaptain}
           isSuperAdmin={isSuperAdmin}

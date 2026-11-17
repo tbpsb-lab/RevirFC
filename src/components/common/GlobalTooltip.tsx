@@ -23,8 +23,8 @@ export const GlobalTooltip: React.FC = () => {
   const isWarmRef = useRef(false);
 
   useEffect(() => {
-    // Mobil/tablet dokunma (touch tap) hariç; Apple Pencil (pen) ve fare (mouse) hover'larını kabul et
-    const isHoverPointer = (pointerType: string) => pointerType === 'mouse' || pointerType === 'pen';
+    // Mobil/tablet parmak dokunması (touch tap) hariç; Apple Pencil (pen) ve fare (mouse) hover'larını kabul et
+    const isHoverPointer = (pointerType: string) => pointerType === 'pen' || pointerType === 'mouse' || (pointerType !== 'touch' && pointerType !== '');
 
     const clearTooltip = () => {
       if (showTimerRef.current !== null) {
@@ -132,7 +132,15 @@ export const GlobalTooltip: React.FC = () => {
       isWarmRef.current = false;
     };
 
+    const handlePointerMove = (e: PointerEvent) => {
+      if (!isHoverPointer(e.pointerType)) return;
+      if (!currentTargetRef.current) {
+        handlePointerOver(e);
+      }
+    };
+
     window.addEventListener('pointerover', handlePointerOver, { capture: true, passive: true });
+    window.addEventListener('pointermove', handlePointerMove, { capture: true, passive: true });
     window.addEventListener('pointerout', handlePointerOut, { capture: true, passive: true });
     window.addEventListener('pointerdown', handlePointerDown, { capture: true, passive: true });
     window.addEventListener('pointercancel', handlePointerDown, { capture: true, passive: true });
@@ -141,6 +149,7 @@ export const GlobalTooltip: React.FC = () => {
 
     return () => {
       window.removeEventListener('pointerover', handlePointerOver, { capture: true });
+      window.removeEventListener('pointermove', handlePointerMove, { capture: true });
       window.removeEventListener('pointerout', handlePointerOut, { capture: true });
       window.removeEventListener('pointerdown', handlePointerDown, { capture: true });
       window.removeEventListener('pointercancel', handlePointerDown, { capture: true });

@@ -18,6 +18,7 @@ import {
   shiftPlayerStatsByDelta,
 } from '../../types';
 import { COMMITTEE_MEMBERS } from '../../services/mockData';
+import { isIdbRef, resolveIdbUrl } from '../../services/photoStore';
 import { FCCard, downloadCardNodeAsPng } from './FCCard';
 import { PLAYSTYLE_CONFIG, PLAYSTYLE_CATEGORIES } from './PlayStyleBadge';
 import {
@@ -242,6 +243,21 @@ export const CardCustomizer: React.FC<Props> = ({
       photoAdjustments: initial,
     }));
   };
+
+  // Kart açıldığında görsel idb: referansıysa anında çöz
+  useEffect(() => {
+    const targetUrl = editedPlayer.photoUrl || player.photoUrl;
+    if (isIdbRef(targetUrl)) {
+      resolveIdbUrl(targetUrl).then((resolved) => {
+        if (resolved) {
+          setEditedPlayer((prev) => ({
+            ...prev,
+            photoUrl: resolved,
+          }));
+        }
+      });
+    }
+  }, [editedPlayer.photoUrl, player.photoUrl]);
 
   // Direct mouse drag on card photo
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -718,6 +734,7 @@ export const CardCustomizer: React.FC<Props> = ({
             <FCCard
               player={editedPlayer}
               size="md"
+              priority={true}
               interactive={!canEdit}
               photoInteractive={canEdit}
               showDownloadButton={false}
