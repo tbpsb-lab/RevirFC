@@ -106,9 +106,9 @@ export const SquadCardGallery: React.FC<Props> = React.memo(({ players, onSelect
   const filtered = orderedPlayers;
 
   return (
-    <div className="space-y-6 w-full max-w-full overflow-x-clip py-2">
+    <div className="space-y-6 w-full max-w-full overflow-x-clip py-1">
       {/* Cards Grid - 260px kart yuvası + 16px boşluk ile laptop/Edge dikey sekmeli tam ekranda 4 kart tek satıra sığar, daralınca üst üste binmeden sütun düşer */}
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,260px),1fr))] gap-x-4 gap-y-7 justify-items-center">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,260px),1fr))] gap-x-4 gap-y-4 justify-items-center">
         {filtered.map((player, idx) => {
           const isMyCard = player.id === myPlayerId;
           const isMvp = player.theme === 'totw';
@@ -118,12 +118,12 @@ export const SquadCardGallery: React.FC<Props> = React.memo(({ players, onSelect
             <div
               key={player.id}
               className={`relative flex flex-col items-center transition-transform duration-300 ${
-                isMvp ? 'z-20 scale-[1.03]' : isMyCard ? 'z-10' : 'z-10'
+                isMvp ? 'z-20 scale-[1.03]' : 'z-10'
               }`}
             >
               {/* Top Badge: "Senin Kartın", "MVP", "Alev Atıyo!", "Etten Duvar", "Haftanın Bidonu", or Score Rank */}
               {isMyCard ? (
-                <div className="flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/25 to-amber-500/20 border border-amber-400/70 shadow-md shadow-amber-500/20 text-amber-300 text-[11px] font-black tracking-wide uppercase mb-2.5">
+                <div className="flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/25 to-amber-500/20 border border-amber-400/70 shadow-md shadow-amber-500/20 text-amber-300 text-[11px] font-black tracking-wide uppercase mb-1">
                   <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                   <span>Senin Kartın</span>
                   {player.theme === 'totw' && <span className="text-yellow-300 font-extrabold">• MVP</span>}
@@ -134,56 +134,50 @@ export const SquadCardGallery: React.FC<Props> = React.memo(({ players, onSelect
                   <span className="inline-flex rounded-full h-2 w-2 bg-amber-400" />
                 </div>
               ) : player.theme === 'totw' ? (
-                <div className="flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-neutral-900 via-amber-950/60 to-neutral-900 border border-amber-400/70 shadow-lg shadow-amber-500/20 text-amber-300 text-[11px] font-black tracking-wide uppercase mb-2.5">
+                <div className="flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-neutral-900 via-amber-950/60 to-neutral-900 border border-amber-400/70 shadow-lg shadow-amber-500/20 text-amber-300 text-[11px] font-black tracking-wide uppercase mb-1">
                   <Crown className="w-3.5 h-3.5 text-amber-400" />
                   <span>Haftanın MVP&apos;si</span>
                   <span className="text-amber-200/70 font-mono text-[10px]">#{rank}</span>
                 </div>
               ) : player.theme === 'inform' ? (
-                <div className="flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-neutral-900 via-orange-950/60 to-neutral-900 border border-orange-500/70 shadow-lg shadow-orange-500/20 text-orange-300 text-[11px] font-black tracking-wide uppercase mb-2.5">
+                <div className="flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-neutral-900 via-orange-950/60 to-neutral-900 border border-orange-500/70 shadow-lg shadow-orange-500/20 text-orange-300 text-[11px] font-black tracking-wide uppercase mb-1">
                   <Flame className="w-3.5 h-3.5 text-orange-400" />
                   <span>Alev Atıyo!</span>
                   <span className="text-orange-200/70 font-mono text-[10px]">#{rank}</span>
                 </div>
               ) : player.theme === 'wall' ? (
-                <div className="flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-neutral-900 via-sky-950/60 to-neutral-900 border border-sky-400/70 shadow-lg shadow-sky-500/20 text-sky-300 text-[11px] font-black tracking-wide uppercase mb-2.5">
+                <div className="flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-neutral-900 via-sky-950/60 to-neutral-900 border border-sky-400/70 shadow-lg shadow-sky-500/20 text-sky-300 text-[11px] font-black tracking-wide uppercase mb-1">
                   <Shield className="w-3.5 h-3.5 text-sky-400" />
                   <span>Etten Duvar</span>
                   <span className="text-sky-200/70 font-mono text-[10px]">#{rank}</span>
                 </div>
               ) : player.theme === 'bidon' ? (
-                <div className="flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-neutral-900 via-rose-950/50 to-neutral-900 border border-rose-500/60 shadow-lg shadow-rose-500/20 text-rose-300 text-[11px] font-black tracking-wide uppercase mb-2.5">
+                <div className="flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-neutral-900 via-rose-950/50 to-neutral-900 border border-rose-500/60 shadow-lg shadow-rose-500/20 text-rose-300 text-[11px] font-black tracking-wide uppercase mb-1">
                   <span>🪵 Haftanın Bidonu • Çay Borçlusu</span>
                 </div>
               ) : player.isFormer ? (
-                <div className="flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-neutral-900/90 border border-neutral-700/80 text-neutral-400 text-[10px] font-bold mb-2.5">
+                <div className="flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-neutral-900/90 border border-neutral-700/80 text-neutral-400 text-[10px] font-bold mb-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-neutral-500"></span>
                   <span>Eski Üye (Ayrıldı)</span>
                   <span className="text-neutral-600">•</span>
                   <span className="text-neutral-400 font-mono">{player.currentOVR} OVR</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-neutral-900/80 border border-neutral-800 text-neutral-400 text-[10px] font-mono font-bold mb-2.5">
+                <div className="flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-neutral-900/80 border border-neutral-800 text-neutral-400 text-[10px] font-mono font-bold mb-1">
                   <span className="text-neutral-500">Sıra #{rank}</span>
                   <span className="text-neutral-600">•</span>
                   <span className="text-amber-400/90 font-extrabold">{player.currentOVR} OVR</span>
                 </div>
               )}
 
-              {/* Card Wrapper: MVP'de tek hafif hale FCCard içinde, Kullanıcının Kendi Kartında zarif statik çerçeve */}
-              <div className="relative">
-                {!isMvp && isMyCard && (
-                  <div className="absolute -inset-2 pointer-events-none -z-10 rounded-[1.8rem] border border-amber-400/25 bg-amber-500/5" />
-                )}
-
-                <FCCard
-                  player={player}
-                  size="md"
-                  interactive={true}
-                  priority={idx < 4}
-                  onClick={() => onSelectPlayer(player)}
-                />
-              </div>
+              <FCCard
+                player={player}
+                size="md"
+                interactive={true}
+                showDownloadButton={false}
+                priority={idx < 4}
+                onClick={() => onSelectPlayer(player)}
+              />
             </div>
           );
         })}
@@ -211,10 +205,10 @@ export const SquadCardGallery: React.FC<Props> = React.memo(({ players, onSelect
             </div>
           </div>
 
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,260px),1fr))] gap-x-4 gap-y-7 justify-items-center">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,260px),1fr))] gap-x-4 gap-y-4 justify-items-center">
             {formerPlayers.map((player) => (
               <div key={player.id} className="relative flex flex-col items-center">
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-900/90 border border-amber-900/50 text-amber-300/90 text-[11px] font-bold mb-2.5 shadow-sm">
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-900/90 border border-amber-900/50 text-amber-300/90 text-[11px] font-bold mb-1 shadow-sm">
                   <span>📜 Mazide Kalanlar</span>
                   <span className="text-neutral-500">•</span>
                   <span className="text-amber-400/90 font-mono">{player.currentOVR} OVR</span>
@@ -223,6 +217,7 @@ export const SquadCardGallery: React.FC<Props> = React.memo(({ players, onSelect
                   player={player}
                   size="md"
                   interactive={true}
+                  showDownloadButton={false}
                   onClick={() => onSelectPlayer(player)}
                 />
               </div>

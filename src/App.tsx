@@ -3366,7 +3366,7 @@ function MainApp() {
                 <div className="h-5 w-48 rounded-full bg-neutral-800/80" />
                 <div className="h-3 w-72 rounded-full bg-neutral-900" />
               </div>
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,260px),1fr))] gap-x-4 gap-y-7 justify-items-center">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,260px),1fr))] gap-x-4 gap-y-4 justify-items-center">
                 {Array.from({ length: 8 }).map((_, idx) => (
                   <div
                     key={idx}
