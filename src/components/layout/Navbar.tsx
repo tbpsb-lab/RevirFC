@@ -281,9 +281,11 @@ export const Navbar: React.FC<Props> = ({
         </button>
       )}
 
-      {/* Top Compact Utility Bar (auto-hides on scroll down, returns on scroll up) */}
+      {/* Top Compact Utility Bar (yan menünün sağından başlar; aşağı kaydırınca gizlenir, yukarı kaydırınca döner) */}
       <header
-        className={`sticky top-0 z-40 h-14 bg-neutral-950/92 backdrop-blur-xl border-b border-neutral-800/90 flex items-center transition-transform duration-300 ease-out ${
+        className={`fixed top-0 right-0 ${
+          activeTab === 'squad' ? 'left-12 lg:left-16' : 'left-0 lg:left-16'
+        } z-40 h-14 bg-neutral-950/92 backdrop-blur-xl border-b border-neutral-800/90 flex items-center transition-transform duration-300 ease-out ${
           headerHidden ? '-translate-y-full pointer-events-none' : 'translate-y-0'
         }`}
       >
@@ -386,13 +388,11 @@ export const Navbar: React.FC<Props> = ({
         </div>
       </header>
 
-      {/* Slim Left Icon Rail (desktop: all tabs; mobile/tablet: active only on squad home tab) */}
+      {/* Slim Left Icon Rail (always top-0 bottom-0; desktop: all tabs, mobile/tablet: squad tab only) */}
       <aside
         className={`${
           activeTab === 'squad' ? 'flex w-12 lg:w-16' : 'hidden lg:flex w-16'
-        } flex-col fixed left-0 ${
-          headerHidden ? 'top-0' : 'top-14'
-        } bottom-0 z-30 bg-neutral-950/95 backdrop-blur-xl border-r border-neutral-800/90 py-3 items-center justify-between select-none transition-[top] duration-300 ease-out`}
+        } flex-col fixed left-0 top-0 bottom-0 z-30 bg-neutral-950/95 backdrop-blur-xl border-r border-neutral-800/90 py-3 items-center justify-between select-none`}
       >
         <div className="flex flex-col items-center gap-1.5 w-full px-1.5 lg:px-2">
           {/* Three-line Menu Icon (opens drawer, no extra label) */}
@@ -482,11 +482,9 @@ export const Navbar: React.FC<Props> = ({
         </div>
       </aside>
 
-      {/* Left Slide-Out Navigation Drawer (Mobile, Tablet & Desktop Expanded — tracks headerHidden 1:1 with slim rail) */}
+      {/* Left Slide-Out / Expandable Navigation Drawer (always top-0 bottom-0; widens in place when slim rail is visible, slides in on mobile non-squad tabs) */}
       <div
-        className={`fixed inset-x-0 ${
-          headerHidden ? 'top-0' : 'top-14'
-        } bottom-0 z-50 transition-all duration-300 ${
+        className={`fixed inset-0 z-50 transition-all duration-250 ${
           drawerOpen ? 'pointer-events-auto visible' : 'pointer-events-none invisible'
         }`}
         aria-hidden={!drawerOpen}
@@ -494,23 +492,27 @@ export const Navbar: React.FC<Props> = ({
         {/* Backdrop Overlay */}
         <div
           onClick={() => setDrawerOpen(false)}
-          className={`fixed inset-x-0 ${
-            headerHidden ? 'top-0' : 'top-14'
-          } bottom-0 bg-black/75 backdrop-blur-sm transition-opacity duration-300 ${
+          className={`fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity duration-250 ${
             drawerOpen ? 'opacity-100' : 'opacity-0'
           }`}
         />
 
         {/* Drawer Panel */}
         <aside
-          className={`fixed ${
-            headerHidden ? 'top-0' : 'top-14'
-          } bottom-0 left-0 w-72 sm:w-80 max-w-[86vw] bg-neutral-950/98 backdrop-blur-2xl border-r border-neutral-800 shadow-2xl shadow-black/90 pt-3 flex flex-col justify-between transition-transform duration-300 ease-out ${
-            drawerOpen ? 'translate-x-0' : '-translate-x-full'
+          className={`fixed top-0 bottom-0 left-0 max-w-[86vw] bg-neutral-950/98 backdrop-blur-2xl border-r border-neutral-800 shadow-2xl shadow-black/90 pt-3 flex flex-col justify-between overflow-hidden ease-out ${
+            activeTab === 'squad'
+              ? `transition-[width,opacity] duration-250 ${
+                  drawerOpen ? 'w-72 sm:w-80 opacity-100' : 'w-12 lg:w-16 opacity-0'
+                }`
+              : `transition-[transform,width,opacity] duration-250 ${
+                  drawerOpen
+                    ? 'translate-x-0 w-72 sm:w-80 opacity-100'
+                    : '-translate-x-full lg:translate-x-0 w-72 sm:w-80 lg:w-16 opacity-100 lg:opacity-0'
+                }`
           }`}
         >
           {/* 1. Navigation Items (1:1 vertical coordinates with Slim Rail) */}
-          <nav aria-label="Ana menü" className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-1.5 w-full px-1.5 lg:px-2 pb-3">
+          <nav aria-label="Ana menü" className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-1.5 w-72 sm:w-80 max-w-full px-1.5 lg:px-2 pb-3">
             {/* Three-line Menu Icon row (closes drawer, aligned 1:1 with rail Menu button) */}
             <button
               type="button"
@@ -596,7 +598,7 @@ export const Navbar: React.FC<Props> = ({
           </nav>
 
           {/* 2. Bottom User Profile, Mode Switcher & Actions (placed at bottom so nav items stay aligned 1:1) */}
-          <div className="shrink-0 p-3 border-t border-neutral-800/90 bg-neutral-900/50 space-y-2">
+          <div className="shrink-0 w-72 sm:w-80 max-w-full p-3 border-t border-neutral-800/90 bg-neutral-900/50 space-y-2">
             {currentUser ? (
               <>
                 <div className="flex items-center justify-between gap-2.5">
