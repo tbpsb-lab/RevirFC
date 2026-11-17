@@ -3358,7 +3358,7 @@ function MainApp() {
       )}
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-6 overflow-x-clip">
+      <main className="flex-1 max-w-[1400px] w-full mx-auto px-4 sm:px-5 py-6 overflow-x-clip">
         {activeTab === 'squad' && (
           !isInitialCloudReady && !isTestMode ? (
             <div className="space-y-6 animate-pulse">
@@ -3366,7 +3366,7 @@ function MainApp() {
                 <div className="h-5 w-48 rounded-full bg-neutral-800/80" />
                 <div className="h-3 w-72 rounded-full bg-neutral-900" />
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-items-center">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,290px),1fr))] gap-x-6 lg:gap-x-7 gap-y-9 justify-items-center">
                 {Array.from({ length: 8 }).map((_, idx) => (
                   <div
                     key={idx}
