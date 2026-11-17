@@ -13,9 +13,6 @@ import {
   Edit3,
   LogIn,
   Menu,
-  X,
-  PanelLeftOpen,
-  PanelLeftClose,
   LayoutGrid,
   Vote,
   FlaskConical,
@@ -263,28 +260,36 @@ export const Navbar: React.FC<Props> = ({
 
   return (
     <>
+      {/* Mobil/Tablet'te kadro dışı sekmelerde (sol dar menü gizliyken) sol üstte üç çizgili menü ikonu; yukarı kaydırınca görünür */}
+      {activeTab !== 'squad' && (
+        <button
+          type="button"
+          onClick={() => setDrawerOpen((v) => !v)}
+          aria-label={drawerOpen ? 'Menüyü kapat' : 'Menüyü aç'}
+          className={`lg:hidden fixed left-3 top-2.5 z-50 w-9 h-9 rounded-xl bg-neutral-900/95 hover:bg-neutral-800 border border-neutral-800 hover:border-amber-500/45 text-neutral-200 hover:text-amber-300 flex items-center justify-center shadow-lg transition-all duration-300 cursor-pointer active:scale-95 ${
+            headerHidden && !drawerOpen ? '-translate-y-16 opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'
+          }`}
+        >
+          <Menu className="w-4 h-4" />
+          {isAdmin && pendingApprovalCount > 0 && (
+            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-neutral-950" />
+          )}
+        </button>
+      )}
+
       {/* Top Compact Utility Bar (auto-hides on scroll down, returns on scroll up) */}
       <header
         className={`sticky top-0 z-40 h-14 bg-neutral-950/92 backdrop-blur-xl border-b border-neutral-800/90 flex items-center transition-transform duration-300 ease-out ${
           headerHidden && !drawerOpen ? '-translate-y-full pointer-events-none' : 'translate-y-0'
         }`}
       >
-        <div className="w-full max-w-[1600px] mx-auto px-3 sm:px-4 flex items-center justify-between gap-2">
-          {/* Left: Hamburger Menu Button + Brand + Active Breadcrumb */}
+        <div
+          className={`w-full max-w-[1600px] mx-auto pr-3 sm:pr-4 ${
+            activeTab !== 'squad' ? 'pl-14 lg:pl-4' : 'pl-3 sm:pl-4'
+          } flex items-center justify-between gap-2`}
+        >
+          {/* Left: Brand + Active Breadcrumb (üç çizgili menü butonu sol açılır menüye taşındı) */}
           <div className="flex items-center gap-2 sm:gap-2.5 flex-1 min-w-0 overflow-hidden">
-            <button
-              type="button"
-              onClick={() => setDrawerOpen((v) => !v)}
-              aria-label={drawerOpen ? 'Sol menüyü kapat' : 'Sol menüyü aç'}
-              title={drawerOpen ? 'Menüyü Kapat' : 'Menüyü Aç'}
-              className="relative inline-flex items-center gap-1.5 px-2.5 py-2 rounded-xl bg-neutral-900/90 hover:bg-neutral-800 border border-neutral-800 hover:border-amber-500/45 text-neutral-200 hover:text-amber-300 transition-all cursor-pointer active:scale-95 shrink-0"
-            >
-              <Menu className="w-4 h-4" />
-              <span className="hidden sm:inline text-xs font-bold">Menü</span>
-              {isAdmin && pendingApprovalCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-neutral-950" />
-              )}
-            </button>
 
             {/* Brand (Clicking navigates to Kadro) */}
             <button
@@ -386,17 +391,17 @@ export const Navbar: React.FC<Props> = ({
         } bottom-0 z-30 bg-neutral-950/95 backdrop-blur-xl border-r border-neutral-800/90 py-3 items-center justify-between select-none transition-[top] duration-300 ease-out`}
       >
         <div className="flex flex-col items-center gap-1.5 w-full px-1.5 lg:px-2">
-          {/* Expand Full Drawer Button */}
+          {/* Three-line Menu Icon (opens drawer, no extra label) */}
           <button
             type="button"
             onClick={() => setDrawerOpen(true)}
-            title="Menüyü Genişlet"
-            className="group relative w-9 lg:w-11 h-10 shrink-0 rounded-xl flex items-center justify-center text-neutral-400 hover:text-amber-300 hover:bg-neutral-900 border border-transparent hover:border-neutral-800 transition-all cursor-pointer"
+            aria-label="Menüyü aç"
+            className="relative w-9 lg:w-11 h-10 shrink-0 rounded-xl flex items-center justify-center text-neutral-300 hover:text-amber-300 hover:bg-neutral-900 border border-transparent hover:border-neutral-800 transition-all cursor-pointer"
           >
-            <PanelLeftOpen className="w-4 h-4" />
-            <span className="hidden lg:block pointer-events-none opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0 transition-all duration-150 fixed left-16 ml-2 px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-700 shadow-2xl text-xs font-bold text-white whitespace-nowrap z-50">
-              Menüyü Genişlet
-            </span>
+            <Menu className="w-4 h-4" />
+            {isAdmin && pendingApprovalCount > 0 && (
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-neutral-950" />
+            )}
           </button>
 
           <div className="w-6 lg:w-8 h-px bg-neutral-800/80 my-1 shrink-0" />
@@ -494,20 +499,16 @@ export const Navbar: React.FC<Props> = ({
             drawerOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
-          {/* 1. Navigation Items (1:1 vertical coordinates with Desktop Slim Rail) */}
-          <nav aria-label="Ana menü" className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-1.5 w-full px-2 pb-3">
-            {/* Collapse Drawer Row (h-10 matches rail Expand button) */}
+          {/* 1. Navigation Items (1:1 vertical coordinates with Slim Rail) */}
+          <nav aria-label="Ana menü" className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-1.5 w-full px-1.5 lg:px-2 pb-3">
+            {/* Three-line Menu Icon row (closes drawer, aligned 1:1 with rail Menu button) */}
             <button
               type="button"
               onClick={() => setDrawerOpen(false)}
-              aria-label="Menüyü daralt"
-              className="w-full h-10 shrink-0 px-3 rounded-xl flex items-center justify-between text-neutral-300 hover:text-amber-300 hover:bg-neutral-900 border border-transparent hover:border-neutral-800 transition-all cursor-pointer"
+              aria-label="Menüyü kapat"
+              className="w-9 lg:w-11 h-10 shrink-0 rounded-xl flex items-center justify-center text-amber-400 hover:bg-neutral-900 border border-transparent hover:border-neutral-800 transition-all cursor-pointer"
             >
-              <span className="flex items-center gap-2.5 text-xs font-bold">
-                <PanelLeftClose className="w-4 h-4 shrink-0" />
-                <span>Menüyü Daralt</span>
-              </span>
-              <X className="w-4 h-4 text-neutral-500 shrink-0" />
+              <Menu className="w-4 h-4" />
             </button>
 
             <div className="w-full h-px bg-neutral-800/80 my-1 shrink-0" />
