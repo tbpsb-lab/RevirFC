@@ -107,8 +107,8 @@ export const SquadCardGallery: React.FC<Props> = React.memo(({ players, onSelect
 
   return (
     <div className="space-y-6 w-full max-w-full overflow-x-clip py-2">
-      {/* Cards Grid - her kart minimum 280px yuva + 20px boşluk alır; tam ekranda eski 4'lü düzeni korur, daralınca üst üste binmeden sütun düşer */}
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,280px),1fr))] gap-x-5 gap-y-7 justify-items-center">
+      {/* Cards Grid - 260px kart yuvası + 16px boşluk ile laptop/Edge dikey sekmeli tam ekranda 4 kart tek satıra sığar, daralınca üst üste binmeden sütun düşer */}
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,260px),1fr))] gap-x-4 gap-y-7 justify-items-center">
         {filtered.map((player, idx) => {
           const isMyCard = player.id === myPlayerId;
           const isMvp = player.theme === 'totw';
@@ -211,7 +211,7 @@ export const SquadCardGallery: React.FC<Props> = React.memo(({ players, onSelect
             </div>
           </div>
 
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,280px),1fr))] gap-x-5 gap-y-7 justify-items-center">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,260px),1fr))] gap-x-4 gap-y-7 justify-items-center">
             {formerPlayers.map((player) => (
               <div key={player.id} className="relative flex flex-col items-center">
                 <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-900/90 border border-amber-900/50 text-amber-300/90 text-[11px] font-bold mb-2.5 shadow-sm">
