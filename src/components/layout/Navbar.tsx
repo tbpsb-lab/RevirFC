@@ -103,9 +103,13 @@ export const Navbar: React.FC<Props> = ({
       if (ticking) return;
       ticking = true;
       window.requestAnimationFrame(() => {
+        if (drawerOpen) {
+          ticking = false;
+          return;
+        }
         const currentY = Math.max(0, window.scrollY || 0);
         const delta = currentY - lastScrollYRef.current;
-        if (drawerOpen || currentY < 24) {
+        if (currentY < 24) {
           setHeaderHidden(false);
         } else if (delta > 8 && currentY > 64) {
           setHeaderHidden(true);
@@ -280,7 +284,7 @@ export const Navbar: React.FC<Props> = ({
       {/* Top Compact Utility Bar (auto-hides on scroll down, returns on scroll up) */}
       <header
         className={`sticky top-0 z-40 h-14 bg-neutral-950/92 backdrop-blur-xl border-b border-neutral-800/90 flex items-center transition-transform duration-300 ease-out ${
-          headerHidden && !drawerOpen ? '-translate-y-full pointer-events-none' : 'translate-y-0'
+          headerHidden ? '-translate-y-full pointer-events-none' : 'translate-y-0'
         }`}
       >
         <div
@@ -387,7 +391,7 @@ export const Navbar: React.FC<Props> = ({
         className={`${
           activeTab === 'squad' ? 'flex w-12 lg:w-16' : 'hidden lg:flex w-16'
         } flex-col fixed left-0 ${
-          headerHidden && !drawerOpen ? 'top-0' : 'top-14'
+          headerHidden ? 'top-0' : 'top-14'
         } bottom-0 z-30 bg-neutral-950/95 backdrop-blur-xl border-r border-neutral-800/90 py-3 items-center justify-between select-none transition-[top] duration-300 ease-out`}
       >
         <div className="flex flex-col items-center gap-1.5 w-full px-1.5 lg:px-2">
@@ -478,9 +482,11 @@ export const Navbar: React.FC<Props> = ({
         </div>
       </aside>
 
-      {/* Left Slide-Out Navigation Drawer (Mobile, Tablet & Desktop Expanded — aligned 1:1 with slim rail below header) */}
+      {/* Left Slide-Out Navigation Drawer (Mobile, Tablet & Desktop Expanded — tracks headerHidden 1:1 with slim rail) */}
       <div
-        className={`fixed inset-x-0 top-14 bottom-0 z-50 transition-all duration-300 ${
+        className={`fixed inset-x-0 ${
+          headerHidden ? 'top-0' : 'top-14'
+        } bottom-0 z-50 transition-all duration-300 ${
           drawerOpen ? 'pointer-events-auto visible' : 'pointer-events-none invisible'
         }`}
         aria-hidden={!drawerOpen}
@@ -488,14 +494,18 @@ export const Navbar: React.FC<Props> = ({
         {/* Backdrop Overlay */}
         <div
           onClick={() => setDrawerOpen(false)}
-          className={`fixed inset-x-0 top-14 bottom-0 bg-black/75 backdrop-blur-sm transition-opacity duration-300 ${
+          className={`fixed inset-x-0 ${
+            headerHidden ? 'top-0' : 'top-14'
+          } bottom-0 bg-black/75 backdrop-blur-sm transition-opacity duration-300 ${
             drawerOpen ? 'opacity-100' : 'opacity-0'
           }`}
         />
 
         {/* Drawer Panel */}
         <aside
-          className={`fixed top-14 bottom-0 left-0 w-72 sm:w-80 max-w-[86vw] bg-neutral-950/98 backdrop-blur-2xl border-r border-neutral-800 shadow-2xl shadow-black/90 pt-3 flex flex-col justify-between transition-transform duration-300 ease-out ${
+          className={`fixed ${
+            headerHidden ? 'top-0' : 'top-14'
+          } bottom-0 left-0 w-72 sm:w-80 max-w-[86vw] bg-neutral-950/98 backdrop-blur-2xl border-r border-neutral-800 shadow-2xl shadow-black/90 pt-3 flex flex-col justify-between transition-transform duration-300 ease-out ${
             drawerOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
