@@ -264,13 +264,13 @@ export const Navbar: React.FC<Props> = ({
 
   return (
     <>
-      {/* Mobil/Tablet'te kadro dışı sekmelerde (sol dar menü gizliyken) sol üstte aynı pozisyonda (left-1.5 top-3, w-9 h-10) üç çizgili menü ikonu */}
+      {/* Mobil/Tablet'te kadro dışı sekmelerde (sol dar menü gizliyken) sol üstte aynı merkez hizada (left-1.5 top-2, w-9 h-10) üç çizgili menü ikonu */}
       {activeTab !== 'squad' && (
         <button
           type="button"
           onClick={() => setDrawerOpen((v) => !v)}
           aria-label={drawerOpen ? 'Menüyü kapat' : 'Menüyü aç'}
-          className={`lg:hidden fixed left-1.5 top-3 z-50 w-9 h-10 rounded-xl bg-neutral-900/95 hover:bg-neutral-800 border border-neutral-800/90 hover:border-amber-500/45 text-neutral-300 hover:text-amber-300 flex items-center justify-center shadow-lg transition-[transform,opacity] duration-200 transform-gpu cursor-pointer active:scale-95 ${
+          className={`lg:hidden fixed left-1.5 top-2 z-50 w-9 h-10 rounded-xl bg-neutral-900/95 hover:bg-neutral-800 border border-neutral-800/90 hover:border-amber-500/45 text-neutral-300 hover:text-amber-300 flex items-center justify-center shadow-lg transition-[transform,opacity] duration-200 transform-gpu cursor-pointer active:scale-95 ${
             headerHidden && !drawerOpen ? '-translate-y-16 opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'
           }`}
         >
@@ -388,11 +388,11 @@ export const Navbar: React.FC<Props> = ({
         </div>
       </header>
 
-      {/* Slim Left Icon Rail (always top-0 bottom-0; desktop: all tabs, mobile/tablet: squad tab only) */}
+      {/* Slim Left Icon Rail (always top-0 bottom-0; pt-2 aligns Menu icon at 28px vertical center matching h-14 header) */}
       <aside
         className={`${
           activeTab === 'squad' ? 'flex w-12 lg:w-16' : 'hidden lg:flex w-16'
-        } flex-col fixed left-0 top-0 bottom-0 z-30 bg-neutral-950/95 backdrop-blur-xl border-r border-neutral-800/90 py-3 items-center justify-between select-none`}
+        } flex-col fixed left-0 top-0 bottom-0 z-30 bg-neutral-950/95 backdrop-blur-xl border-r border-neutral-800/90 pt-2 pb-3 items-center justify-between select-none`}
       >
         <div className="flex flex-col items-center gap-1.5 w-full px-1.5 lg:px-2">
           {/* Three-line Menu Icon (opens drawer, no extra label) */}
@@ -499,12 +499,8 @@ export const Navbar: React.FC<Props> = ({
 
         {/* Drawer Panel */}
         <aside
-          className={`fixed top-0 bottom-0 left-0 w-72 sm:w-80 max-w-[86vw] bg-neutral-950/[0.98] border-r border-neutral-800 shadow-2xl shadow-black/90 pt-3 flex flex-col justify-between transform-gpu transition-[transform,opacity] duration-200 ease-out ${
-            drawerOpen
-              ? 'translate-x-0 opacity-100'
-              : activeTab === 'squad'
-              ? '-translate-x-4 opacity-0'
-              : '-translate-x-full lg:-translate-x-4 opacity-0'
+          className={`fixed top-0 bottom-0 left-0 w-72 sm:w-80 max-w-[86vw] bg-neutral-950/[0.98] border-r border-neutral-800 shadow-2xl shadow-black/90 pt-2 flex flex-col justify-between origin-left transform-gpu transition-[transform,opacity] duration-150 ease-out ${
+            drawerOpen ? 'scale-x-100 opacity-100' : 'scale-x-95 opacity-0'
           }`}
         >
           {/* 1. Navigation Items (1:1 vertical coordinates with Slim Rail) */}
