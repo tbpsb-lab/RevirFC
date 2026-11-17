@@ -3290,8 +3290,8 @@ function MainApp() {
         onToggleTestMode={() => (isTestMode ? handleExitTestMode() : handleEnterTestMode())}
       />
 
-      {/* Shell offset for desktop left icon rail */}
-      <div className="flex-1 flex flex-col lg:pl-16">
+      {/* Shell offset for left icon rail (always on lg+, and on mobile/tablet only on squad home tab) */}
+      <div className={`flex-1 flex flex-col ${activeTab === 'squad' ? 'pl-12 lg:pl-16' : 'lg:pl-16'}`}>
       {isTestMode && (
         <TestModeControlBar
           players={players}

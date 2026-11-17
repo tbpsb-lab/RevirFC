@@ -8,7 +8,6 @@ import {
   LogOut,
   Sliders,
   Bell,
-  ChevronDown,
   ChevronRight,
   UserCircle,
   Edit3,
@@ -95,27 +94,40 @@ export const Navbar: React.FC<Props> = ({
   onToggleTestMode,
 }) => {
   const { currentUser, logout, adminMode, setAdminMode } = useAuth();
-  const [menuOpen, setMenuOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const [headerHidden, setHeaderHidden] = useState(false);
+  const lastScrollYRef = useRef(0);
 
-  // Close profile dropdown on outside click
+  // Sayfa aşağı kaydırıldığında üst barı gizle, yukarı kaydırınca veya sayfa başında göster
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false);
-      }
+    lastScrollYRef.current = window.scrollY || 0;
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        const currentY = Math.max(0, window.scrollY || 0);
+        const delta = currentY - lastScrollYRef.current;
+        if (drawerOpen || currentY < 24) {
+          setHeaderHidden(false);
+        } else if (delta > 8 && currentY > 64) {
+          setHeaderHidden(true);
+        } else if (delta < -6) {
+          setHeaderHidden(false);
+        }
+        lastScrollYRef.current = currentY;
+        ticking = false;
+      });
     };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, []);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [drawerOpen]);
 
   // Close drawer on Escape key & prevent background scroll when drawer is open
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setDrawerOpen(false);
-        setMenuOpen(false);
       }
     };
     window.addEventListener('keydown', onKeyDown);
@@ -241,11 +253,9 @@ export const Navbar: React.FC<Props> = ({
   const handleSelectTab = (tab: NavTab) => {
     setActiveTab(tab);
     setDrawerOpen(false);
-    setMenuOpen(false);
   };
 
   const handleLogout = () => {
-    setMenuOpen(false);
     setDrawerOpen(false);
     logout();
     onOpenAuthModal?.();
@@ -253,8 +263,12 @@ export const Navbar: React.FC<Props> = ({
 
   return (
     <>
-      {/* Top Compact Utility Bar */}
-      <header className="sticky top-0 z-40 h-14 bg-neutral-950/92 backdrop-blur-xl border-b border-neutral-800/90 flex items-center">
+      {/* Top Compact Utility Bar (auto-hides on scroll down, returns on scroll up) */}
+      <header
+        className={`sticky top-0 z-40 h-14 bg-neutral-950/92 backdrop-blur-xl border-b border-neutral-800/90 flex items-center transition-transform duration-300 ease-out ${
+          headerHidden && !drawerOpen ? '-translate-y-full pointer-events-none' : 'translate-y-0'
+        }`}
+      >
         <div className="w-full max-w-[1600px] mx-auto px-3 sm:px-4 flex items-center justify-between gap-2">
           {/* Left: Hamburger Menu Button + Brand + Active Breadcrumb */}
           <div className="flex items-center gap-2 sm:gap-2.5 flex-1 min-w-0 overflow-hidden">
@@ -308,9 +322,9 @@ export const Navbar: React.FC<Props> = ({
             )}
           </div>
 
-          {/* Right: Active Test Mode Pill (when running) + Notifications + User Menu */}
-          <div className="flex items-center gap-1.5 shrink-0" ref={menuRef}>
-            {/* Test Modu yalnızca aktifken üst barda çıkış kısayolu olarak görünür; başlatmak profil/sol menüdedir */}
+          {/* Right: Active Test Mode Pill (when running) + Notifications + Guest Login */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            {/* Test Modu yalnızca aktifken üst barda çıkış kısayolu olarak görünür; başlatmak sol menüdedir */}
             {isTestMode && canUseTestMode && onToggleTestMode && (
               <button
                 type="button"
@@ -338,16 +352,15 @@ export const Navbar: React.FC<Props> = ({
               </button>
             )}
 
-            {/* Profile Avatar Button OR Spectator Badge + Guest Login Button */}
-            {!currentUser ? (
+            {/* Guest / Spectator Login Button (logged-in profile actions live in left drawer) */}
+            {!currentUser && (
               <div className="flex items-center gap-1.5">
                 <span
-                  className="hidden xs:inline-flex sm:inline-flex items-center gap-1 px-2 py-1 rounded-xl bg-neutral-900/90 border border-neutral-700/80 text-[10px] sm:text-[11px] font-bold text-neutral-300 whitespace-nowrap"
+                  className="hidden sm:inline-flex items-center gap-1 px-2 py-1 rounded-xl bg-neutral-900/90 border border-neutral-700/80 text-[10px] sm:text-[11px] font-bold text-neutral-300 whitespace-nowrap"
                   title="Giriş yapmadığınız için salt-okunur Seyirci Modundasınız"
                 >
                   <span>👁️</span>
-                  <span className="hidden sm:inline">Seyirci Modu</span>
-                  <span className="sm:hidden">Seyirci</span>
+                  <span>Seyirci Modu</span>
                 </span>
                 <button
                   type="button"
@@ -359,175 +372,39 @@ export const Navbar: React.FC<Props> = ({
                   <span>Giriş Yap</span>
                 </button>
               </div>
-            ) : (
-              <div className="relative">
-                <button
-                  onClick={() => setMenuOpen((v) => !v)}
-                  className="flex items-center gap-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 hover:border-amber-500/50 px-2 py-1 rounded-xl transition-all group cursor-pointer"
-                >
-                  {claimedPlayer?.photoUrl ? (
-                    <img
-                      src={claimedPlayer.photoUrl}
-                      alt="Avatar"
-                      className="w-6 h-6 rounded-full object-cover border border-amber-400/40"
-                    />
-                  ) : (
-                    <UserCircle className="w-6 h-6 text-neutral-400 group-hover:text-amber-400 transition-colors" />
-                  )}
-                  <div className="hidden sm:flex flex-col items-start">
-                    <span className="text-xs font-bold text-white leading-tight">
-                      {claimedPlayer?.name || currentUser?.displayName || 'Hesabım'}
-                    </span>
-                    <span className="text-[10px] text-amber-400/80 font-mono leading-tight">{roleLabel}</span>
-                  </div>
-                  <ChevronDown
-                    className={`w-3.5 h-3.5 text-neutral-400 transition-transform ${menuOpen ? 'rotate-180' : ''}`}
-                  />
-                </button>
-
-                {/* Dropdown Menu */}
-                {menuOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-52 bg-neutral-900 border border-neutral-700 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden z-50">
-                    {/* User info header */}
-                    <div className="px-4 py-3 border-b border-neutral-800 bg-neutral-950/50">
-                      <p className="text-xs font-black text-white truncate">
-                        {claimedPlayer?.name || currentUser?.displayName || 'Futbolcu'}
-                      </p>
-                      <p className="text-[10px] text-amber-400 font-mono">{roleLabel}</p>
-                      {claimedPlayer && (
-                        <p className="text-[10px] text-neutral-500 font-mono">OVR {claimedPlayer.currentOVR}</p>
-                      )}
-                    </div>
-
-                    {/* Mode switcher inside menu */}
-                    {isAdminAccount && (
-                      <div className="px-3 py-2 border-b border-neutral-800 bg-neutral-950/40">
-                        <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5">
-                          Çalışma Modu
-                        </p>
-                        <div className="grid grid-cols-2 gap-1 bg-neutral-900 p-0.5 rounded-lg border border-neutral-800">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setAdminMode('admin');
-                              setMenuOpen(false);
-                            }}
-                            className={`px-2 py-1 rounded-md text-[10px] font-black transition-all cursor-pointer ${
-                              adminMode === 'admin'
-                                ? 'bg-amber-500 text-black'
-                                : 'text-neutral-400 hover:text-white'
-                            }`}
-                          >
-                            👑 Yönetici
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setAdminMode('committee');
-                              setMenuOpen(false);
-                            }}
-                            className={`px-2 py-1 rounded-md text-[10px] font-black transition-all cursor-pointer ${
-                              adminMode === 'committee'
-                                ? 'bg-sky-500 text-black'
-                                : 'text-neutral-400 hover:text-white'
-                            }`}
-                          >
-                            ⭐ Kurul
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Menu items */}
-                    <div className="py-1">
-                      {claimedPlayer && (
-                        <button
-                          onClick={() => {
-                            setMenuOpen(false);
-                            onOpenCardEdit?.();
-                          }}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-semibold text-neutral-200 hover:bg-neutral-800 hover:text-amber-300 transition-colors cursor-pointer"
-                        >
-                          <Edit3 className="w-4 h-4 text-amber-400" />
-                          Kartımı Düzenle
-                        </button>
-                      )}
-
-                      {isAdmin && (
-                        <button
-                          onClick={() => {
-                            setMenuOpen(false);
-                            handleSelectTab('admin');
-                          }}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-semibold text-neutral-200 hover:bg-neutral-800 hover:text-amber-300 transition-colors cursor-pointer"
-                        >
-                          <Bell className="w-4 h-4 text-rose-400" />
-                          <span>Bildirimler</span>
-                          {pendingApprovalCount > 0 && (
-                            <span className="ml-auto px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[9px] font-black">
-                              {pendingApprovalCount}
-                            </span>
-                          )}
-                        </button>
-                      )}
-
-                      {canUseTestMode && onToggleTestMode && (
-                        <button
-                          onClick={() => {
-                            setMenuOpen(false);
-                            onToggleTestMode();
-                          }}
-                          className={`w-full flex items-center gap-3 px-4 py-2.5 text-xs font-semibold transition-colors cursor-pointer ${
-                            isTestMode
-                              ? 'text-fuchsia-300 hover:bg-fuchsia-500/15'
-                              : 'text-violet-300 hover:bg-violet-500/15'
-                          }`}
-                        >
-                          <FlaskConical className="w-4 h-4 shrink-0" />
-                          <span>{isTestMode ? '🧪 Test Modundan Çık' : '🧪 Test Modunu Aç'}</span>
-                        </button>
-                      )}
-
-                      <div className="border-t border-neutral-800 my-1" />
-
-                      <button
-                        onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-semibold text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors cursor-pointer"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        Çıkış Yap
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
             )}
           </div>
         </div>
       </header>
 
-      {/* Desktop Slim Left Icon Rail (always visible on lg+, 1:1 aligned with expanded drawer) */}
-      <aside className="hidden lg:flex flex-col fixed left-0 top-14 bottom-0 w-16 z-30 bg-neutral-950/95 backdrop-blur-xl border-r border-neutral-800/90 py-3 items-center justify-between select-none">
-        <div className="flex flex-col items-center gap-1.5 w-full px-2">
+      {/* Slim Left Icon Rail (desktop: all tabs; mobile/tablet: active only on squad home tab) */}
+      <aside
+        className={`${
+          activeTab === 'squad' ? 'flex w-12 lg:w-16' : 'hidden lg:flex w-16'
+        } flex-col fixed left-0 ${
+          headerHidden && !drawerOpen ? 'top-0' : 'top-14'
+        } bottom-0 z-30 bg-neutral-950/95 backdrop-blur-xl border-r border-neutral-800/90 py-3 items-center justify-between select-none transition-[top] duration-300 ease-out`}
+      >
+        <div className="flex flex-col items-center gap-1.5 w-full px-1.5 lg:px-2">
           {/* Expand Full Drawer Button */}
           <button
             type="button"
             onClick={() => setDrawerOpen(true)}
             title="Menüyü Genişlet"
-            className="group relative w-11 h-10 shrink-0 rounded-xl flex items-center justify-center text-neutral-400 hover:text-amber-300 hover:bg-neutral-900 border border-transparent hover:border-neutral-800 transition-all cursor-pointer"
+            className="group relative w-9 lg:w-11 h-10 shrink-0 rounded-xl flex items-center justify-center text-neutral-400 hover:text-amber-300 hover:bg-neutral-900 border border-transparent hover:border-neutral-800 transition-all cursor-pointer"
           >
             <PanelLeftOpen className="w-4 h-4" />
-            <span className="pointer-events-none opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0 transition-all duration-150 fixed left-16 ml-2 px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-700 shadow-2xl text-xs font-bold text-white whitespace-nowrap z-50">
+            <span className="hidden lg:block pointer-events-none opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0 transition-all duration-150 fixed left-16 ml-2 px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-700 shadow-2xl text-xs font-bold text-white whitespace-nowrap z-50">
               Menüyü Genişlet
             </span>
           </button>
 
-          <div className="w-8 h-px bg-neutral-800/80 my-1 shrink-0" />
+          <div className="w-6 lg:w-8 h-px bg-neutral-800/80 my-1 shrink-0" />
 
           {/* Group Icons with Hover Tooltips */}
           {visibleGroups.map((group, gIdx) => (
             <React.Fragment key={group.group}>
-              {gIdx > 0 && <div className="w-7 h-px bg-neutral-800/70 my-1 shrink-0" />}
+              {gIdx > 0 && <div className="w-5 lg:w-7 h-px bg-neutral-800/70 my-1 shrink-0" />}
               {group.items.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
@@ -536,21 +413,22 @@ export const Navbar: React.FC<Props> = ({
                     key={item.id}
                     type="button"
                     onClick={() => handleSelectTab(item.id)}
-                    className={`group relative w-11 h-11 shrink-0 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
+                    aria-label={item.label}
+                    className={`group relative w-9 lg:w-11 h-11 shrink-0 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
                       isActive
                         ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/25'
                         : 'text-neutral-400 hover:text-white hover:bg-neutral-900 border border-transparent hover:border-neutral-800'
                     }`}
                   >
                     {isActive && (
-                      <span className="absolute -left-2 top-2 bottom-2 w-1 rounded-r-full bg-amber-300" />
+                      <span className="absolute -left-1.5 lg:-left-2 top-2 bottom-2 w-1 rounded-r-full bg-amber-300" />
                     )}
                     <Icon className="w-4 h-4 shrink-0" />
 
                     {/* Live Badges on Rail Icons */}
                     {item.id === 'match' && (
                       <span
-                        className={`absolute -top-1 -right-1 min-w-[18px] h-[16px] px-1 rounded-full text-[9px] font-mono font-black flex items-center justify-center ring-2 ring-neutral-950 ${
+                        className={`absolute -top-1 -right-1 min-w-[16px] lg:min-w-[18px] h-[15px] lg:h-[16px] px-1 rounded-full text-[8px] lg:text-[9px] font-mono font-black flex items-center justify-center ring-2 ring-neutral-950 ${
                           matchStartersCount >= 12
                             ? 'bg-emerald-500 text-black'
                             : 'bg-amber-500 text-black'
@@ -560,13 +438,13 @@ export const Navbar: React.FC<Props> = ({
                       </span>
                     )}
                     {item.id === 'admin' && pendingApprovalCount > 0 && (
-                      <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center ring-2 ring-neutral-950">
+                      <span className="absolute -top-1 -right-1 min-w-[15px] lg:min-w-[16px] h-[15px] lg:h-[16px] px-1 rounded-full bg-rose-500 text-white text-[8px] lg:text-[9px] font-black flex items-center justify-center ring-2 ring-neutral-950">
                         {pendingApprovalCount}
                       </span>
                     )}
 
-                    {/* Floating Hover Tooltip */}
-                    <div className="pointer-events-none opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0 transition-all duration-150 fixed left-16 ml-2.5 px-3 py-2 rounded-xl bg-neutral-900/95 border border-neutral-700/90 shadow-2xl text-left whitespace-nowrap z-50">
+                    {/* Floating Hover Tooltip (Desktop only) */}
+                    <div className="hidden lg:block pointer-events-none opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0 transition-all duration-150 fixed left-16 ml-2.5 px-3 py-2 rounded-xl bg-neutral-900/95 border border-neutral-700/90 shadow-2xl text-left whitespace-nowrap z-50">
                       <p className="text-xs font-black text-white">{item.label}</p>
                       <p className="text-[10px] text-neutral-400 mt-0.5">{item.desc}</p>
                     </div>
@@ -578,16 +456,16 @@ export const Navbar: React.FC<Props> = ({
         </div>
 
         {/* Bottom Rail Utility */}
-        <div className="flex flex-col items-center gap-2 w-full px-2">
+        <div className="flex flex-col items-center gap-2 w-full px-1.5 lg:px-2">
           {claimedPlayer && (
             <button
               type="button"
               onClick={() => onOpenCardEdit?.()}
               title="Kartımı Düzenle"
-              className="group relative w-11 h-10 rounded-xl flex items-center justify-center text-amber-400 hover:bg-amber-500/15 border border-transparent hover:border-amber-500/35 transition-all cursor-pointer"
+              className="group relative w-9 lg:w-11 h-10 rounded-xl flex items-center justify-center text-amber-400 hover:bg-amber-500/15 border border-transparent hover:border-amber-500/35 transition-all cursor-pointer"
             >
               <Edit3 className="w-4 h-4" />
-              <span className="pointer-events-none opacity-0 group-hover:opacity-100 fixed left-16 ml-2.5 px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-700 shadow-2xl text-xs font-bold text-white whitespace-nowrap z-50">
+              <span className="hidden lg:block pointer-events-none opacity-0 group-hover:opacity-100 fixed left-16 ml-2.5 px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-700 shadow-2xl text-xs font-bold text-white whitespace-nowrap z-50">
                 Kartımı Düzenle
               </span>
             </button>
