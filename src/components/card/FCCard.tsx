@@ -1066,8 +1066,9 @@ export const FCCard: React.FC<Props> = React.memo(({
             ['--crest-glow-secondary' as string]: CREST_GLOW_SECONDARY,
           }}
         >
-          {theme !== 'nostalgia' && (() => {
-            const crestHoverClass = theme === 'totw' || theme === 'inform' ? '' : ' crest-hover-only';
+          {(() => {
+            const crestHoverClass =
+              theme === 'totw' || theme === 'inform' || theme === 'wall' ? '' : ' crest-hover-only';
             return (
               <>
                 {/* İnce arka parlama halkası: tek tip beyaz Efsane parlama */}
@@ -1189,11 +1190,7 @@ export const FCCard: React.FC<Props> = React.memo(({
             alt={`${theme} Crest`}
             loading={priority || size === 'lg' ? 'eager' : 'lazy'}
             decoding="async"
-            className={`w-full h-full object-contain ${
-              theme === 'nostalgia'
-                ? 'opacity-95 relative z-10'
-                : 'opacity-95 relative z-10 animate-electric-rim'
-            }`}
+            className="w-full h-full object-contain opacity-95 relative z-10 animate-electric-rim"
           />
         </div>
 
