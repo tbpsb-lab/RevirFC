@@ -264,19 +264,19 @@ export const Navbar: React.FC<Props> = ({
 
   return (
     <>
-      {/* Mobil/Tablet'te kadro dışı sekmelerde (sol dar menü gizliyken) sol üstte üç çizgili menü ikonu; yukarı kaydırınca görünür */}
+      {/* Mobil/Tablet'te kadro dışı sekmelerde (sol dar menü gizliyken) sol üstte aynı pozisyonda (left-1.5 top-3, w-9 h-10) üç çizgili menü ikonu */}
       {activeTab !== 'squad' && (
         <button
           type="button"
           onClick={() => setDrawerOpen((v) => !v)}
           aria-label={drawerOpen ? 'Menüyü kapat' : 'Menüyü aç'}
-          className={`lg:hidden fixed left-3 top-2.5 z-50 w-9 h-9 rounded-xl bg-neutral-900/95 hover:bg-neutral-800 border border-neutral-800 hover:border-amber-500/45 text-neutral-200 hover:text-amber-300 flex items-center justify-center shadow-lg transition-all duration-300 cursor-pointer active:scale-95 ${
+          className={`lg:hidden fixed left-1.5 top-3 z-50 w-9 h-10 rounded-xl bg-neutral-900/95 hover:bg-neutral-800 border border-neutral-800/90 hover:border-amber-500/45 text-neutral-300 hover:text-amber-300 flex items-center justify-center shadow-lg transition-[transform,opacity] duration-200 transform-gpu cursor-pointer active:scale-95 ${
             headerHidden && !drawerOpen ? '-translate-y-16 opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'
           }`}
         >
           <Menu className="w-4 h-4" />
           {isAdmin && pendingApprovalCount > 0 && (
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-neutral-950" />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-neutral-950" />
           )}
         </button>
       )}
@@ -291,7 +291,7 @@ export const Navbar: React.FC<Props> = ({
       >
         <div
           className={`w-full max-w-[1600px] mx-auto pr-3 sm:pr-4 ${
-            activeTab !== 'squad' ? 'pl-14 lg:pl-4' : 'pl-3 sm:pl-4'
+            activeTab !== 'squad' ? 'pl-15 lg:pl-4' : 'pl-3 sm:pl-4'
           } flex items-center justify-between gap-2`}
         >
           {/* Left: Brand + Active Breadcrumb (üç çizgili menü butonu sol açılır menüye taşındı) */}
@@ -482,9 +482,9 @@ export const Navbar: React.FC<Props> = ({
         </div>
       </aside>
 
-      {/* Left Slide-Out / Expandable Navigation Drawer (always top-0 bottom-0; widens in place when slim rail is visible, slides in on mobile non-squad tabs) */}
+      {/* Left Navigation Drawer (Safari/iPad 60fps GPU-only transform + opacity; no width reflow or heavy backdrop blur) */}
       <div
-        className={`fixed inset-0 z-50 transition-all duration-250 ${
+        className={`fixed inset-0 z-50 transition-[visibility] duration-200 ${
           drawerOpen ? 'pointer-events-auto visible' : 'pointer-events-none invisible'
         }`}
         aria-hidden={!drawerOpen}
@@ -492,27 +492,23 @@ export const Navbar: React.FC<Props> = ({
         {/* Backdrop Overlay */}
         <div
           onClick={() => setDrawerOpen(false)}
-          className={`fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity duration-250 ${
+          className={`fixed inset-0 bg-black/75 transition-opacity duration-200 ${
             drawerOpen ? 'opacity-100' : 'opacity-0'
           }`}
         />
 
         {/* Drawer Panel */}
         <aside
-          className={`fixed top-0 bottom-0 left-0 max-w-[86vw] bg-neutral-950/98 backdrop-blur-2xl border-r border-neutral-800 shadow-2xl shadow-black/90 pt-3 flex flex-col justify-between overflow-hidden ease-out ${
-            activeTab === 'squad'
-              ? `transition-[width,opacity] duration-250 ${
-                  drawerOpen ? 'w-72 sm:w-80 opacity-100' : 'w-12 lg:w-16 opacity-0'
-                }`
-              : `transition-[transform,width,opacity] duration-250 ${
-                  drawerOpen
-                    ? 'translate-x-0 w-72 sm:w-80 opacity-100'
-                    : '-translate-x-full lg:translate-x-0 w-72 sm:w-80 lg:w-16 opacity-100 lg:opacity-0'
-                }`
+          className={`fixed top-0 bottom-0 left-0 w-72 sm:w-80 max-w-[86vw] bg-neutral-950/[0.98] border-r border-neutral-800 shadow-2xl shadow-black/90 pt-3 flex flex-col justify-between transform-gpu transition-[transform,opacity] duration-200 ease-out ${
+            drawerOpen
+              ? 'translate-x-0 opacity-100'
+              : activeTab === 'squad'
+              ? '-translate-x-4 opacity-0'
+              : '-translate-x-full lg:-translate-x-4 opacity-0'
           }`}
         >
           {/* 1. Navigation Items (1:1 vertical coordinates with Slim Rail) */}
-          <nav aria-label="Ana menü" className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-1.5 w-72 sm:w-80 max-w-full px-1.5 lg:px-2 pb-3">
+          <nav aria-label="Ana menü" className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-1.5 w-full px-1.5 lg:px-2 pb-3">
             {/* Three-line Menu Icon row (closes drawer, aligned 1:1 with rail Menu button) */}
             <button
               type="button"
